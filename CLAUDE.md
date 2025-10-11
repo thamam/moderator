@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Moderator** is a meta-orchestration system that coordinates multiple AI code generation backends (Claude Code, CCPM, Custom agents), analyzes their output with a QA layer, and continuously improves code quality through the Ever-Thinker improvement engine.
 
-**Current Status:** Walking skeleton implementation complete. Full end-to-end pipeline working with Claude Code. Other backends stubbed for future implementation.
+**Current Status:** Phase 2 complete - Agent Configuration System implemented. Multi-agent iterative improvement working with 6 pre-configured Claude CLI agents.
 
 ## Development Commands
 
@@ -18,10 +18,12 @@ pip install -e .
 moderator execute "Create a REST API"
 moderator status exec_abc12345
 moderator list-executions
+moderator improve exec_abc12345 --rounds 5  # NEW: Iterative improvement
 
 # Run tests
 pytest
 pytest tests/test_orchestrator.py
+pytest tests/test_agents.py  # Agent system tests
 pytest -v  # Verbose output
 
 # Check imports
@@ -32,22 +34,25 @@ python -c "from moderator import Orchestrator"
 
 The system follows a pipeline architecture:
 
-1. **CLI** → User commands
-2. **Orchestrator** → Main coordination logic
-3. **TaskDecomposer** → Breaks requests into tasks (currently stub: single task only)
-4. **ExecutionRouter** → Routes to backends (currently stub: always Claude Code)
-5. **Backend Adapters** → Execute tasks
+1. **CLI** → User commands (execute, status, list-executions, improve)
+2. **Orchestrator** → Main coordination logic + iterative improvement
+3. **Agent System** → Pre-configured Claude CLI agents with personas (NEW in Phase 2)
+   - Generator, Reviewer, Fixer
+   - Security Reviewer, Performance Reviewer, Test Generator
+4. **TaskDecomposer** → Breaks requests into tasks (currently stub: single task only)
+5. **ExecutionRouter** → Routes to backends (currently stub: always Claude Code)
+6. **Backend Adapters** → Execute tasks
    - Claude Code (real implementation)
    - CCPM (stub)
    - Custom (stub)
-6. **QA Layer** → Analyzes generated code
+7. **QA Layer** → Analyzes generated code
    - CodeAnalyzer (5+ detection rules)
    - SecurityScanner (stub)
    - TestGenerator (stub)
-7. **Ever-Thinker** → Identifies improvements
+8. **Ever-Thinker** → Identifies improvements
    - Improver (basic suggestions)
    - Learner (stub)
-8. **StateManager** → SQLite persistence
+9. **StateManager** → SQLite persistence
 
 ## Core Components
 
@@ -100,6 +105,70 @@ Detection rules:
 
 Issues include: severity, category, location, auto_fixable flag, confidence score, fix_suggestion
 
+### Agent System (Phase 2)
+
+**Agent Configuration** (agents.yaml):
+YAML-based configuration defining 6 agents with distinct personas:
+
+1. **generator** - Code Generator (temp: 0.7)
+   - Expert software engineer creating production-ready code
+   - Pragmatic, complete implementations
+
+2. **reviewer** - Code Reviewer (temp: 0.3)
+   - Critical senior reviewer and security auditor
+   - Finds issues, checks edge cases, identifies vulnerabilities
+
+3. **fixer** - Code Fixer (temp: 0.2)
+   - Surgical refactoring specialist
+   - Makes minimal changes to fix specific issues
+
+4. **security_reviewer** - Security Specialist (temp: 0.2, variant: security)
+   - Security-focused auditor with OWASP expertise
+   - Finds SQL injection, XSS, hardcoded secrets, auth issues
+
+5. **performance_reviewer** - Performance Analyst (temp: 0.3, variant: performance)
+   - Performance optimization specialist
+   - Identifies bottlenecks, inefficient algorithms, N+1 queries
+
+6. **test_generator** - Test Engineer (temp: 0.5, variant: tests)
+   - Test-driven development specialist
+   - Generates comprehensive test suites with edge cases
+
+**AgentRegistry** (moderator/agents/registry.py):
+- Loads agents from agents.yaml
+- Provides convenience accessors (registry.generator, registry.reviewer, etc.)
+- Creates ClaudeAgent instances on demand
+
+**ClaudeAgent** (moderator/agents/claude_agent.py):
+- Wraps Claude CLI with agent-specific configuration
+- Builds prompts: system prompt + context + memory + task
+- Executes with configured temperature and max_tokens
+- Returns text responses or collected files
+
+**Iterative Improvement Workflow** (moderator/orchestrator.py:115):
+```python
+def improve_iteratively(result, max_rounds=5):
+    for round in 1..max_rounds:
+        # Multi-agent review
+        issues = []
+        issues += reviewer.execute("Review code...")
+        issues += security_reviewer.execute("Security audit...")
+        issues += performance_reviewer.execute("Performance analysis...")
+
+        if no high-priority issues: break
+
+        # Fix top 3 issues
+        for issue in high_priority[:3]:
+            fixed_files = fixer.execute_with_files("Fix: {issue}...")
+            current_files = fixed_files
+
+        # Create round result
+
+    return all_rounds
+```
+
+Usage: `moderator improve exec_abc12345 --rounds 5`
+
 ### Ever-Thinker
 
 **Improver** (moderator/ever_thinker/improver.py):
@@ -117,12 +186,15 @@ Suggests improvements:
 - Progressive enhancement strategy
 
 ### What Works
-- ✅ CLI commands: execute, status, list-executions
+- ✅ CLI commands: execute, status, list-executions, **improve** (NEW)
 - ✅ Single task creation and execution
 - ✅ Claude Code backend integration
 - ✅ File collection from generated code
 - ✅ Basic QA analysis (5+ rules)
 - ✅ Improvement suggestions
+- ✅ **Multi-agent iterative improvement** (NEW - Phase 2)
+- ✅ **6 pre-configured agent personas** (NEW)
+- ✅ **Agent-based code review and fixing** (NEW)
 - ✅ SQLite persistence
 - ✅ Status queries
 
@@ -167,12 +239,30 @@ Edit `moderator/ever_thinker/improver.py`:
 - Create `Improvement` objects with priority
 - Set auto_applicable flag if can be applied automatically
 
+### Adding New Agents
+Edit `agents.yaml` to add new agent personas:
+```yaml
+agents:
+  my_new_agent:
+    name: "Agent Name"
+    type: "generator|reviewer|fixer"
+    variant: "optional_variant"  # e.g., "security", "performance"
+    system_prompt: |
+      Your agent's persona and instructions here.
+      Define their role, focus areas, and style.
+    temperature: 0.5
+    max_tokens: 4000
+```
+
+Then add convenience accessor to `AgentRegistry` if needed.
+
 ## Testing
 
 Tests use pytest with in-memory SQLite (`:memory:`):
 - `test_orchestrator.py`: Orchestrator, decomposition, state management
 - `test_backends.py`: Backend adapters
 - `test_qa.py`: QA layer analysis
+- `test_agents.py`: Agent configuration system (NEW - 7 tests)
 
 Run individual tests:
 ```bash
@@ -185,6 +275,8 @@ pytest tests/test_orchestrator.py::test_task_decomposition
 2. **Output Directory**: Claude Code generates files in `./claude-generated/`
 3. **Database**: `moderator.db` created automatically on first run
 4. **Execution IDs**: Format is `exec_{8-char-hex}` for easy reference
+5. **Agent Configuration**: `agents.yaml` must exist in project root for iterative improvement
+6. **Dependencies**: PyYAML >= 6.0 required for agent configuration loading
 
 ## Future Enhancement Areas
 
