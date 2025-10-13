@@ -101,21 +101,21 @@ flowchart TD
     SaveState --> NotifyCompletion[Notify User:<br/>Execution Complete]
     NotifyCompletion --> End([System Stopped])
 
-    style Start fill:#e1f5ff
-    style Stop1 fill:#ffcdd2
-    style Stop2 fill:#ffcdd2
-    style Stop3 fill:#ffcdd2
-    style Stop4 fill:#ffcdd2
-    style Stop5 fill:#ffcdd2
-    style Stop6 fill:#ffcdd2
-    style Stop7 fill:#ffcdd2
-    style Stop8 fill:#ffcdd2
-    style Stop9 fill:#ffcdd2
-    style Stop10 fill:#ffcdd2
-    style Stop11 fill:#ffcdd2
-    style Complete fill:#c8e6c9
-    style End fill:#e1f5ff
-    style Monitor fill:#fff9c4
+    style Start fill:#2d5a7a
+    style Stop1 fill:#7a3a3a
+    style Stop2 fill:#7a3a3a
+    style Stop3 fill:#7a3a3a
+    style Stop4 fill:#7a3a3a
+    style Stop5 fill:#7a3a3a
+    style Stop6 fill:#7a3a3a
+    style Stop7 fill:#7a3a3a
+    style Stop8 fill:#7a3a3a
+    style Stop9 fill:#7a3a3a
+    style Stop10 fill:#7a3a3a
+    style Stop11 fill:#7a3a3a
+    style Complete fill:#3d6b4a
+    style End fill:#2d5a7a
+    style Monitor fill:#7a7530
 ```
 
 ## Stopping Conditions Detail

@@ -14,7 +14,7 @@ sequenceDiagram
 
     Note over Moderator,Monitor: All agents communicate via MessageBus
 
-    rect rgb(220, 240, 255)
+    rect rgb(40, 80, 120)
         Note over Moderator,TechLead: TASK_ASSIGNMENT (Async)
         Moderator->>MessageBus: TASK_ASSIGNMENT<br/>{task_id, description,<br/>acceptance_criteria,<br/>context, deadline}
         MessageBus->>TechLead: Forward message
@@ -22,14 +22,14 @@ sequenceDiagram
         MessageBus-->>Moderator: ACK (delivered)
     end
 
-    rect rgb(220, 255, 220)
+    rect rgb(40, 120, 40)
         Note over TechLead,Moderator: TASK_COMPLETION (Async)
         TechLead->>MessageBus: TASK_COMPLETION<br/>{task_id, pr_url,<br/>summary, files_changed,<br/>tests_added}
         MessageBus->>Moderator: Forward message
         Moderator-->>MessageBus: ACK (received)
     end
 
-    rect rgb(255, 240, 220)
+    rect rgb(120, 90, 40)
         Note over TechLead,Moderator: SPECIALIST_REQUEST (Sync - requires response)
         TechLead->>MessageBus: SPECIALIST_REQUEST<br/>{specialist_type,<br/>reason, context}<br/>requires_response: true
         MessageBus->>Moderator: Forward message
@@ -38,7 +38,7 @@ sequenceDiagram
         MessageBus->>TechLead: Forward response
     end
 
-    rect rgb(255, 220, 220)
+    rect rgb(120, 40, 40)
         Note over TechLead,Moderator: PR_SUBMITTED (Async)
         TechLead->>MessageBus: PR_SUBMITTED<br/>{pr_url, task_id,<br/>description, files}
         MessageBus->>Moderator: Forward message
@@ -53,7 +53,7 @@ sequenceDiagram
         end
     end
 
-    rect rgb(255, 255, 220)
+    rect rgb(120, 100, 40)
         Note over Monitor,Moderator: HEALTH_ALERT (High Priority)
         Monitor->>MessageBus: HEALTH_ALERT<br/>{alert_type,<br/>severity: "critical",<br/>metrics: {...}}<br/>priority: HIGH
         MessageBus->>Moderator: Forward immediately
@@ -64,7 +64,7 @@ sequenceDiagram
         end
     end
 
-    rect rgb(240, 220, 255)
+    rect rgb(80, 40, 120)
         Note over Moderator,Monitor: STATUS_UPDATE (Broadcast)
         Moderator->>MessageBus: STATUS_UPDATE<br/>{phase: "IMPLEMENTING",<br/>progress: 0.6,<br/>tasks_completed: 12}<br/>broadcast: true
         MessageBus->>TechLead: Forward to all

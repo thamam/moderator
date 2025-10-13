@@ -92,16 +92,16 @@ flowchart TD
     FallbackMock1 --> Result
     FallbackCCPM1 --> Result
 
-    style Start fill:#e1f5ff
-    style CCPM fill:#fff9c4
-    style ClaudeCode fill:#c8e6c9
-    style TaskMaster fill:#f8bbd0
-    style CustomAgent fill:#d1c4e9
-    style Result fill:#e1f5ff
-    style ExecuteCCPM fill:#fff9c4
-    style ExecuteClaude fill:#c8e6c9
-    style ExecuteTM fill:#f8bbd0
-    style ExecuteCustom fill:#d1c4e9
+    style Start fill:#2d5a7a
+    style CCPM fill:#7a7530
+    style ClaudeCode fill:#3d6b4a
+    style TaskMaster fill:#7a4a5a
+    style CustomAgent fill:#5a4a7a
+    style Result fill:#2d5a7a
+    style ExecuteCCPM fill:#7a7530
+    style ExecuteClaude fill:#3d6b4a
+    style ExecuteTM fill:#7a4a5a
+    style ExecuteCustom fill:#5a4a7a
 ```
 
 ## Backend Selection Criteria

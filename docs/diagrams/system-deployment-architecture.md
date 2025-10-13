@@ -87,15 +87,15 @@ graph TB
     Orchestrator -.->|Load| AgentsConfig
     Orchestrator -.->|Read| EnvVars
 
-    style Orchestrator fill:#e1f5ff
-    style Moderator fill:#c8e6c9
-    style TechLead fill:#c8e6c9
-    style Monitor fill:#fff9c4
-    style EverThinker fill:#f8bbd0
-    style MessageBus fill:#bbdefb
-    style GitHub fill:#e0f2f1
-    style ClaudeAPI fill:#e0f2f1
-    style OpenAI fill:#e0f2f1
+    style Orchestrator fill:#2d5a7a
+    style Moderator fill:#3d6b4a
+    style TechLead fill:#3d6b4a
+    style Monitor fill:#7a7530
+    style EverThinker fill:#7a4a5a
+    style MessageBus fill:#4a6a8a
+    style GitHub fill:#4a6a5a
+    style ClaudeAPI fill:#4a6a5a
+    style OpenAI fill:#4a6a5a
 ```
 
 ## Environment Setup

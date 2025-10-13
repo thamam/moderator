@@ -86,12 +86,12 @@ flowchart TD
 
     CleanupResources --> Stop
 
-    style Start fill:#e1f5ff
-    style Continue fill:#c8e6c9
-    style Stop fill:#ffcdd2
-    style TransientPath fill:#fff9c4
-    style RecoverablePath fill:#ffcc80
-    style CriticalPath fill:#ef5350,color:#fff
+    style Start fill:#2d5a7a
+    style Continue fill:#3d6b4a
+    style Stop fill:#7a3a3a
+    style TransientPath fill:#7a7530
+    style RecoverablePath fill:#7a5a30
+    style CriticalPath fill:#5a2020,color:#fff
 ```
 
 ## Error Classification

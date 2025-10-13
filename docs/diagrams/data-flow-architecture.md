@@ -82,19 +82,19 @@ flowchart TD
     Decision -->|No| TaskQueue
     Decision -->|Yes| Complete([Project Complete<br/>Final Report])
 
-    style Start fill:#e1f5ff
-    style Complete fill:#c8e6c9
-    style Parallel fill:#fff9c4
-    style ReqData fill:#f0f0f0
-    style TaskQueue fill:#f0f0f0
-    style Code1 fill:#f0f0f0
-    style CodeOutput fill:#f0f0f0
-    style Issues fill:#ffebee
-    style PR fill:#e3f2fd
-    style Feedback fill:#fff3e0
-    style Result fill:#f0f0f0
-    style Improvements fill:#f3e5f5
-    style Health fill:#ffccbc
+    style Start fill:#2d5a7a
+    style Complete fill:#3d6b4a
+    style Parallel fill:#7a7530
+    style ReqData fill:#4a4a4a
+    style TaskQueue fill:#4a4a4a
+    style Code1 fill:#4a4a4a
+    style CodeOutput fill:#4a4a4a
+    style Issues fill:#7a3a3a
+    style PR fill:#2d5580
+    style Feedback fill:#7a5a30
+    style Result fill:#4a4a4a
+    style Improvements fill:#5a3d5a
+    style Health fill:#7a4a3a
 ```
 
 ## Data Formats by Stage

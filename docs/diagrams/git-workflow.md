@@ -111,10 +111,10 @@ flowchart TD
 
     NotifyComplete --> End([PR Lifecycle Complete])
 
-    style Start fill:#e1f5ff
-    style PRCreated fill:#fff9c4
-    style MergePR fill:#c8e6c9
-    style End fill:#e1f5ff
+    style Start fill:#2d5a7a
+    style PRCreated fill:#7a7530
+    style MergePR fill:#3d6b4a
+    style End fill:#2d5a7a
 ```
 
 ## Parallel PR Management
@@ -207,8 +207,8 @@ flowchart TD
 
     RebaseOriginal --> Start
 
-    style Success fill:#c8e6c9
-    style Abort fill:#ffcdd2
+    style Success fill:#3d6b4a
+    style Abort fill:#7a3a3a
 ```
 
 ## Branch Naming Convention

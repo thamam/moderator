@@ -94,11 +94,11 @@ flowchart TD
 
     Complete --> Monitor
 
-    style Start fill:#e1f5ff
-    style IdleDetected fill:#fff9c4
-    style MultiAngleAnalysis fill:#e1bee7
-    style MergePR fill:#c8e6c9
-    style RecordOutcome fill:#bbdefb
+    style Start fill:#2d5a7a
+    style IdleDetected fill:#7a7530
+    style MultiAngleAnalysis fill:#6a4a7a
+    style MergePR fill:#3d6b4a
+    style RecordOutcome fill:#4a6a8a
 ```
 
 ## Analysis Angles

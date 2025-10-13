@@ -70,11 +70,11 @@ flowchart TD
     CheckDepNow -->|Yes| MoveToReady
     CheckDepNow -->|No| Scheduler
 
-    style Start fill:#e1f5ff
-    style ReadyQueue fill:#c8e6c9
-    style WaitingQueue fill:#fff9c4
-    style Execute fill:#bbdefb
-    style ReleaseSlot fill:#c8e6c9
+    style Start fill:#2d5a7a
+    style ReadyQueue fill:#3d6b4a
+    style WaitingQueue fill:#7a7530
+    style Execute fill:#4a6a8a
+    style ReleaseSlot fill:#3d6b4a
 ```
 
 ## Priority Calculation Algorithm

@@ -6,6 +6,33 @@ This diagram shows the primary development cycle in the Moderator system, illust
 ## Diagram
 
 ```mermaid
+%%{init: {
+  'theme': 'dark',
+  'themeVariables': {
+    'darkMode': true,
+    'background': '#1a1a1a',
+    'mainBkg': '#2d2d2d',
+    'primaryColor': '#2d2d2d',
+    'primaryTextColor': '#ffffff',
+    'primaryBorderColor': '#666666',
+    'lineColor': '#999999',
+    'secondaryColor': '#3d3d3d',
+    'tertiaryColor': '#4d4d4d',
+    'textColor': '#ffffff',
+    'signalColor': '#ffffff',
+    'signalTextColor': '#ffffff',
+    'labelBoxBkgColor': '#2d2d2d',
+    'labelBoxBorderColor': '#999999',
+    'labelTextColor': '#ffffff',
+    'actorBkg': '#2d2d2d',
+    'actorBorder': '#999999',
+    'actorTextColor': '#ffffff',
+    'actorLineColor': '#999999',
+    'loopTextColor': '#ffffff',
+    'altTextColor': '#ffffff',
+    'noteBorderColor': '#999999'
+  }
+}}%%
 sequenceDiagram
     participant User
     participant Moderator as Moderator Agent
@@ -26,7 +53,7 @@ sequenceDiagram
     Moderator->>Monitor: Start health monitoring
     activate Monitor
 
-    rect rgb(220, 240, 255)
+    rect rgb(40, 80, 120)
         Note over Moderator,EverThinker: Main Development Loop
 
         loop For each task in queue
@@ -65,7 +92,7 @@ sequenceDiagram
         end
     end
 
-    rect rgb(255, 250, 220)
+    rect rgb(120, 100, 40)
         Note over Moderator,EverThinker: Improvement Cycle
 
         loop Until stopping conditions met

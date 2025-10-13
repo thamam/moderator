@@ -50,12 +50,12 @@ flowchart TD
     Resume --> Success
     Fatal --> End([System Stopped])
 
-    style SafeZone fill:#c8e6c9
-    style WarningZone fill:#fff9c4
-    style DangerZone fill:#ffcc80
-    style CriticalZone fill:#ffcdd2
-    style Fatal fill:#ef5350
-    style Success fill:#e1f5ff
+    style SafeZone fill:#3d6b4a
+    style WarningZone fill:#7a7530
+    style DangerZone fill:#7a5a30
+    style CriticalZone fill:#7a3a3a
+    style Fatal fill:#5a2020,color:#fff
+    style Success fill:#2d5a7a
 ```
 
 ## Pruning Strategy Decision Tree

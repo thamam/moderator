@@ -97,11 +97,11 @@ graph TB
 
     History -.->|Historical Analysis| SuccessAnalyzer
 
-    style Input fill:#e1f5ff
-    style LearningDB fill:#fff9c4
-    style Analysis fill:#c8e6c9
-    style Application fill:#f8bbd0
-    style Output fill:#d1c4e9
+    style Input fill:#2d5a7a
+    style LearningDB fill:#7a7530
+    style Analysis fill:#3d6b4a
+    style Application fill:#7a4a5a
+    style Output fill:#5a4a7a
 ```
 
 ## Learning Database Schema
