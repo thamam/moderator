@@ -3,66 +3,68 @@
 ## Description
 This C4-style component diagram shows the system architecture with all major layers, their components, interactions, dependencies, and data flow between layers. This represents the complete Moderator system structure.
 
+**Visual Design**: The diagram uses **white backgrounds** with **colored borders** for maximum readability. Each layer has a distinct border color, and emoji icons help identify layers at a glance. Components implemented in the current walking skeleton are marked with ✅.
+
 ## Diagram
 
 ```mermaid
 graph TB
-    subgraph UI["USER INTERFACE LAYER"]
-        CLI[CLI Interface<br/>commands: execute, status, improve]
-        WebDash[Web Dashboard<br/>real-time monitoring]
-        VSCode[VS Code Extension<br/>IDE integration]
-        GitHub[GitHub Bot<br/>PR automation]
+    subgraph UI["🖥️ USER INTERFACE LAYER"]
+        CLI["CLI Interface<br/><i>execute, status, improve</i>"]
+        WebDash["Web Dashboard<br/><i>real-time monitoring</i>"]
+        VSCode["VS Code Extension<br/><i>IDE integration</i>"]
+        GitHub["GitHub Bot<br/><i>PR automation</i>"]
     end
 
-    subgraph Orchestrator["ORCHESTRATOR LAYER"]
-        Mod[Moderator Agent<br/>Planning & QA Gatekeeper]
-        TechLead[TechLead Agent<br/>Primary Implementation]
-        Monitor[Monitor Agent<br/>Health & Metrics]
+    subgraph Orchestrator["⚙️ ORCHESTRATOR LAYER"]
+        Mod["<b>Moderator Agent</b><br/>Planning & QA Gatekeeper"]
+        TechLead["<b>TechLead Agent</b><br/>Primary Implementation"]
+        Monitor["<b>Monitor Agent</b><br/>Health & Metrics"]
 
-        TaskDecomp[Task Decomposer<br/>Requirements → Tasks]
-        ExecRouter[Execution Router<br/>Task → Backend Selection]
-        ContextMgr[Context Manager<br/>Memory & Pruning]
-        StateMgr[State Manager<br/>Persistence & Recovery]
-        MsgBus[Message Bus<br/>Inter-agent Communication]
+        TaskDecomp["Task Decomposer<br/><i>Requirements → Tasks</i>"]
+        ExecRouter["Execution Router<br/><i>Task → Backend Selection</i>"]
+        ContextMgr["Context Manager<br/><i>Memory & Pruning</i>"]
+        StateMgr["State Manager<br/><i>Persistence & Recovery</i>"]
+        MsgBus["Message Bus<br/><i>Inter-agent Communication</i>"]
     end
 
-    subgraph Backends["EXECUTION BACKENDS LAYER"]
-        ClaudeAdapter[Claude Code Adapter<br/>subprocess integration]
-        CCPMAdapter[CCPM Adapter<br/>multi-agent workflows]
-        TaskMaster[Task Master Adapter<br/>complex orchestration]
-        CustomAdapter[Custom Agents Adapter<br/>user-defined agents]
+    subgraph Backends["🔌 EXECUTION BACKENDS LAYER"]
+        ClaudeAdapter["Claude Code Adapter<br/><i>subprocess integration</i>"]
+        CCPMAdapter["CCPM Adapter<br/><i>multi-agent workflows</i>"]
+        TaskMaster["Task Master Adapter<br/><i>complex orchestration</i>"]
+        CustomAdapter["Custom Agents Adapter<br/><i>user-defined agents</i>"]
     end
 
-    subgraph QA["QUALITY ASSURANCE LAYER"]
-        CodeAnalyzer[Code Analyzer<br/>5+ detection rules]
-        SecScanner[Security Scanner<br/>OWASP checks]
-        TestGen[Test Generator<br/>automated test creation]
-        CoverageCheck[Coverage Checker<br/>test coverage analysis]
+    subgraph QA["🔍 QUALITY ASSURANCE LAYER"]
+        CodeAnalyzer["Code Analyzer<br/><i>5+ detection rules</i>"]
+        SecScanner["Security Scanner<br/><i>OWASP checks</i>"]
+        TestGen["Test Generator<br/><i>automated test creation</i>"]
+        CoverageCheck["Coverage Checker<br/><i>test coverage analysis</i>"]
     end
 
-    subgraph Improvement["IMPROVEMENT ENGINE LAYER"]
-        EverThinker[Ever-Thinker<br/>continuous background analysis]
-        ImprovementQueue[Improvement Queue<br/>prioritized enhancements]
-        PriorityEngine[Priority Engine<br/>impact/effort scoring]
-        LearningDB[Learning Database<br/>pattern extraction]
+    subgraph Improvement["💡 IMPROVEMENT ENGINE LAYER"]
+        EverThinker["Ever-Thinker<br/><i>continuous background analysis</i>"]
+        ImprovementQueue["Improvement Queue<br/><i>prioritized enhancements</i>"]
+        PriorityEngine["Priority Engine<br/><i>impact/effort scoring</i>"]
+        LearningDB["Learning Database<br/><i>pattern extraction</i>"]
     end
 
-    subgraph Monitoring["MONITORING & SELF-HEALING LAYER"]
-        HealthMon[Health Monitor<br/>metrics tracking]
-        AnomalyDet[Anomaly Detector<br/>threshold violations]
-        SelfHeal[Self Healer<br/>auto-recovery]
-        AlertSys[Alert System<br/>user notifications]
+    subgraph Monitoring["📊 MONITORING & SELF-HEALING"]
+        HealthMon["Health Monitor<br/><i>metrics tracking</i>"]
+        AnomalyDet["Anomaly Detector<br/><i>threshold violations</i>"]
+        SelfHeal["Self Healer<br/><i>auto-recovery</i>"]
+        AlertSys["Alert System<br/><i>user notifications</i>"]
     end
 
-    subgraph Storage["STORAGE LAYER"]
-        SQLite[(SQLite Database<br/>executions, tasks,<br/>results, issues)]
-        FileSystem[(File System<br/>generated code,<br/>checkpoints, logs)]
-        Git[(Git Repository<br/>branches, PRs,<br/>commits)]
+    subgraph Storage["💾 STORAGE LAYER"]
+        SQLite[("SQLite Database<br/><i>executions, tasks,<br/>results, issues</i>")]
+        FileSystem[("File System<br/><i>generated code,<br/>checkpoints, logs</i>")]
+        Git[("Git Repository<br/><i>branches, PRs,<br/>commits</i>")]
     end
 
-    subgraph External["EXTERNAL SERVICES"]
-        GitHubAPI[GitHub API<br/>PR management]
-        LLM_APIs[LLM APIs<br/>Claude, GPT-4]
+    subgraph External["🌐 EXTERNAL SERVICES"]
+        GitHubAPI["GitHub API<br/><i>PR management</i>"]
+        LLM_APIs["LLM APIs<br/><i>Claude, GPT-4</i>"]
     end
 
     %% UI connections
@@ -120,15 +122,15 @@ graph TB
     ClaudeAdapter --> LLM_APIs
     CCPMAdapter --> LLM_APIs
 
-    %% Styling
-    classDef uiStyle fill:#e1f5ff,stroke:#0288d1,stroke-width:2px
-    classDef orchStyle fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
-    classDef backendStyle fill:#fff9c4,stroke:#fbc02d,stroke-width:2px
-    classDef qaStyle fill:#fce4ec,stroke:#c2185b,stroke-width:2px
-    classDef improvStyle fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
-    classDef monStyle fill:#fff3e0,stroke:#e64a19,stroke-width:2px
-    classDef storageStyle fill:#e0e0e0,stroke:#616161,stroke-width:2px
-    classDef extStyle fill:#e0f2f1,stroke:#00796b,stroke-width:2px
+    %% Improved Styling with Better Contrast
+    classDef uiStyle fill:#fff,stroke:#0288d1,stroke-width:3px,color:#000
+    classDef orchStyle fill:#fff,stroke:#2e7d32,stroke-width:3px,color:#000
+    classDef backendStyle fill:#fff,stroke:#f57c00,stroke-width:3px,color:#000
+    classDef qaStyle fill:#fff,stroke:#c2185b,stroke-width:3px,color:#000
+    classDef improvStyle fill:#fff,stroke:#7b1fa2,stroke-width:3px,color:#000
+    classDef monStyle fill:#fff,stroke:#d84315,stroke-width:3px,color:#000
+    classDef storageStyle fill:#fff,stroke:#455a64,stroke-width:3px,color:#000
+    classDef extStyle fill:#fff,stroke:#00695c,stroke-width:3px,color:#000
 
     class CLI,WebDash,VSCode,GitHub uiStyle
     class Mod,TechLead,Monitor,TaskDecomp,ExecRouter,ContextMgr,StateMgr,MsgBus orchStyle
@@ -142,17 +144,20 @@ graph TB
 
 ## Component Descriptions
 
-### User Interface Layer
+### 🖥️ User Interface Layer
+Components with **blue borders**:
 - **CLI Interface**: Command-line tool for execute, status, list-executions, improve commands
 - **Web Dashboard**: Real-time monitoring dashboard (WebSocket-based)
 - **VS Code Extension**: IDE integration (future)
 - **GitHub Bot**: Automated PR interaction (future)
 
-### Orchestrator Layer
-**Core Agents**:
-- **Moderator Agent**: Orchestrator, planner, QA gatekeeper (Blue)
-- **TechLead Agent**: Primary code implementation agent (Green)
-- **Monitor Agent**: Health watchdog, metrics tracking (Yellow)
+### ⚙️ Orchestrator Layer
+Components with **green borders**:
+
+**Core Agents** (shown in bold):
+- **Moderator Agent**: Orchestrator, planner, QA gatekeeper
+- **TechLead Agent**: Primary code implementation agent
+- **Monitor Agent**: Health watchdog, metrics tracking
 
 **Supporting Components**:
 - **Task Decomposer**: Breaks requirements into executable tasks
@@ -161,36 +166,42 @@ graph TB
 - **State Manager**: SQLite persistence, checkpoints, recovery
 - **Message Bus**: Async/sync inter-agent communication
 
-### Execution Backends Layer
-- **Claude Code Adapter**: Real implementation via subprocess
+### 🔌 Execution Backends Layer
+Components with **orange borders**:
+- **Claude Code Adapter**: Real implementation via subprocess ✅
 - **CCPM Adapter**: Stub for Claude Code Project Manager
 - **Task Master Adapter**: Stub for complex orchestration
 - **Custom Agents Adapter**: Stub for user-defined agents
 
-### Quality Assurance Layer
-- **Code Analyzer**: 5+ detection rules (tests, secrets, errors, dependencies)
+### 🔍 Quality Assurance Layer
+Components with **pink/magenta borders**:
+- **Code Analyzer**: 5+ detection rules (tests, secrets, errors, dependencies) ✅
 - **Security Scanner**: OWASP checks (stub)
 - **Test Generator**: Automated test creation (stub)
 - **Coverage Checker**: Test coverage analysis (stub)
 
-### Improvement Engine Layer
-- **Ever-Thinker**: Background continuous analysis
+### 💡 Improvement Engine Layer
+Components with **purple borders**:
+- **Ever-Thinker**: Background continuous analysis ✅
 - **Improvement Queue**: Prioritized enhancement backlog
 - **Priority Engine**: Impact/effort/risk scoring
 - **Learning Database**: Pattern extraction and tracking
 
-### Monitoring & Self-Healing Layer
+### 📊 Monitoring & Self-Healing Layer
+Components with **red/orange borders**:
 - **Health Monitor**: Token, context, error, stagnation tracking
 - **Anomaly Detector**: Threshold violations
 - **Self Healer**: Automatic recovery procedures (stub)
 - **Alert System**: User intervention requests
 
-### Storage Layer
-- **SQLite Database**: Executions, tasks, results, issues, improvements
-- **File System**: Generated code, checkpoints, logs, agent memory
+### 💾 Storage Layer
+Components with **gray borders**:
+- **SQLite Database**: Executions, tasks, results, issues, improvements ✅
+- **File System**: Generated code, checkpoints, logs, agent memory ✅
 - **Git Repository**: Branches, PRs, commits, history
 
-### External Services
+### 🌐 External Services
+Components with **teal borders**:
 - **GitHub API**: PR creation, review, merge operations
 - **LLM APIs**: Claude API, OpenAI API for agent intelligence
 

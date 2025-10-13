@@ -11,20 +11,27 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Development Commands
 
 ```bash
-# Install in development mode
+# Install in development mode (from project root)
 pip install -e .
 
 # Run the CLI
-moderator execute "Create a REST API"
-moderator status exec_abc12345
-moderator list-executions
-moderator improve exec_abc12345 --rounds 5  # NEW: Iterative improvement
+moderator execute "Create a REST API"               # Execute new request
+moderator status exec_abc12345                      # Check status
+moderator list-executions                           # List recent runs
+moderator improve exec_abc12345 --rounds 5          # Iterative improvement (NEW)
+moderator improve exec_abc12345 --rounds 3 --db custom.db  # Custom DB path
 
-# Run tests
-pytest
-pytest tests/test_orchestrator.py
-pytest tests/test_agents.py  # Agent system tests
-pytest -v  # Verbose output
+# Run tests (requires: pip install pytest)
+pytest                              # Run all tests
+pytest -v                           # Verbose output
+pytest tests/test_orchestrator.py  # Run specific test file
+pytest tests/test_agents.py         # Agent system tests
+pytest tests/test_qa.py             # QA layer tests
+pytest -k "test_name"               # Run tests matching pattern
+pytest -x                           # Stop on first failure
+
+# Run specific test function
+pytest tests/test_orchestrator.py::test_task_decomposition
 
 # Check imports
 python -c "from moderator import Orchestrator"
@@ -66,12 +73,23 @@ Data structures:
 - Enums: `TaskType`, `Severity`, `BackendType`
 
 ### orchestrator.py
-Main execution flow (moderator/orchestrator.py):
-1. Decompose request → tasks
-2. Execute task via router → output
-3. Analyze code → issues
-4. Identify improvements
-5. Save to database
+**Main execution flow** (moderator/orchestrator.py:32):
+```python
+def execute(request: str) -> ExecutionResult:
+    1. Create execution record in database
+    2. Decompose request → tasks (currently: single task)
+    3. Execute task via router → output (ClaudeAdapter)
+    4. Analyze code → issues (CodeAnalyzer with 5+ rules)
+    5. Identify improvements (Improver)
+    6. Save results to database
+    7. Update execution status
+    8. Return ExecutionResult
+```
+
+**Iterative improvement flow** (moderator/orchestrator.py:115):
+- See "Iterative Improvement Workflow" section below for details
+- Requires agents.yaml configuration
+- Uses multi-agent review and fix cycle
 
 ### state_manager.py
 SQLite tables:
@@ -88,11 +106,12 @@ All backends inherit from `Backend` abstract base class (moderator/backends/base
 - `supports(task_type) → bool`
 - `health_check() → bool`
 
-**ClaudeAdapter** (moderator/backends/claude_adapter.py:416):
+**ClaudeAdapter** (moderator/backends/claude_adapter.py:11):
 - Executes via subprocess: `claude --dangerously-skip-permissions {description}`
-- Collects generated files from output directory
+- Collects generated files from output directory (default: `./claude-generated/`)
 - 5-minute timeout
 - Returns CodeOutput with files dict and metadata
+- Reads all files recursively with UTF-8 encoding
 
 ### QA Layer
 
@@ -146,28 +165,44 @@ YAML-based configuration defining 6 agents with distinct personas:
 - Returns text responses or collected files
 
 **Iterative Improvement Workflow** (moderator/orchestrator.py:115):
+Multi-agent improvement loop with three specialized reviewers and a fixer:
+
 ```python
 def improve_iteratively(result, max_rounds=5):
+    rounds = [result]
+    current_files = result.output.files
+
     for round in 1..max_rounds:
-        # Multi-agent review
+        # Step 1: Multi-agent review
         issues = []
-        issues += reviewer.execute("Review code...")
-        issues += security_reviewer.execute("Security audit...")
-        issues += performance_reviewer.execute("Performance analysis...")
+        issues += reviewer.execute("Review code...")               # General issues
+        issues += security_reviewer.execute("Security audit...")   # Vulnerabilities
+        issues += performance_reviewer.execute("Performance...")   # Bottlenecks
 
-        if no high-priority issues: break
+        # Step 2: Early exit if quality is acceptable
+        if no critical/high issues: break
 
-        # Fix top 3 issues
+        # Step 3: Fix top 3 high-priority issues
         for issue in high_priority[:3]:
-            fixed_files = fixer.execute_with_files("Fix: {issue}...")
-            current_files = fixed_files
+            fixed_files = fixer.execute_with_files(
+                f"Fix: {issue.description} at {issue.location}",
+                current_files
+            )
+            current_files = fixed_files  # Update for next iteration
 
-        # Create round result
+        # Step 4: Create round result with updated files
+        rounds.append(new_result_with_current_files)
 
-    return all_rounds
+    return rounds  # All iterations including original
 ```
 
-Usage: `moderator improve exec_abc12345 --rounds 5`
+**Usage**: `moderator improve exec_abc12345 --rounds 5`
+
+**Key behaviors**:
+- Stops early if no high-priority issues found
+- Fixes max 3 issues per round to avoid thrashing
+- Each round builds on previous fixes
+- Returns all rounds for comparison
 
 ### Ever-Thinker
 
@@ -258,25 +293,53 @@ Then add convenience accessor to `AgentRegistry` if needed.
 
 ## Testing
 
-Tests use pytest with in-memory SQLite (`:memory:`):
+**Requirements**: `pip install pytest`
+
+Tests use pytest with in-memory SQLite (`:memory:`) for isolation:
 - `test_orchestrator.py`: Orchestrator, decomposition, state management
-- `test_backends.py`: Backend adapters
-- `test_qa.py`: QA layer analysis
-- `test_agents.py`: Agent configuration system (NEW - 7 tests)
+- `test_backends.py`: Backend adapters (requires `claude` CLI)
+- `test_qa.py`: QA layer analysis rules
+- `test_agents.py`: Agent configuration system (7 tests for Phase 2)
 
 Run individual tests:
 ```bash
-pytest tests/test_orchestrator.py::test_task_decomposition
+pytest tests/test_orchestrator.py::test_task_decomposition -v
+pytest tests/test_agents.py::test_agent_registry_loads_all_agents -v
 ```
+
+Test structure follows pytest conventions:
+- Each test file uses fixtures for setup/teardown
+- In-memory database prevents test pollution
+- Backend tests may be skipped if `claude` CLI is unavailable
 
 ## Important Notes
 
-1. **Claude Code Requirement**: The `claude` CLI must be available and functional (verify with `claude --version`)
-2. **Output Directory**: Claude Code generates files in `./claude-generated/` relative to execution directory
-3. **Database**: `moderator.db` created automatically in current working directory on first run
+1. **Claude Code Requirement**: The `claude` CLI must be available and functional
+   - Verify: `claude --version`
+   - Install if needed: Follow instructions at claude.ai/code
+
+2. **Output Directory**: Claude Code generates files in `./claude-generated/` relative to current working directory
+   - Created automatically during execution
+   - Files are collected and stored in database
+
+3. **Database Location**: `moderator.db` created in **current working directory** (not installation directory)
+   - First run creates schema automatically
+   - Use `--db` flag to specify custom location
+   - Development tests use `:memory:` (ephemeral)
+
 4. **Execution IDs**: Format is `exec_{8-char-hex}` for easy reference
-5. **Agent Configuration**: `agents.yaml` must exist in project root for iterative improvement (see agents.yaml in repo root)
-6. **Dependencies**: PyYAML >= 6.0 required for agent configuration loading
+   - Example: `exec_a1b2c3d4`
+   - Used in status and improve commands
+
+5. **Agent Configuration**: `agents.yaml` must exist in project root for iterative improvement
+   - Contains 6 pre-configured agents with personas
+   - If missing, system falls back to basic execution (no iterative improvement)
+   - See agents.yaml in repo root for reference
+
+6. **Dependencies**:
+   - Required: Click >= 8.0, PyYAML >= 6.0
+   - Dev/Test: pytest (for running tests)
+   - Runtime: `claude` CLI must be in PATH
 
 ## Troubleshooting
 
