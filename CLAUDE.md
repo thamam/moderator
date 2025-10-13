@@ -271,12 +271,30 @@ pytest tests/test_orchestrator.py::test_task_decomposition
 
 ## Important Notes
 
-1. **Claude Code Requirement**: The `claude` CLI must be available and functional
-2. **Output Directory**: Claude Code generates files in `./claude-generated/`
-3. **Database**: `moderator.db` created automatically on first run
+1. **Claude Code Requirement**: The `claude` CLI must be available and functional (verify with `claude --version`)
+2. **Output Directory**: Claude Code generates files in `./claude-generated/` relative to execution directory
+3. **Database**: `moderator.db` created automatically in current working directory on first run
 4. **Execution IDs**: Format is `exec_{8-char-hex}` for easy reference
-5. **Agent Configuration**: `agents.yaml` must exist in project root for iterative improvement
+5. **Agent Configuration**: `agents.yaml` must exist in project root for iterative improvement (see agents.yaml in repo root)
 6. **Dependencies**: PyYAML >= 6.0 required for agent configuration loading
+
+## Troubleshooting
+
+### Agent System Fails to Load
+- Ensure `agents.yaml` exists in the project root directory
+- Verify YAML syntax is valid
+- Check that PyYAML is installed: `pip list | grep -i pyyaml`
+- If agents.yaml is missing, the system will fall back to basic execution without iterative improvement
+
+### Database Issues
+- Reset database: `rm moderator.db` (will recreate on next run)
+- Check database location: it's created in the current working directory, not the installation directory
+- For development, database is always created fresh in tests (`:memory:`)
+
+### Claude CLI Not Found
+- Install Claude CLI and ensure it's in PATH
+- Verify with: `which claude` and `claude --version`
+- The ClaudeAdapter will fail with a clear error if `claude` command is not available
 
 ## Future Enhancement Areas
 

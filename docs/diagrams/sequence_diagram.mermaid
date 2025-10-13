@@ -1,0 +1,88 @@
+sequenceDiagram
+    title Moderator System: Mock PoC vs Full Vision
+
+    participant User
+    participant Moderator
+    participant ExecutionBackend as Execution Backend<br/>(CCPM/Claude/TaskMaster)
+    participant Analyzer as Code Analyzer
+    participant GitHub
+    participant EverThinker as Ever-Thinker<br/>(Background)
+    participant Monitor as Health Monitor
+    participant Learning as Learning DB
+
+    Note over User, Learning: CURRENT MOCK POC (What we're testing)
+    
+    User->>Moderator: "Build a Flask API"
+    activate Moderator
+    Moderator->>ExecutionBackend: Generate code (Mock CCPM)
+    ExecutionBackend-->>Moderator: Files created locally
+    Moderator->>Analyzer: Analyze generated code
+    activate Analyzer
+    Analyzer-->>Analyzer: Find security issues<br/>Find missing tests<br/>Find code smells
+    Analyzer-->>Moderator: 11 improvements found
+    deactivate Analyzer
+    Moderator-->>User: Display prioritized issues<br/>Save to state.json
+    deactivate Moderator
+
+    Note over User, Learning: === VALUE OF MOCK: Proves we can detect issues in ANY generated code ===
+
+    Note over User, Learning: FULL SYSTEM (The complete vision)
+    
+    User->>Moderator: "Build a blog platform"
+    activate Moderator
+    
+    rect rgb(240, 240, 255)
+        Note right of Moderator: Orchestration Layer
+        Moderator->>Moderator: Decompose into 15+ tasks
+        Moderator->>Monitor: Register project
+        Monitor-->>Monitor: Start health monitoring
+    end
+    
+    loop For each task
+        Moderator->>ExecutionBackend: Execute task via CCPM
+        activate ExecutionBackend
+        ExecutionBackend->>GitHub: Create branch
+        ExecutionBackend->>ExecutionBackend: Generate code
+        ExecutionBackend->>GitHub: Create PR
+        ExecutionBackend-->>Moderator: PR #123 created
+        deactivate ExecutionBackend
+        
+        rect rgb(255, 240, 240)
+            Note right of Analyzer: Immediate Review
+            Moderator->>Analyzer: Analyze PR
+            activate Analyzer
+            Analyzer->>GitHub: Fetch PR files
+            Analyzer-->>Analyzer: Static analysis<br/>Security scan<br/>Complexity check
+            Analyzer->>GitHub: Post review comments
+            Analyzer-->>Moderator: Review posted
+            deactivate Analyzer
+        end
+    end
+    
+    rect rgb(240, 255, 240)
+        Note left of EverThinker: Continuous Improvement (Async)
+        EverThinker->>EverThinker: Wake up every 60s
+        activate EverThinker
+        EverThinker->>GitHub: Scan completed PRs
+        EverThinker->>Learning: Get historical patterns
+        Learning-->>EverThinker: Similar past issues
+        EverThinker-->>EverThinker: Find optimizations<br/>Detect tech debt<br/>Suggest refactors
+        EverThinker->>GitHub: Create improvement PR
+        EverThinker->>Learning: Store outcomes
+        deactivate EverThinker
+    end
+    
+    rect rgb(255, 255, 240)
+        Note left of Monitor: Health Monitoring (Continuous)
+        Monitor->>Monitor: Check all components
+        Monitor-->>Monitor: Detect stuck agent
+        Monitor->>Moderator: Trigger self-healing
+        Moderator->>ExecutionBackend: Restart agent
+        Monitor->>User: Dashboard update
+    end
+    
+    Moderator->>Learning: Store project knowledge
+    Moderator-->>User: Complete blog platform<br/>15 PRs created<br/>42 improvements applied<br/>3 self-healing events
+    deactivate Moderator
+
+    Note over User, Learning: === KEY INSIGHT: Every code generation is continuously improved ===
