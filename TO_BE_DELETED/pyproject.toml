@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "moderator"
+version = "0.1.0"
+description = "AI Code Generation Orchestration System"
+requires-python = ">=3.9"
+dependencies = [
+    "click>=8.0.0",
+    "pyyaml>=6.0",
+]
+
+[project.scripts]
+moderator = "moderator.cli:cli"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["moderator*"]

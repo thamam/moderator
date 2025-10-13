@@ -1,0 +1,36 @@
+# Production environment configuration
+# config/production_config.yaml
+
+# Project settings
+project:
+  name: "moderator-production"
+  repo_path: "."
+
+# Backend configuration - use real backends
+backend:
+  type: "ccpm"  # Options: ccpm, claude_code
+  api_key: ${CCPM_API_KEY}  # Read from environment variable
+  timeout: 300  # 5 minutes
+  retry_attempts: 3
+
+# State management
+state_dir: "./state"
+
+# Logging - less verbose for production
+logging:
+  level: "INFO"
+  console: true
+  format: "%(asctime)s - %(levelname)s - %(message)s"
+  file: "./logs/moderator.log"  # Optional: log to file
+
+# Git settings
+git:
+  auto_commit: false
+  pr_draft: true
+  require_approval: true  # Manual review required in production
+  default_branch: "main"
+
+# Rate limiting (for production backends)
+rate_limit:
+  requests_per_minute: 10
+  cooldown_seconds: 60

@@ -1,0 +1,27 @@
+# Test environment configuration
+# config/test_config.yaml
+
+# Project settings
+project:
+  name: "test-project"
+  repo_path: "."
+
+# Backend configuration - use mock for testing
+backend:
+  type: "test_mock"  # Mock backend for fast, deterministic tests
+  api_key: null
+
+# State management - use test directory
+state_dir: "./test_state"
+
+# Logging - verbose for debugging tests
+logging:
+  level: "DEBUG"
+  console: true
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# Git settings - use mocks in tests
+git:
+  auto_commit: false
+  pr_draft: true
+  require_approval: false  # For automated testing

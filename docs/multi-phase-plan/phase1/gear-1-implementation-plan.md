@@ -465,10 +465,11 @@ class CCPMBackend(Backend):
         self.api_key = api_key or "dummy-key"  # For testing
 
     def execute(self, task_description: str, output_dir: Path) -> Dict[str, str]:
-        """Execute via CCPM API"""
+        """
+        Execute via CCPM API.
 
-        # For Gear 1: Stub implementation
-        # TODO: Replace with actual CCPM API call
+        This is the production backend for real code generation.
+        """
 
         print(f"[CCPM] Executing: {task_description}")
         time.sleep(2)  # Simulate processing
@@ -498,13 +499,26 @@ if __name__ == "__main__":
         # For Gear 1: Always return True (stub)
         return True
 
-class MockBackend(Backend):
-    """Mock backend for testing"""
+class TestMockBackend(Backend):
+    """
+    TEST INFRASTRUCTURE ONLY - Generates dummy files for fast testing.
+
+    This is permanent test infrastructure, not temporary Gear 1 code.
+
+    Use this for:
+    ✓ Unit tests (fast, deterministic)
+    ✓ Integration tests (no external dependencies)
+    ✓ CI/CD pipelines (no API costs)
+    ✓ Local development sanity checks
+
+    DO NOT use for production code generation.
+    Use CCPMBackend or ClaudeCodeBackend for actual code generation.
+    """
 
     def execute(self, task_description: str, output_dir: Path) -> Dict[str, str]:
-        """Generate mock files"""
+        """Generate mock files for testing"""
 
-        print(f"[MOCK] Executing: {task_description}")
+        print(f"[TEST_MOCK] Executing: {task_description}")
 
         files = {}
         output_dir.mkdir(parents=True, exist_ok=True)
@@ -786,7 +800,7 @@ from datetime import datetime
 from .models import ProjectState, ProjectPhase
 from .decomposer import SimpleDecomposer
 from .executor import SequentialExecutor
-from .backend import Backend, CCPMBackend, MockBackend
+from .backend import Backend, CCPMBackend, TestMockBackend
 from .git_manager import GitManager
 from .state_manager import StateManager
 from .logger import StructuredLogger
@@ -898,13 +912,17 @@ class Orchestrator:
     def _create_backend(self) -> Backend:
         """Create backend based on config"""
 
-        backend_type = self.config.get('backend', {}).get('type', 'mock')
+        backend_type = self.config.get('backend', {}).get('type', 'test_mock')
 
         if backend_type == 'ccpm':
+            # Production: Real CCPM API for actual code generation
             api_key = self.config.get('backend', {}).get('api_key')
             return CCPMBackend(api_key)
+        elif backend_type == 'test_mock':
+            # Testing: Fast, deterministic mock for tests/CI
+            return TestMockBackend()
         else:
-            return MockBackend()
+            raise ValueError(f"Unknown backend type: {backend_type}")
 ```
 
 ---
@@ -921,8 +939,8 @@ project:
 
 # Backend configuration
 backend:
-  type: "mock"  # Options: mock, ccpm
-  api_key: null  # Set if using CCPM
+  type: "test_mock"  # Options: test_mock (testing), ccpm (production)
+  api_key: null  # Required for CCPM backend
 
 # State management
 state_dir: "./state"
@@ -932,6 +950,183 @@ logging:
   level: "INFO"  # DEBUG, INFO, WARN, ERROR
   console: true
 ```
+
+---
+
+## Testing Philosophy
+
+### Mock Backends are Permanent Test Infrastructure
+
+**IMPORTANT:** `TestMockBackend` is NOT temporary "Gear 1" code. It is **permanent test infrastructure** that exists alongside production backends.
+
+**Why TestMockBackend Exists:**
+- ✅ Fast test execution (no network calls, no API costs)
+- ✅ Deterministic CI/CD pipelines (no flaky external dependencies)
+- ✅ Cost-free development iterations
+- ✅ Sanity checks before expensive LLM calls
+- ✅ Unit testing of orchestration logic without external services
+
+**When to Use TestMock vs Production Backends:**
+
+```python
+# Default: Use TestMockBackend for fast, deterministic tests
+pytest tests/                    # Runs with TestMockBackend
+
+# Explicitly run expensive "live" tests with real backends
+pytest -m live tests/            # Runs with CCPMBackend, etc.
+pytest -m "not live" tests/      # Skip live tests (default)
+```
+
+### Test Configuration Strategy
+
+#### For Fast Tests (Default):
+```yaml
+# test_config.yaml
+backend:
+  type: "test_mock"  # No API calls, instant responses
+```
+
+#### For Live Integration Tests:
+```yaml
+# production_config.yaml
+backend:
+  type: "ccpm"
+  api_key: "${CCPM_API_KEY}"  # From environment
+```
+
+### pytest Configuration
+
+Add to `pytest.ini` or `pyproject.toml`:
+
+```ini
+# pytest.ini
+[pytest]
+markers =
+    live: marks tests that require live backends (expensive, slow)
+    slow: marks tests that take significant time
+
+# Default: run only non-live tests
+addopts = -m "not live"
+```
+
+Or in `pyproject.toml`:
+
+```toml
+[tool.pytest.ini_options]
+markers = [
+    "live: marks tests that require live backends (expensive, slow)",
+    "slow: marks tests that take significant time",
+]
+addopts = "-m 'not live'"
+```
+
+### Test Structure Examples
+
+#### Fast Unit Test (Default):
+```python
+# tests/test_orchestrator_fast.py
+
+import pytest
+from src.orchestrator import Orchestrator
+
+def test_backend_creation_with_test_mock():
+    """Fast test using TestMockBackend"""
+    config = {'backend': {'type': 'test_mock'}}
+    orch = Orchestrator(config)
+    backend = orch._create_backend()
+
+    assert backend.health_check() is True
+    # Fast, deterministic, no API costs
+```
+
+#### Live Integration Test (Opt-in):
+```python
+# tests/test_orchestrator_live.py
+
+import pytest
+import os
+from src.orchestrator import Orchestrator
+
+@pytest.mark.live
+def test_ccpm_backend_execution():
+    """Expensive test using real CCPM API"""
+    if not os.getenv('CCPM_API_KEY'):
+        pytest.skip("CCPM_API_KEY not set")
+
+    config = {
+        'backend': {
+            'type': 'ccpm',
+            'api_key': os.getenv('CCPM_API_KEY')
+        }
+    }
+    orch = Orchestrator(config)
+    backend = orch._create_backend()
+
+    # This makes real API calls - slow and costs money
+    result = backend.execute("Create a hello world script", Path("./tmp"))
+    assert len(result) > 0
+```
+
+### Running Tests
+
+```bash
+# Default: Fast tests only (TestMockBackend)
+pytest
+
+# Explicitly run live tests
+pytest -m live
+
+# Run all tests (including live)
+pytest -m ""
+
+# Verbose output for debugging
+pytest -v -m "not live"
+
+# Run specific test file
+pytest tests/test_orchestrator_fast.py
+```
+
+### CI/CD Integration
+
+In your GitHub Actions or CI pipeline:
+
+```yaml
+# .github/workflows/test.yml
+name: Tests
+
+on: [push, pull_request]
+
+jobs:
+  fast-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run fast tests
+        run: pytest -m "not live"  # Only TestMockBackend tests
+
+  live-tests:
+    runs-on: ubuntu-latest
+    # Only run on main branch or when explicitly triggered
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run live tests
+        run: pytest -m live
+        env:
+          CCPM_API_KEY: ${{ secrets.CCPM_API_KEY }}
+```
+
+### Key Principles
+
+1. **TestMockBackend is permanent** - Never remove it thinking it's "just for Gear 1"
+2. **Fast by default** - Most tests should use TestMockBackend
+3. **Expensive opt-in** - Live tests require explicit markers
+4. **Clear naming** - `test_mock` clearly indicates testing purpose
+5. **Separate configs** - `test_config.yaml` vs `production_config.yaml`
 
 ---
 
@@ -1059,12 +1254,12 @@ import tempfile
 from pathlib import Path
 from src.orchestrator import Orchestrator
 
-def test_end_to_end_with_mock_backend():
-    """Test complete workflow with mock backend"""
+def test_end_to_end_with_test_mock():
+    """Test complete workflow with TestMockBackend"""
 
     with tempfile.TemporaryDirectory() as tmpdir:
         config = {
-            'backend': {'type': 'mock'},
+            'backend': {'type': 'test_mock'},
             'state_dir': tmpdir,
             'repo_path': tmpdir
         }
@@ -1125,7 +1320,7 @@ python main.py "Create a simple command-line TODO application with the following
 | 3 | State manager | Implement file-based persistence | 3h | 2 |
 | 4 | Logger | Implement structured logging | 2h | 2,3 |
 | 5 | Decomposer | Implement template-based decomposition | 3h | 2 |
-| 6 | Backend | Implement mock backend | 2h | 2 |
+| 6 | Backend | Implement TestMockBackend (test infrastructure) | 2h | 2 |
 | 7 | Git manager | Implement branch/commit/PR creation | 4h | 2 |
 | 8 | Executor | Implement sequential execution | 3h | 2,6,7 |
 | 9 | Orchestrator | Implement main coordination | 3h | 5,8 |
@@ -1348,8 +1543,8 @@ class Orchestrator:
 **Issue**: State not persisting
 - **Solution**: Check `state/` directory permissions and disk space
 
-**Issue**: Mock backend generates empty files
-- **Solution**: Expected behavior. Replace with real backend (CCPM) for actual code generation.
+**Issue**: TestMockBackend generates simple stub files
+- **Solution**: This is expected test infrastructure behavior. For production use, configure the CCPM backend in `config.yaml`.
 
 ### Debug Mode
 
@@ -1375,7 +1570,7 @@ Then check detailed logs in `state/proj_*/logs.jsonl`.
 - CLI with multiple commands
 
 ### Gear 1 (This Plan):
-- Single backend (CCPM/Mock)
+- Single backend (CCPM for production, TestMockBackend for tests)
 - No routing - always same backend
 - No QA layer
 - No improvements

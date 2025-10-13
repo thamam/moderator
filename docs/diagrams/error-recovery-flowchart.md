@@ -211,19 +211,32 @@ class RetryStrategy:
 ## Fallback Chain
 
 ### Backend Fallback Chain
+
+**Production Fallback Chain:**
 ```
-CCPM → Task Master → Claude Code → Mock Backend
+CCPM → Task Master → Claude Code → User Intervention
 ```
+
+**Test Environment Fallback Chain:**
+```
+TestMockBackend (for fast, deterministic tests)
+```
+
+> **Note:** `TestMockBackend` is permanent test infrastructure, not part of the production fallback chain. It's used exclusively in test environments for fast, deterministic testing without API costs.
 
 ```python
 class BackendFallbackChain:
-    def __init__(self):
-        self.backends = [
-            CCPMAdapter(),
-            TaskMasterAdapter(),
-            ClaudeCodeAdapter(),
-            MockBackend()
-        ]
+    def __init__(self, environment="production"):
+        if environment == "test":
+            # Test environment: Use mock for fast, deterministic tests
+            self.backends = [TestMockBackend()]
+        else:
+            # Production: Real backends only
+            self.backends = [
+                CCPMAdapter(),
+                TaskMasterAdapter(),
+                ClaudeCodeAdapter()
+            ]
 
     def execute_with_fallback(self, task):
         """
