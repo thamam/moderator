@@ -76,7 +76,7 @@ class Orchestrator:
                         print("Execution cancelled.")
                         return project_state
                 except EOFError:
-                    # Non-interactive environment - treat as auto-approve if require_approval is False
+                    # In a non-interactive environment, we cannot prompt for input, so we proceed as if approved.
                     logger.info("orchestrator", "non_interactive_environment_detected")
                     print("\nNon-interactive environment detected. Auto-approving...")
             else:
