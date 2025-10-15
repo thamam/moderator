@@ -28,7 +28,7 @@ class Orchestrator:
     def execute(self, requirements: str) -> ProjectState:
         """Execute complete workflow"""
 
-        # Create project
+        # Create project ID using Universally Unique Identifier (UUID)
         project_id = f"proj_{uuid.uuid4().hex[:8]}"
 
         project_state = ProjectState(
