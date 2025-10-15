@@ -143,10 +143,10 @@ class ClaudeCodeBackend(Backend):
         prompt_file = output_dir / "prompt.txt"
         prompt_file.write_text(task_description)
 
-        # Step 2: Execute Claude CLI
+        # Step 2: Execute Claude CLI in non-interactive mode
         try:
             result = subprocess.run(
-                [self.cli_path, "chat", "--message", task_description],
+                [self.cli_path, "--print", "--dangerously-skip-permissions", task_description],
                 capture_output=True,
                 text=True,
                 timeout=300,  # 5 minute timeout

@@ -42,10 +42,22 @@ Examples:
         help='Path to configuration file (default: config/config.yaml)'
     )
 
+    parser.add_argument(
+        '--auto-approve', '-y',
+        action='store_true',
+        help='Skip interactive approval prompts (auto-approve all tasks)'
+    )
+
     args = parser.parse_args()
 
     # Load config
     config = load_config(args.config)
+
+    # Override require_approval if --auto-approve flag is set
+    if args.auto_approve:
+        if 'git' not in config:
+            config['git'] = {}
+        config['git']['require_approval'] = False
 
     # Create orchestrator
     orch = Orchestrator(config)

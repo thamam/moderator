@@ -65,12 +65,23 @@ class Orchestrator:
 
             self.state_manager.save_project(project_state)
 
-            # Get user confirmation
-            print("\nProceed with execution? (yes/no): ", end='')
-            if input().lower() != 'yes':
-                logger.warn("orchestrator", "execution_cancelled_by_user")
-                print("Execution cancelled.")
-                return project_state
+            # Get user confirmation (if required by config)
+            require_approval = self.config.get('git', {}).get('require_approval', True)
+            if require_approval:
+                print("\nProceed with execution? (yes/no): ", end='')
+                try:
+                    response = input().lower()
+                    if response != 'yes':
+                        logger.warn("orchestrator", "execution_cancelled_by_user")
+                        print("Execution cancelled.")
+                        return project_state
+                except EOFError:
+                    # In a non-interactive environment, we cannot prompt for input, so we proceed as if approved.
+                    logger.info("orchestrator", "non_interactive_environment_detected")
+                    print("\nNon-interactive environment detected. Auto-approving...")
+            else:
+                print("\nAuto-approval enabled (require_approval=false). Proceeding...")
+                logger.info("orchestrator", "auto_approval_enabled")
 
             # Step 2: Execute tasks
             print("\n" + "="*60)
@@ -85,7 +96,8 @@ class Orchestrator:
                 backend=backend,
                 git_manager=git_manager,
                 state_manager=self.state_manager,
-                logger=logger
+                logger=logger,
+                require_approval=require_approval
             )
 
             executor.execute_all(project_state)
