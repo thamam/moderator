@@ -119,44 +119,96 @@ logging:
   console: true
 ```
 
-### Using Production Backends
+### Production Mode
 
-**Option 1: CCPM Backend**
+Gear 1 supports two production backends for real code generation:
 
-For real code generation with CCPM:
+#### Option 1: CCPM Backend
 
-```yaml
-backend:
-  type: "ccpm"
-  api_key: "your-ccpm-api-key"
+**Setup:**
+```bash
+# 1. Get your CCPM API key from https://ccpm.ai (or your CCPM provider)
+export CCPM_API_KEY="your-api-key-here"
+
+# 2. Use production config
+cp config/production_config.yaml config/config.yaml
+
+# 3. Edit config/config.yaml - uncomment CCPM backend section:
+# backend:
+#   type: "ccpm"
+#   api_key: ${CCPM_API_KEY}
+#   timeout: 300
+#   retry_attempts: 3
 ```
 
-Or use environment variable:
+**Run:**
 ```bash
+python main.py "Create a REST API for user management with CRUD operations"
+```
+
+#### Option 2: Claude Code CLI Backend (Recommended for Gear 1)
+
+**Setup:**
+```bash
+# 1. Install Claude Code CLI
+# macOS/Linux:
+curl -fsSL https://claude.ai/install.sh | sh
+
+# Or follow: https://docs.anthropic.com/claude/docs/claude-cli
+
+# 2. Authenticate with Claude
+claude auth login
+
+# 3. Use production config
+cp config/production_config.yaml config/config.yaml
+
+# 4. Verify Claude Code backend is enabled in config/config.yaml:
+# backend:
+#   type: "claude_code"
+#   cli_path: "claude"
+```
+
+**Run:**
+```bash
+python main.py "Create a command-line expense tracker with categories and monthly reports"
+```
+
+#### Switching Between Test and Production
+
+**Option A: Using --config flag (Recommended)**
+
+```bash
+# Test mode (fast, mock backend):
+python main.py --config config/test_config.yaml "Create a calculator"
+
+# Production mode with Claude Code:
+python main.py --config config/production_config.yaml "Create a calculator"
+
+# Production mode with CCPM:
 export CCPM_API_KEY="your-key"
+python main.py -c config/production_config.yaml "Create a REST API"
+
+# Use shorthand -c:
+python main.py -c config/test_config.yaml "Create a TODO app"
 ```
 
-**Option 2: Claude Code CLI Backend**
+**Option B: Copy config file (Alternative)**
 
-For code generation using Claude Code CLI:
-
-1. Install Claude CLI:
 ```bash
-# Follow installation guide at:
-# https://docs.anthropic.com/claude/docs/claude-cli
+# For testing:
+cp config/test_config.yaml config/config.yaml
+python main.py "Create a calculator"
+
+# For production:
+cp config/production_config.yaml config/config.yaml
+python main.py "Create a calculator"
 ```
 
-2. Configure backend:
-```yaml
-backend:
-  type: "claude_code"
-  cli_path: "claude"  # Or full path to claude executable
-```
-
-3. Run:
-```bash
-python main.py "Create a TODO app"
-```
+**Important Notes:**
+- Production backends make real API calls and may incur costs
+- Test mode (TestMockBackend) generates simple stub files for validation
+- Production mode generates actual working code
+- All modes follow the same Git workflow (branch → commit → PR)
 
 ## Testing
 
