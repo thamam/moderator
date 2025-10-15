@@ -42,9 +42,11 @@ class GitManager:
         """Commit generated files"""
 
         try:
-            # Stage files
+            # Stage files (force add to bypass .gitignore for Gear 1)
+            # Note: Gear 1 design flaw - artifacts in state/ are gitignored
+            # but need to be committed. Fixed in Gear 2 with .moderator/ architecture.
             for file_path in files:
-                self._run_git("add", file_path)
+                self._run_git("add", "--force", file_path)
 
             # Create commit message
             message = self._format_commit_message(task)
