@@ -65,12 +65,23 @@ class Orchestrator:
 
             self.state_manager.save_project(project_state)
 
-            # Get user confirmation
-            print("\nProceed with execution? (yes/no): ", end='')
-            if input().lower() != 'yes':
-                logger.warn("orchestrator", "execution_cancelled_by_user")
-                print("Execution cancelled.")
-                return project_state
+            # Get user confirmation (if required by config)
+            require_approval = self.config.get('git', {}).get('require_approval', True)
+            if require_approval:
+                print("\nProceed with execution? (yes/no): ", end='')
+                try:
+                    response = input().lower()
+                    if response != 'yes':
+                        logger.warn("orchestrator", "execution_cancelled_by_user")
+                        print("Execution cancelled.")
+                        return project_state
+                except EOFError:
+                    # Non-interactive environment - treat as auto-approve if require_approval is False
+                    logger.info("orchestrator", "non_interactive_environment_detected")
+                    print("\nNon-interactive environment detected. Auto-approving...")
+            else:
+                print("\nAuto-approval enabled (require_approval=false). Proceeding...")
+                logger.info("orchestrator", "auto_approval_enabled")
 
             # Step 2: Execute tasks
             print("\n" + "="*60)
@@ -80,12 +91,14 @@ class Orchestrator:
             # Initialize components
             backend = self._create_backend()
             git_manager = GitManager(self.config.get('repo_path', '.'))
+            require_approval = self.config.get('git', {}).get('require_approval', True)
 
             executor = SequentialExecutor(
                 backend=backend,
                 git_manager=git_manager,
                 state_manager=self.state_manager,
-                logger=logger
+                logger=logger,
+                require_approval=require_approval
             )
 
             executor.execute_all(project_state)

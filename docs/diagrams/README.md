@@ -2,15 +2,35 @@
 
 This directory contains comprehensive architecture and flow diagrams for the Moderator system. These diagrams illustrate the system's design, workflows, and key components using Mermaid notation.
 
-## Quick Start for Newcomers
+## Understanding the Gear System
 
-If you're new to the Moderator system, we recommend viewing the diagrams in this order:
+Moderator follows a **"gear system"** approach where each gear adds incremental complexity:
 
-1. **[Component Architecture](./component-architecture.md)** - Start here to understand the overall system structure
-2. **[Main Execution Loop](./main-execution-loop.md)** - See how the system executes tasks end-to-end
-3. **[System State Machine](./system-state-machine.md)** - Understand the different phases of execution
-4. **[Data Flow Architecture](./data-flow-architecture.md)** - Follow data through the system
-5. **[Git Workflow](./git-workflow.md)** - See how code changes are managed via PRs
+- **Gear 1 (✅ Complete)**: Single agent, sequential execution, manual review
+- **Gear 2 (📋 Current Phase)**: Two-agent system, automated review, one improvement cycle
+- **Gear 3 (Future)**: Ever-Thinker, learning system, advanced QA
+- **Gear 4 (Future)**: Monitoring, self-healing, multi-project
+
+**Diagrams are organized by gear below.** Start with Gear 1 to understand the foundation, then progress to Gear 2.
+
+---
+
+## Quick Start by Gear
+
+### For Gear 1 (Current Implementation)
+1. **[Component Architecture](./component-architecture.md)** - Overall structure (full vision)
+2. **[Main Execution Loop](./main-execution-loop.md)** - Task execution flow
+3. **[Git Workflow](./git-workflow.md)** - PR-based workflow
+
+### For Gear 2 (Next Phase)
+1. **[Gear 2 Component Architecture](./gear2-component-architecture.md)** - Two-agent system ⭐ START HERE
+2. **[Gear 2 Execution Loop](./gear2-execution-loop.md)** - Automated PR review flow
+3. **[Gear 2 Message Flow](./gear2-message-flow.md)** - Inter-agent communication
+
+### For Full Vision (Gears 3-4)
+1. **[Component Architecture](./component-architecture.md)** - Complete system architecture
+2. **[Ever-Thinker Continuous Loop](./ever-thinker-continuous-loop.md)** - Continuous improvement
+3. **[Learning System Architecture](./learning-system-architecture.md)** - Pattern learning
 
 ## Complete Diagram Index
 
@@ -116,21 +136,52 @@ Context window management including size monitoring, pruning strategies (what to
 
 **Key Concepts**: Context monitoring, pruning algorithm, checkpoint strategy, overflow recovery
 
+---
+
+### Gear 2 Specific Diagrams (Week 1B Implementation)
+
+#### 19. [Gear 2 Component Architecture](./gear2-component-architecture.md)
+Updated component architecture for Gear 2 showing the two-agent system (Moderator + TechLead), message bus communication, repository isolation via `--target` flag, and `.moderator/` directory structure. Includes configuration cascade and comparison with Gear 1.
+
+**Key Concepts**: Two-agent system, message bus, repository isolation, configuration cascade, `.moderator/` workspace
+
+**Priority**: ⭐ **START HERE** for Gear 2 understanding
+
+#### 20. [Gear 2 Execution Loop](./gear2-execution-loop.md)
+Complete execution flow for Gear 2 including task assignment, automated PR review with scoring (≥80 for approval), feedback iterations (max 3), improvement cycle (one per project), and state transitions. Shows decision points and agent interactions.
+
+**Key Concepts**: PR review cycle, approval criteria, feedback iterations, improvement cycle, state machine
+
+#### 21. [Gear 2 Message Flow](./gear2-message-flow.md)
+Detailed message-based communication patterns between Moderator and TechLead agents. Includes message types (TASK_ASSIGNED, PR_SUBMITTED, PR_FEEDBACK, etc.), payload structures, sequence diagrams, and correlation IDs for request/response tracking.
+
+**Key Concepts**: Message types, payload formats, async communication, correlation tracking, message history
+
+---
+
 ## Diagram Categories
 
+### Gear 2 Implementation (Current Phase)
+- **Gear 2 Component Architecture** ⭐ Start here for Gear 2
+- **Gear 2 Execution Loop** - PR review & feedback cycles
+- **Gear 2 Message Flow** - Agent communication patterns
+
 ### For Understanding System Architecture
-- Component Architecture
+- Component Architecture (Full vision)
 - System Deployment Architecture
 - Data Flow Architecture
+- Gear 2 Component Architecture (Current implementation)
 
 ### For Understanding Execution Flow
-- Main Execution Loop
+- Main Execution Loop (Full vision)
+- Gear 2 Execution Loop (Current implementation)
 - System State Machine
 - Task Routing Decision Tree
 - Queue Management
 
 ### For Understanding Agent Communication
-- Agent Communication Protocol
+- Agent Communication Protocol (Full vision)
+- Gear 2 Message Flow (Current implementation)
 - Specialist Lifecycle
 
 ### For Understanding Code Management
@@ -138,12 +189,12 @@ Context window management including size monitoring, pruning strategies (what to
 - PR Review Criteria Matrix
 
 ### For Understanding Continuous Improvement
-- Ever-Thinker Continuous Loop
+- Ever-Thinker Continuous Loop (Gear 3)
 - Improvement Priority Matrix
-- Learning System Architecture
+- Learning System Architecture (Gear 3)
 
 ### For Understanding System Operations
-- Health Monitoring Dashboard
+- Health Monitoring Dashboard (Gear 4)
 - Stopping Conditions Flowchart
 - Error Recovery Flowchart
 - Context Management Strategy
@@ -200,6 +251,12 @@ If you have questions about these diagrams or find issues:
 
 ---
 
-**Last Updated**: 2024-10-13
-**Diagram Count**: 18
-**Status**: Complete for Phase 2 (Agent Configuration System)
+**Last Updated**: 2024-10-15
+**Diagram Count**: 21 (18 full vision + 3 Gear 2 specific)
+**Status**: Gear 1 Complete, Gear 2 Documentation Ready for Implementation
+
+## Gear-Specific Documentation
+
+- **Gear 1**: See main README and implementation plan in `docs/multi-phase-plan/phase1/`
+- **Gear 2**: See implementation plan, architectural fix, and transition guide in `docs/multi-phase-plan/phase2/`
+- **Gear 3-4**: See PRD (`docs/moderator-prd.md`) and architecture vision (`docs/archetcture.md`)
