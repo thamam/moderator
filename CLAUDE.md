@@ -41,8 +41,11 @@ moderator/
 │   ├── moderator-prd.md         # Product Requirements Document
 │   ├── archetcture.md           # Big architecture vision
 │   ├── multi-phase-plan/        # Phased implementation strategy
-│   │   └── phase1/
-│   │       └── gear-1-implementation-plan.md  # Gear 1 specification
+│   │   └── phase1/              # Gear 1 specific documentation
+│   │       ├── gear-1-implementation-plan.md         # Gear 1 specification
+│   │       ├── gear-1-sequence-diagram.md            # Execution flow diagram
+│   │       ├── gear1-dev-branch-setup.md             # Dev branch workflow
+│   │       └── design-issue-separation-of-concerns.md # Known issues & Gear 2 plan
 │   └── diagrams/                # 18 Mermaid architecture diagrams
 ├── main.py                       # CLI entry point
 ├── requirements.txt              # Python 3.9+ dependencies
@@ -520,3 +523,90 @@ Previous prototype code has been moved to TO_BE_DELETED/ directory to allow clea
 - Learning system
 - Self-healing capabilities
 - Real-time monitoring dashboard
+
+## Documentation Organization
+
+### Guidelines for Creating New Documentation
+
+**IMPORTANT:** All gear-specific and phase-specific documentation must be organized in the appropriate subdirectories to avoid cluttering the main docs folder.
+
+### Directory Structure
+
+```
+docs/
+├── moderator-prd.md              # Main PRD (root level - describes full vision)
+├── archetcture.md                # Architecture vision (root level - high-level)
+├── plan.md                       # Original plan (root level - historical)
+├── multi-phase-plan/             # Phased implementation
+│   ├── multi_phase_plan.md      # Overview of all phases
+│   ├── phase1/                   # Gear 1 specific (COMPLETED)
+│   │   ├── gear-1-implementation-plan.md
+│   │   ├── gear-1-sequence-diagram.md
+│   │   ├── gear1-dev-branch-setup.md
+│   │   └── design-issue-separation-of-concerns.md
+│   ├── phase2/                   # Gear 2 specific (FUTURE)
+│   │   └── gear-2-*.md
+│   ├── phase3/                   # Gear 3 specific (FUTURE)
+│   │   └── gear-3-*.md
+│   └── phase4/                   # Gear 4 specific (FUTURE)
+│       └── gear-4-*.md
+└── diagrams/                     # Architecture diagrams (root level - cross-gear)
+    ├── README.md
+    ├── component-architecture.md
+    └── ... (18 diagrams)
+```
+
+### Rules for Document Placement
+
+1. **Root Level (`docs/`)** - Only for documents that span all gears:
+   - Main PRD
+   - Architecture vision
+   - Cross-gear diagrams
+   - General project documentation
+
+2. **Phase Subdirectories (`docs/multi-phase-plan/phaseN/`)** - For gear-specific docs:
+   - Implementation plans
+   - Design decisions
+   - Known issues and workarounds
+   - Sequence diagrams specific to that gear
+   - Setup instructions
+   - Testing strategies
+
+3. **Create New Phase Directory** when starting a new gear:
+   ```bash
+   mkdir -p docs/multi-phase-plan/phase2
+   ```
+
+### Naming Conventions
+
+**Gear-specific docs should be prefixed:**
+- `gear-N-*` for implementation docs (e.g., `gear-2-implementation-plan.md`)
+- `gearN-*` for auxiliary docs (e.g., `gear2-testing-strategy.md`)
+
+**Examples:**
+- ✅ `docs/multi-phase-plan/phase1/gear-1-sequence-diagram.md`
+- ✅ `docs/multi-phase-plan/phase2/gear-2-api-design.md`
+- ❌ `docs/gear-1-sequence-diagram.md` (wrong location)
+- ❌ `docs/sequence-diagram.md` (unclear which gear)
+
+### When to Create Phase-Specific Documentation
+
+Create new docs in `docs/multi-phase-plan/phaseN/` when documenting:
+- Implementation details specific to a gear
+- Workflows unique to a gear
+- Known limitations of a gear
+- Migration guides between gears
+- Testing strategies for a gear
+- Design decisions made during a gear's implementation
+
+### Cross-Referencing
+
+When referencing phase-specific docs from root-level docs:
+```markdown
+See [Gear 1 Sequence Diagram](multi-phase-plan/phase1/gear-1-sequence-diagram.md)
+```
+
+When referencing root-level docs from phase-specific docs:
+```markdown
+See [Architecture Vision](../../archetcture.md)
+```

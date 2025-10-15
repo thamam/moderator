@@ -26,13 +26,84 @@ Create a self-orchestrating development system that autonomously builds, reviews
 - Maintain system health score >80% throughout execution
 - Generate improvements in at least 3 cycles before hitting stopping conditions
 
+### 1.4 Phased Implementation Approach
+
+This PRD describes the **complete vision** (Gear 4) for the Moderator system. Implementation follows a "gear system" where each gear adds complexity progressively.
+
+**Gear 1 (✅ COMPLETE - November 2024):**
+- Single agent, sequential execution, manual review
+- Template-based decomposition, one backend (CCPM or TestMock)
+- Basic logging and Git workflow integration
+- File-based state persistence
+- **Known Limitation:** Operates within tool repository (fixed in Gear 2)
+- See: `docs/multi-phase-plan/phase1/gear-1-implementation-plan.md`
+
+**Gear 2 (📋 CURRENT PHASE - Q4 2024):**
+- **FIRST PRIORITY:** Architectural fix - `--target` flag, `.moderator/` directory structure
+- Two-agent system (Moderator + TechLead agents)
+- Automated PR review and feedback loops
+- One improvement cycle
+- Message bus communication between agents
+- See: `docs/multi-phase-plan/phase2/gear-2-implementation-plan.md`
+
+**Gear 3 (🎯 FUTURE - 2025):**
+- Ever-Thinker with multiple improvement cycles
+- Learning system (hybrid: global + project-specific databases)
+- Advanced QA layer integration
+- Backend routing based on task type
+
+**Gear 4 (🚀 FUTURE - 2025):**
+- Real-time monitoring dashboard
+- Self-healing capabilities
+- Multi-project orchestration
+- Full system as described in this PRD
+
+**How to Read This Document:**
+- For current implementation status → See gear-specific implementation plans
+- For architectural vision → Read the full PRD
+- For component-specific details → Check sections marked with (Gear X) indicators
+
+### 1.5 Gear 1 Known Issues & Fixes
+
+#### Critical: Repository Architecture Limitation
+
+**Issue:** Gear 1 operates within the moderator tool repository, causing fundamental problems:
+- ❌ Tool repository pollution with generated code and state
+- ❌ Cannot work on multiple projects simultaneously
+- ❌ State conflicts between different projects
+- ❌ Git operations risk affecting the tool repository itself
+
+**Example of the Problem:**
+```bash
+cd ~/moderator              # Tool directory
+python main.py "Build app"  # ❌ Creates ~/moderator/state/proj_xxx/
+                           # ❌ Generated code mixes with tool source
+```
+
+**Fixed in Gear 2:**
+- ✅ `--target` directory flag for working on any repository
+- ✅ `.moderator/` directory structure in target repositories
+- ✅ Multi-project isolation and simultaneous execution
+- ✅ Clean separation of tool code vs. generated code
+
+**Correct Usage (Gear 2+):**
+```bash
+cd ~/my-project                           # Target project directory
+python ~/moderator/main.py "Build app"   # ✅ Creates ~/my-project/.moderator/
+
+# Or use explicit --target flag:
+python ~/moderator/main.py "Build app" --target ~/my-project
+```
+
+**Workaround for Gear 1:** Use separate clone of moderator per project (not recommended - wait for Gear 2 instead).
+
 ---
 
 ## 2. System Architecture
 
 ### 2.1 Agent Definitions
 
-#### 2.1.1 Moderator Agent
+#### 2.1.1 Moderator Agent (Gear 2+)
 **Role:** Orchestrator, Planner, and Quality Gatekeeper
 
 **Responsibilities:**
@@ -64,7 +135,7 @@ tools:
   - metric_evaluation
 ```
 
-#### 2.1.2 TechLead Agent  
+#### 2.1.2 TechLead Agent (Gear 2+)
 **Role:** Primary Implementation Agent
 
 **Responsibilities:**
@@ -96,7 +167,7 @@ tools:
   - specialist_request
 ```
 
-#### 2.1.3 Monitor Agent
+#### 2.1.3 Monitor Agent (Gear 3+)
 **Role:** System Health Watchdog
 
 **Responsibilities:**
@@ -115,7 +186,7 @@ check_interval: 60 seconds
 memory_type: metrics-only
 ```
 
-#### 2.1.4 Specialist Agents (Dynamic)
+#### 2.1.4 Specialist Agents (Gear 3+, Dynamic)
 **Types Available:**
 - `api_designer`: REST/GraphQL API design
 - `test_specialist`: Unit/Integration test creation
@@ -130,8 +201,14 @@ memory_type: metrics-only
 
 ### 3.1 Core Data Structures
 
+**Implementation by Gear:**
+- **Gear 1:** `ProjectState`, `Task`, `WorkLogEntry` (basic structures)
+- **Gear 2:** Adds `AgentMessage`, `ReviewResult`, `HealthMetrics` (agent communication)
+- **Gear 3:** Adds `Improvement`, `LearningPattern` (learning system)
+- **Gear 4:** Adds `MonitoringMetrics`, `AlertDefinition` (monitoring)
+
 ```python
-# Project State
+# Project State (Gear 1+)
 class ProjectState:
     project_id: str
     name: str
@@ -325,7 +402,10 @@ while not stopping_conditions_met():
     moderator.update_progress_metrics()
 ```
 
-### 5.3 Improvement Cycle
+### 5.3 Improvement Cycle (Gear 2: One cycle, Gear 3+: Multiple cycles with learning)
+
+**Gear 2 Implementation:** Single improvement cycle after initial implementation, top 3 improvements only.
+**Gear 3+ Enhancement:** Multiple cycles with diminishing returns detection, learning from outcomes.
 
 ```python
 class ImprovementCycle:
@@ -916,15 +996,15 @@ POST /api/intervention   # Manual intervention endpoint
 
 ---
 
-## 15. Future Enhancements (Post-MVP)
+## 15. Future Enhancements (Gear 3-4)
 
-### 15.1 Phase 2 Features
+### 15.1 Gear 3 Features
 - **Parallel worktree management** for concurrent development
 - **Advanced specialist agents** with domain expertise
 - **Self-modification capabilities** for agent code
 - **Multi-project orchestration**
 
-### 15.2 Phase 3 Features
+### 15.2 Gear 4 Features
 - **Learning system** that improves based on past projects
 - **Custom agent creation** through natural language
 - **Distributed execution** across multiple machines

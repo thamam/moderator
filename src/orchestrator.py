@@ -61,7 +61,7 @@ class Orchestrator:
 
             print(f"✅ Created {len(tasks)} tasks:\n")
             for i, task in enumerate(tasks, 1):
-                print(f"  {i}. {task.description[:60]}...")
+                print(f"  {i}. {task.description}")
 
             self.state_manager.save_project(project_state)
 

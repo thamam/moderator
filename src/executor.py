@@ -85,13 +85,20 @@ class SequentialExecutor:
         file_paths = [str(output_dir / f) for f in files.keys()]
         self.git.commit_changes(task, file_paths)
 
-        # Step 4: Create PR
+        # Step 4: Push branch to remote
+        self.logger.info("executor", "pushing_branch", task_id=task.id)
+        if task.branch_name:
+            self.git.push_branch(task.branch_name)
+        else:
+            raise Exception("Branch name not set - cannot push branch")
+
+        # Step 5: Create PR
         self.logger.info("executor", "creating_pr", task_id=task.id)
         pr_url, pr_number = self.git.create_pr(task)
         task.pr_url = pr_url
         task.pr_number = pr_number
 
-        # Step 5: Wait for manual review
+        # Step 6: Wait for manual review
         self.logger.info("executor", "awaiting_review",
                         task_id=task.id,
                         pr_url=pr_url)

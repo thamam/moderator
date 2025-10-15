@@ -5,7 +5,12 @@
       "Bash(curl -LsSf https://astral.sh/uv/install.sh)",
       "Bash(sh)",
       "Bash(~/.local/bin/uv venv:*)",
-      "Bash(source:*)"
+      "Bash(source:*)",
+      "Bash(pip install:*)",
+      "Bash(python:*)",
+      "Bash(cat:*)",
+      "Bash(mv:*)",
+      "Bash(sudo apt:*)"
     ],
     "deny": [],
     "ask": []
