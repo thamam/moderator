@@ -1,0 +1,89 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Moderator - Calculator CLI",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "args": [
+                "Create a simple calculator CLI with add, subtract, multiply, divide operations"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {},
+            "justMyCode": true,
+            "purpose": ["debug-in-terminal"]
+        },
+        {
+            "name": "Python: Moderator - TODO App",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "args": [
+                "Create a TODO app with CLI interface"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {},
+            "justMyCode": true,
+            "purpose": ["debug-in-terminal"]
+        },
+        {
+            "name": "Python: Moderator - REST API",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "args": [
+                "Create a REST API with user authentication"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {},
+            "justMyCode": true,
+            "purpose": ["debug-in-terminal"]
+        },
+        {
+            "name": "Python: Moderator - Debug Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "justMyCode": true
+        },
+        {
+            "name": "Python: Moderator - Production (Claude Code Auto-Approve)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "args": [
+                "--config",
+                "config/production_config.yaml",
+                "--auto-approve",
+                "Create a simple calculator CLI with add and subtract functions"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {},
+            "justMyCode": true,
+            "purpose": ["debug-in-terminal"]
+        },
+        {
+            "name": "Python: Moderator - Production (Claude Code Interactive)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "args": [
+                "--config",
+                "config/production_config.yaml",
+                "Create a simple calculator CLI with add and subtract functions"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {},
+            "justMyCode": true,
+            "purpose": ["debug-in-terminal"]
+        }
+    ]
+}
