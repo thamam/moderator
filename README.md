@@ -22,8 +22,8 @@ The simplest possible working implementation of Moderator that demonstrates valu
 git clone <repo-url> moderator
 cd moderator
 
-# 2. Ensure Python 3.9+ is installed
-python --version  # Should be 3.9 or higher
+# 2. Ensure Python 3.10+ is installed
+python --version  # Should be 3.10 or higher
 
 # 3. Create virtual environment
 python -m venv venv

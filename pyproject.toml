@@ -7,15 +7,13 @@ name = "moderator"
 version = "0.1.0"
 description = "Meta-orchestration system for AI code generation"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
     {name = "Moderator Team"}
 ]
 dependencies = [
     "pyyaml>=6.0",
-    "pytest>=7.0",
-    "pytest-mock>=3.10",
 ]
 
 [project.optional-dependencies]

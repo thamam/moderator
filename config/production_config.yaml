@@ -1,10 +1,12 @@
 # Production environment configuration
 # config/production_config.yaml
 
+# Git repository path (top-level so GitManager can access it)
+repo_path: "."
+
 # Project settings
 project:
   name: "moderator-production"
-  repo_path: "."
 
 # Backend configuration - use real backends
 backend:

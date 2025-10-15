@@ -1,10 +1,12 @@
 # Configuration settings for the moderator system
 # config/config.yaml
 
+# Git repository path (top-level so GitManager can access it)
+repo_path: "."
+
 # Project settings
 project:
   name: "gear1-test-project"
-  repo_path: "."  # Path to git repository
 
 # Backend configuration
 backend:

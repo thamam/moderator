@@ -1,10 +1,12 @@
 # Test environment configuration
 # config/test_config.yaml
 
+# Git repository path (top-level so GitManager can access it)
+repo_path: "."
+
 # Project settings
 project:
   name: "test-project"
-  repo_path: "."
 
 # Backend configuration - use mock for testing
 backend:
