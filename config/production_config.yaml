@@ -1,5 +1,12 @@
 # Production environment configuration
 # config/production_config.yaml
+#
+# REFERENCE EXAMPLE: Choose your backend and configure accordingly
+#
+# For CCPM backend:     See config/production_ccpm_config.yaml
+# For Claude Code CLI:  See config/production_claude_config.yaml
+#
+# Then copy your chosen config to config.yaml for use.
 
 # Git repository path (top-level so GitManager can access it)
 repo_path: "."
@@ -8,11 +15,23 @@ repo_path: "."
 project:
   name: "moderator-production"
 
-# Backend configuration - use real backends
+# Backend configuration - CHOOSE ONE:
+# --------------------------------------------
+# Option 1: CCPM Backend (uncomment below)
+# --------------------------------------------
+# backend:
+#   type: "ccpm"
+#   api_key: ${CCPM_API_KEY}  # Read from environment variable
+#   timeout: 300
+#   retry_attempts: 3
+
+# --------------------------------------------
+# Option 2: Claude Code CLI Backend (uncomment below)
+# --------------------------------------------
 backend:
-  type: "ccpm"  # Options: ccpm, claude_code
-  api_key: ${CCPM_API_KEY}  # Read from environment variable
-  timeout: 300  # 5 minutes
+  type: "claude_code"
+  cli_path: "claude"     # Path to claude executable
+  timeout: 300
   retry_attempts: 3
 
 # State management
