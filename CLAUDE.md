@@ -12,7 +12,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Vision:** A backend-agnostic orchestration system that continuously improves generated code through automated review cycles and learns from every project.
 
-**Current Status:** Gear 1 implementation complete! The system can now orchestrate AI code generation end-to-end with Git workflow integration. Ready for testing and validation.
+**Current Status:** Gear 1 implementation complete! Gear 2 documentation ready (architectural fix + two-agent system).
+
+**⚠️ Critical Discovery:** Gear 1 has architectural flaw - operates within tool repository causing pollution. **Gear 2 MUST fix this FIRST** (Week 1A) before adding features (Week 1B).
 
 ## Repository Structure
 
@@ -38,15 +40,19 @@ moderator/
 │   ├── test_executor.py         # 13 execution tests
 │   └── test_integration.py      # 10 end-to-end tests + 1 live test
 ├── docs/                         # Comprehensive project documentation
-│   ├── moderator-prd.md         # Product Requirements Document
+│   ├── moderator-prd.md         # Product Requirements Document (updated with Gear markers)
 │   ├── archetcture.md           # Big architecture vision
 │   ├── multi-phase-plan/        # Phased implementation strategy
-│   │   └── phase1/              # Gear 1 specific documentation
-│   │       ├── gear-1-implementation-plan.md         # Gear 1 specification
-│   │       ├── gear-1-sequence-diagram.md            # Execution flow diagram
-│   │       ├── gear1-dev-branch-setup.md             # Dev branch workflow
-│   │       └── design-issue-separation-of-concerns.md # Known issues & Gear 2 plan
-│   └── diagrams/                # 18 Mermaid architecture diagrams
+│   │   ├── phase1/              # Gear 1 specific documentation (✅ COMPLETE)
+│   │   │   ├── gear-1-implementation-plan.md         # Gear 1 specification
+│   │   │   ├── gear-1-sequence-diagram.md            # Execution flow diagram
+│   │   │   ├── gear1-dev-branch-setup.md             # Dev branch workflow
+│   │   │   └── design-issue-separation-of-concerns.md # Known issues
+│   │   └── phase2/              # Gear 2 specific documentation (📋 READY)
+│   │       ├── gear-2-implementation-plan.md         # Complete Gear 2 plan
+│   │       ├── gear-2-architectural-fix.md           # Week 1A: Fix tool repo issue
+│   │       └── gear-2-transition-guide.md            # Migration guide from Gear 1
+│   └── diagrams/                # 21 Mermaid architecture diagrams (18 full vision + 3 Gear 2)
 ├── main.py                       # CLI entry point
 ├── requirements.txt              # Python 3.9+ dependencies
 ├── pyproject.toml               # Python project metadata
@@ -102,10 +108,12 @@ The project follows a "gear system" where each gear adds complexity:
 - **Tests:** 44 comprehensive tests covering all components
 - **Success Criteria:** Complete a simple TODO app end-to-end in < 30 minutes
 
-**Gear 2** (Future):
-- Add TechLead agent for better task execution
-- Automated code review
-- Parallel task execution
+**Gear 2** (📋 Documentation Ready - see docs/multi-phase-plan/phase2/):
+- **Week 1A (PRIORITY #1):** Fix architectural flaw - `--target` flag + `.moderator/` directory structure
+- **Week 1B:** Two-agent system (Moderator + TechLead)
+- **Week 1B:** Automated PR review with scoring (≥80 for approval)
+- **Week 1B:** One improvement cycle per project
+- **Timeline:** 8.5 days total (3 days fix + 5.5 days features)
 
 **Gear 3** (Future):
 - Ever-Thinker improvement cycles
@@ -117,18 +125,41 @@ The project follows a "gear system" where each gear adds complexity:
 - Self-healing capabilities
 - Multi-project orchestration
 
-### Current Phase: Gear 1 Implementation Complete ✅
+### Current Phase: Gear 1 Complete ✅, Gear 2 Documentation Ready 📋
 
-The repository now contains:
-1. **Working Gear 1 Implementation** - All 9 core modules fully implemented (749 lines of production code)
+**Gear 1 (COMPLETE):**
+1. **Working Implementation** - All 9 core modules fully implemented (749 lines of production code)
 2. **Comprehensive Test Suite** - 44 tests covering all components (43 fast + 1 optional live test)
 3. **Complete Configuration** - Test, development, and production configurations ready
-4. **Complete PRD** (docs/moderator-prd.md) - 1035 lines defining the full duo-agent system
+4. **Complete PRD** (docs/moderator-prd.md) - Updated with phased implementation approach and Gear markers
 5. **Architecture Vision** (docs/archetcture.md) - 263 lines explaining the big picture
 6. **Gear 1 Implementation Plan** (docs/multi-phase-plan/phase1/gear-1-implementation-plan.md) - 1414 lines of detailed specification
-7. **18 Architecture Diagrams** (docs/diagrams/) - Visual representations of all system aspects
+7. **21 Architecture Diagrams** (docs/diagrams/) - Visual representations (18 full vision + 3 Gear 2 specific)
 
-**Next Steps:** Test Gear 1 with real projects and begin planning Gear 2.
+**⚠️ Critical Architectural Issue Identified:**
+- Gear 1 operates within moderator tool repository → causes tool repo pollution
+- Cannot work on multiple projects simultaneously
+- State conflicts between different projects
+
+**Gear 2 Documentation (READY):**
+1. **Gear 2 Implementation Plan** (docs/multi-phase-plan/phase2/gear-2-implementation-plan.md) - Complete 15-section plan
+2. **Architectural Fix Specification** (docs/multi-phase-plan/phase2/gear-2-architectural-fix.md) - Week 1A detailed guide
+3. **Transition Guide** (docs/multi-phase-plan/phase2/gear-2-transition-guide.md) - Step-by-step migration
+4. **Gear 2 Component Architecture Diagram** (docs/diagrams/gear2-component-architecture.md) - Two-agent system
+5. **Gear 2 Execution Loop Diagram** (docs/diagrams/gear2-execution-loop.md) - PR review cycles
+6. **Gear 2 Message Flow Diagram** (docs/diagrams/gear2-message-flow.md) - Inter-agent communication
+
+**Next Steps:**
+1. **Week 1A (Days 1-3):** Implement architectural fix (MUST DO FIRST)
+   - Add `--target` CLI flag
+   - Create `.moderator/` directory structure in target repos
+   - Update StateManager, GitManager, Orchestrator
+   - Validate: tool repo stays clean, multi-project support works
+2. **Week 1B (Days 4-7):** Implement two-agent system (ONLY after Week 1A validation passes)
+   - Create Moderator and TechLead agents
+   - Implement message bus
+   - Add automated PR review with scoring
+   - Add one improvement cycle per project
 
 ## Key Documents Guide
 
@@ -136,19 +167,27 @@ The repository now contains:
 - **docs/archetcture.md** - Read this first to understand why Moderator exists and what makes it unique
 - **docs/moderator-prd.md** - Complete product requirements for the full system
 
-### For Understanding Implementation
-- **docs/multi-phase-plan/phase1/gear-1-implementation-plan.md** - Start here for actual implementation
+### For Understanding Gear 1 Implementation
+- **docs/multi-phase-plan/phase1/gear-1-implementation-plan.md** - Gear 1 specification
   - Contains complete data models
   - Module specifications with code examples
   - Testing strategy
   - Validation criteria
   - 37-hour task breakdown
 
+### For Understanding Gear 2 Implementation (Next Phase)
+- **docs/multi-phase-plan/phase2/gear-2-implementation-plan.md** - ⭐ Complete Gear 2 plan (15 sections)
+- **docs/multi-phase-plan/phase2/gear-2-architectural-fix.md** - 🔧 PRIORITY #1: Fix tool repo issue (Week 1A)
+- **docs/multi-phase-plan/phase2/gear-2-transition-guide.md** - Step-by-step migration from Gear 1
+- **docs/diagrams/gear2-component-architecture.md** - Two-agent system architecture
+- **docs/diagrams/gear2-execution-loop.md** - PR review cycles and state machine
+- **docs/diagrams/gear2-message-flow.md** - Inter-agent communication patterns
+
 ### For Understanding Architecture
-- **docs/diagrams/README.md** - Index of all 18 diagrams with recommended viewing order
-- **docs/diagrams/component-architecture.md** - System structure (start here)
-- **docs/diagrams/main-execution-loop.md** - How tasks flow through the system
-- **docs/diagrams/ever-thinker-continuous-loop.md** - The unique continuous improvement engine
+- **docs/diagrams/README.md** - Index of all 21 diagrams with gear-specific viewing order
+- **docs/diagrams/component-architecture.md** - Full system structure (all gears)
+- **docs/diagrams/main-execution-loop.md** - Task flow through the system
+- **docs/diagrams/ever-thinker-continuous-loop.md** - Continuous improvement engine (Gear 3+)
 
 ## Gear 1 Quick Reference
 
@@ -469,31 +508,55 @@ The documentation describes the full vision, but implementation is phased:
 - Real-time monitoring dashboard
 - Advanced QA (security scanning, test generation)
 
-**Added in Later Gears:**
-- Gear 2: Multi-agent + automated review + parallel execution
+**📋 Gear 2 (Documentation Ready):**
+- Week 1A: Architectural fix - `--target` flag + `.moderator/` directory (PRIORITY #1)
+- Week 1B: Multi-agent system (Moderator + TechLead)
+- Week 1B: Automated PR review with scoring
+- Week 1B: One improvement cycle per project
+- See: docs/multi-phase-plan/phase2/ for complete specifications
+
+**🎯 Gear 3+ (Future):**
 - Gear 3: Ever-Thinker + learning system + advanced QA
 - Gear 4: Monitoring + self-healing + multi-project
 
 ## References
 
-### Essential Reading
-- [Gear 1 Implementation Plan](docs/multi-phase-plan/phase1/gear-1-implementation-plan.md) - **Start here for implementation**
+### Essential Reading (By Gear)
+
+**For Gear 1 (Current):**
+- [Gear 1 Implementation Plan](docs/multi-phase-plan/phase1/gear-1-implementation-plan.md) - Complete Gear 1 specification
 - [Architecture Vision](docs/archetcture.md) - Understanding the "why"
 - [Product Requirements](docs/moderator-prd.md) - Full system specification
 
+**For Gear 2 (Next - Documentation Ready):**
+- [Gear 2 Implementation Plan](docs/multi-phase-plan/phase2/gear-2-implementation-plan.md) - ⭐ **Start here for Gear 2**
+- [Gear 2 Architectural Fix](docs/multi-phase-plan/phase2/gear-2-architectural-fix.md) - 🔧 **Week 1A - MUST DO FIRST**
+- [Gear 2 Transition Guide](docs/multi-phase-plan/phase2/gear-2-transition-guide.md) - Step-by-step migration
+
 ### Diagram Documentation
-- [Diagram Index](docs/diagrams/README.md) - Guide to all 18 architecture diagrams
-- [Component Architecture](docs/diagrams/component-architecture.md) - System structure
-- [Main Execution Loop](docs/diagrams/main-execution-loop.md) - Task flow
-- [Ever-Thinker Loop](docs/diagrams/ever-thinker-continuous-loop.md) - Continuous improvement
+- [Diagram Index](docs/diagrams/README.md) - Guide to all 21 diagrams (18 full vision + 3 Gear 2)
+- [Component Architecture](docs/diagrams/component-architecture.md) - Full system structure (all gears)
+- [Gear 2 Component Architecture](docs/diagrams/gear2-component-architecture.md) - Two-agent system
+- [Gear 2 Execution Loop](docs/diagrams/gear2-execution-loop.md) - PR review cycles
+- [Gear 2 Message Flow](docs/diagrams/gear2-message-flow.md) - Inter-agent communication
+- [Main Execution Loop](docs/diagrams/main-execution-loop.md) - Task flow (full vision)
+- [Ever-Thinker Loop](docs/diagrams/ever-thinker-continuous-loop.md) - Continuous improvement (Gear 3+)
 
 ## Project History
 
 - **October 2024:** Initial PRD and architecture documentation created
 - **October 2024:** Gear 1 implementation plan completed (1414 lines)
 - **October 2024:** Gear 1 implementation completed (749 lines of production code + 44 tests)
-- **Current:** Gear 1 ready for testing and validation
-- **Next:** Test with real projects, gather feedback, begin Gear 2 planning
+- **October 2024:** Critical architectural flaw discovered - tool repo pollution issue
+- **October 15, 2024:** Gear 2 complete documentation package created:
+  - Updated PRD with phased approach and Gear markers (Sections 1.4, 1.5)
+  - Created gear-2-implementation-plan.md (15 sections, 8.5 day timeline)
+  - Created gear-2-architectural-fix.md (Week 1A specification - PRIORITY #1)
+  - Created gear-2-transition-guide.md (8-section migration guide)
+  - Created 3 Gear 2 diagrams (component architecture, execution loop, message flow)
+  - Updated diagrams README with gear-specific navigation
+- **Current:** Gear 1 complete, Gear 2 documentation ready for implementation
+- **Next:** Implement Week 1A architectural fix (MUST DO FIRST), then Week 1B two-agent system
 
 Previous prototype code has been moved to TO_BE_DELETED/ directory to allow clean start with Gear 1 approach.
 
@@ -511,12 +574,31 @@ Previous prototype code has been moved to TO_BE_DELETED/ directory to allow clea
 - Configuration management
 - CLI interface
 
-### 🔄 Next Phase (Gear 2)
-- Multi-agent system (Moderator, TechLead agents)
-- Automated code review
-- Parallel task execution
-- Backend routing based on task type
+### 📋 Gear 2 Documentation Ready (Implementation Next)
+
+**Week 1A (Days 1-3) - CRITICAL PRIORITY #1:**
+- ⚠️ Fix architectural flaw: `--target` directory flag
+- ⚠️ Implement `.moderator/` directory structure in target repos
+- ⚠️ Update StateManager to use target repo instead of tool repo
+- ⚠️ Update GitManager to operate on target repository
+- ⚠️ Update Orchestrator constructor to accept target_dir
+- ⚠️ Create configuration cascade (4 levels)
+- ⚠️ Add multi-project isolation tests
+- ⚠️ Validate: Tool repo stays clean, multi-project works
+
+**Week 1B (Days 4-7) - ONLY after Week 1A validation passes:**
+- Multi-agent system (Moderator + TechLead agents)
+- Message bus for inter-agent communication
+- Automated PR review with scoring (≥80 for approval)
+- Feedback iterations (max 3 per PR)
+- One improvement cycle per project
 - Enhanced error recovery
+
+**Documentation Complete:**
+- 15-section implementation plan
+- Architectural fix specification
+- Transition guide with code examples
+- 3 architecture diagrams
 
 ### 🎯 Future (Gear 3+)
 - Ever-Thinker improvement cycles
