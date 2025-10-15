@@ -119,7 +119,9 @@ logging:
   console: true
 ```
 
-### Using Production Backend
+### Using Production Backends
+
+**Option 1: CCPM Backend**
 
 For real code generation with CCPM:
 
@@ -132,6 +134,28 @@ backend:
 Or use environment variable:
 ```bash
 export CCPM_API_KEY="your-key"
+```
+
+**Option 2: Claude Code CLI Backend**
+
+For code generation using Claude Code CLI:
+
+1. Install Claude CLI:
+```bash
+# Follow installation guide at:
+# https://docs.anthropic.com/claude/docs/claude-cli
+```
+
+2. Configure backend:
+```yaml
+backend:
+  type: "claude_code"
+  cli_path: "claude"  # Or full path to claude executable
+```
+
+3. Run:
+```bash
+python main.py "Create a TODO app"
 ```
 
 ## Testing

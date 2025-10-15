@@ -1,0 +1,45 @@
+# Production environment configuration - Claude Code CLI Backend
+# config/production_claude_config.yaml
+#
+# REFERENCE EXAMPLE: Copy to config.yaml for production use with Claude Code CLI backend
+# This configuration uses the Claude CLI tool for code generation.
+#
+# Prerequisites:
+# 1. Install Claude CLI: https://docs.anthropic.com/claude/docs/claude-cli
+# 2. Authenticate: Follow Claude CLI setup instructions
+
+# Git repository path (top-level so GitManager can access it)
+repo_path: "."
+
+# Project settings
+project:
+  name: "moderator-production"
+
+# Backend configuration - Claude Code CLI
+backend:
+  type: "claude_code"
+  cli_path: "claude"  # Path to claude executable (or full path like /usr/local/bin/claude)
+  timeout: 300        # 5 minutes
+  retry_attempts: 3
+
+# State management
+state_dir: "./state"
+
+# Logging - less verbose for production
+logging:
+  level: "INFO"
+  console: true
+  format: "%(asctime)s - %(levelname)s - %(message)s"
+  file: "./logs/moderator.log"  # Optional: log to file
+
+# Git settings
+git:
+  auto_commit: false
+  pr_draft: true
+  require_approval: true  # Manual review required in production
+  default_branch: "main"
+
+# Rate limiting (for production backends)
+rate_limit:
+  requests_per_minute: 10
+  cooldown_seconds: 60
