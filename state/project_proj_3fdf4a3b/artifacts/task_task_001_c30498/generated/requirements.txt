@@ -1,0 +1,7 @@
+# No external dependencies required for basic calculator
+# Python 3.9+ standard library is sufficient
+
+# Optional development dependencies (uncomment if needed):
+# pytest>=7.0.0          # For unit testing
+# black>=22.0.0          # For code formatting
+# mypy>=0.990            # For type checking
