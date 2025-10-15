@@ -18,11 +18,13 @@ class SequentialExecutor:
                  backend: Backend,
                  git_manager: GitManager,
                  state_manager: StateManager,
-                 logger: StructuredLogger):
+                 logger: StructuredLogger,
+                 require_approval: bool = True):
         self.backend = backend
         self.git = git_manager
         self.state = state_manager
         self.logger = logger
+        self.require_approval = require_approval
 
     def execute_all(self, project_state: ProjectState) -> None:
         """Execute all tasks sequentially"""
@@ -70,6 +72,7 @@ class SequentialExecutor:
         # Step 1: Create git branch
         self.logger.info("executor", "creating_branch", task_id=task.id)
         branch_name = self.git.create_branch(task)
+        task.branch_name = branch_name
 
         # Step 2: Execute via backend
         self.logger.info("executor", "calling_backend", task_id=task.id)
@@ -98,19 +101,31 @@ class SequentialExecutor:
         task.pr_url = pr_url
         task.pr_number = pr_number
 
-        # Step 6: Wait for manual review
-        self.logger.info("executor", "awaiting_review",
-                        task_id=task.id,
-                        pr_url=pr_url)
+        # Step 6: Wait for manual review (if required)
+        if self.require_approval:
+            self.logger.info("executor", "awaiting_review",
+                            task_id=task.id,
+                            pr_url=pr_url)
 
-        print(f"\n{'='*60}")
-        print(f"⏸️  MANUAL REVIEW REQUIRED")
-        print(f"{'='*60}")
-        print(f"PR Created: {pr_url}")
-        print(f"Task: {task.description}")
-        print(f"\nPlease review and merge the PR, then press ENTER to continue...")
-        print(f"{'='*60}\n")
+            print(f"\n{'='*60}")
+            print(f"⏸️  MANUAL REVIEW REQUIRED")
+            print(f"{'='*60}")
+            print(f"PR Created: {pr_url}")
+            print(f"Task: {task.description}")
+            print(f"\nPlease review and merge the PR, then press ENTER to continue...")
+            print(f"{'='*60}\n")
 
-        input()  # Wait for user
+            try:
+                input()  # Wait for user
+            except EOFError:
+                # Non-interactive environment
+                self.logger.info("executor", "non_interactive_skipping_review")
+                print("Non-interactive environment detected. Skipping manual review wait.")
 
-        self.logger.info("executor", "review_completed", task_id=task.id)
+            self.logger.info("executor", "review_completed", task_id=task.id)
+        else:
+            self.logger.info("executor", "auto_approval_skipping_review",
+                            task_id=task.id,
+                            pr_url=pr_url)
+            print(f"\n✅ PR Created: {pr_url}")
+            print(f"   Auto-approval enabled. Continuing without manual review...\n")
