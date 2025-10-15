@@ -1,5 +1,8 @@
 # Test environment configuration
 # config/test_config.yaml
+#
+# REFERENCE EXAMPLE: Copy to config.yaml or use with: python main.py --config config/test_config.yaml
+# This configuration is optimized for testing with mock backends.
 
 # Git repository path (top-level so GitManager can access it)
 repo_path: "."
@@ -10,8 +13,9 @@ project:
 
 # Backend configuration - use mock for testing
 backend:
-  type: "test_mock"  # Mock backend for fast, deterministic tests
-  api_key: null
+  type: "test_mock"  # Options: test_mock (testing), ccpm (production), claude_code (production)
+  api_key: null      # Required for CCPM backend
+  cli_path: "claude" # Path to Claude CLI executable (for claude_code backend)
 
 # State management - use test directory
 state_dir: "./test_state"
