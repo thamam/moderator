@@ -91,7 +91,6 @@ class Orchestrator:
             # Initialize components
             backend = self._create_backend()
             git_manager = GitManager(self.config.get('repo_path', '.'))
-            require_approval = self.config.get('git', {}).get('require_approval', True)
 
             executor = SequentialExecutor(
                 backend=backend,
