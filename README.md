@@ -47,11 +47,15 @@ python -c "from src.models import ProjectState; print('✅ Setup complete')"
 ### Running Your First Project
 
 ```bash
-# Execute with simple requirements
+# Execute with simple requirements (interactive mode - asks for approval)
 python main.py "Create a simple calculator CLI with add, subtract, multiply, divide operations"
 
 # Or try a TODO app
 python main.py "Create a command-line TODO application with the following features: add task, list tasks, mark complete, delete task. Use Python and store data in a JSON file."
+
+# Auto-approve mode (skip interactive prompts - useful for automation)
+python main.py --auto-approve "Create a simple calculator"
+python main.py -y "Create a TODO app"  # Shorthand
 ```
 
 ### Monitoring Execution
@@ -107,8 +111,9 @@ Edit `config/config.yaml` to customize:
 ```yaml
 # Backend configuration
 backend:
-  type: "test_mock"  # Options: test_mock (testing), ccpm (production)
+  type: "test_mock"  # Options: test_mock, ccpm, claude_code
   api_key: null      # Required for CCPM backend
+  cli_path: "claude" # Path to Claude CLI (for claude_code backend)
 
 # State management
 state_dir: "./state"
@@ -117,6 +122,22 @@ state_dir: "./state"
 logging:
   level: "INFO"  # DEBUG, INFO, WARN, ERROR
   console: true
+
+# Git settings
+git:
+  require_approval: true   # Set to false for automation/CI workflows
+  pr_draft: true
+  default_branch: "main"
+```
+
+### CLI Flags
+
+```bash
+# Config file selection
+--config, -c <path>      Use specific config file (default: config/config.yaml)
+
+# Auto-approval mode
+--auto-approve, -y       Skip interactive approval prompts for automated workflows
 ```
 
 ### Production Mode
@@ -170,8 +191,18 @@ cp config/production_config.yaml config/config.yaml
 
 **Run:**
 ```bash
-python main.py "Create a command-line expense tracker with categories and monthly reports"
+# Interactive mode (asks for approval at each step)
+python main.py --config config/production_config.yaml "Create a command-line expense tracker"
+
+# Auto-approve mode (skip prompts - for automation)
+python main.py --config config/production_config.yaml -y "Create an expense tracker"
 ```
+
+**Multi-Agent Orchestration:**
+
+The Claude Code backend supports **recursive orchestration** - spawned Claude Code instances can generate real, production-quality code independently. Each task runs in an isolated subdirectory with its own git branch, preventing conflicts.
+
+See `MULTI_AGENT_ORCHESTRATION_FINDINGS.md` for comprehensive testing results and architecture analysis.
 
 #### Switching Between Test and Production
 
