@@ -1,0 +1,22 @@
+# Configuration settings for the moderator system
+# config/config.yaml
+
+# Git repository path (top-level so GitManager can access it)
+repo_path: "."
+
+# Project settings
+project:
+  name: "gear1-test-project"
+
+# Backend configuration
+backend:
+  type: "test_mock"  # Options: test_mock (testing), ccpm (production)
+  api_key: null  # Required for CCPM backend
+
+# State management
+state_dir: "./state"
+
+# Logging
+logging:
+  level: "INFO"  # DEBUG, INFO, WARN, ERROR
+  console: true

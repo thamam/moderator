@@ -4,370 +4,609 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Moderator** is a meta-orchestration system that coordinates multiple AI code generation backends (Claude Code, CCPM, Custom agents), analyzes their output with a QA layer, and continuously improves code quality through the Ever-Thinker improvement engine.
+**Moderator** is a meta-orchestration system for AI code generation that addresses fundamental issues with current AI code generation tools (CCPM, Claude Code, Copilot, Cursor):
+- Generates working code but with hidden problems
+- No feedback loop for improvement
+- Same mistakes repeated across projects
+- One-shot generation with no iteration
 
-**Current Status:** Phase 2 complete - Agent Configuration System implemented. Multi-agent iterative improvement working with 6 pre-configured Claude CLI agents.
+**Vision:** A backend-agnostic orchestration system that continuously improves generated code through automated review cycles and learns from every project.
 
-## Development Commands
+**Current Status:** Gear 1 implementation complete! The system can now orchestrate AI code generation end-to-end with Git workflow integration. Ready for testing and validation.
 
+## Repository Structure
+
+```
+moderator/
+├── src/                           # Core implementation (Gear 1 complete)
+│   ├── models.py                 # Data structures (ProjectState, Task, WorkLogEntry)
+│   ├── orchestrator.py           # Main coordinator
+│   ├── decomposer.py             # Task decomposition
+│   ├── executor.py               # Sequential task execution
+│   ├── backend.py                # Backend adapters (TestMock, CCPM, ClaudeCode)
+│   ├── git_manager.py            # Git operations & PR creation
+│   ├── state_manager.py          # File-based persistence
+│   └── logger.py                 # Structured logging
+├── config/                       # Configuration files
+│   ├── config.yaml              # Default configuration
+│   ├── test_config.yaml         # Test environment
+│   └── production_config.yaml   # Production environment
+├── tests/                        # Comprehensive test suite (44 tests)
+│   ├── conftest.py              # Shared test fixtures
+│   ├── test_decomposer.py       # 9 unit tests
+│   ├── test_state_manager.py    # 11 persistence tests
+│   ├── test_executor.py         # 13 execution tests
+│   └── test_integration.py      # 10 end-to-end tests + 1 live test
+├── docs/                         # Comprehensive project documentation
+│   ├── moderator-prd.md         # Product Requirements Document
+│   ├── archetcture.md           # Big architecture vision
+│   ├── multi-phase-plan/        # Phased implementation strategy
+│   │   └── phase1/              # Gear 1 specific documentation
+│   │       ├── gear-1-implementation-plan.md         # Gear 1 specification
+│   │       ├── gear-1-sequence-diagram.md            # Execution flow diagram
+│   │       ├── gear1-dev-branch-setup.md             # Dev branch workflow
+│   │       └── design-issue-separation-of-concerns.md # Known issues & Gear 2 plan
+│   └── diagrams/                # 18 Mermaid architecture diagrams
+├── main.py                       # CLI entry point
+├── requirements.txt              # Python 3.9+ dependencies
+├── pyproject.toml               # Python project metadata
+├── pytest.ini                   # Test configuration
+├── README.md                     # User documentation
+├── CLAUDE.md                     # This file
+└── .gitignore
+```
+
+## Core Concepts
+
+### The Architecture Vision
+
+**Three Phases of Value:**
+1. **Immediate Value** - Catch security issues, add missing tests, fix common problems
+2. **Orchestration Value** - Build complete systems by coordinating multiple AI backends
+3. **Evolution Value** - System improves itself over time, learns from every project
+
+**Key Architectural Innovations:**
+- **Backend Agnostic** - Orchestrates CCPM, Claude Code, and custom agents
+- **Ever-Thinker** - Background process that continuously identifies improvements
+- **PR-Based Workflow** - All changes go through automated review cycles
+- **Learning System** - Tracks patterns and outcomes to improve future generations
+- **Self-Healing** - Monitors health metrics and automatically recovers from failures
+
+### System Layers (from docs/diagrams/component-architecture.md)
+
+```
+User Interface Layer (CLI, Web Dashboard, VS Code Extension)
+         ↓
+Moderator Orchestrator (Task Decomposer, Execution Router, Context Manager)
+         ↓
+Execution Backends (CCPM, Claude Code, Task Master, Custom Agents)
+         ↓
+Quality Assurance Layer (Code Analyzer, Security Scanner, Test Generator)
+         ↓
+Improvement Engine (Ever-Thinker, Priority Engine, Learning Database)
+         ↓
+Monitoring & Self-Healing (Health Monitor, Anomaly Detector, Real-time Dashboard)
+```
+
+## Implementation Strategy
+
+### Gear System Approach
+
+The project follows a "gear system" where each gear adds complexity:
+
+**Gear 1** (✅ COMPLETE - see docs/multi-phase-plan/phase1/gear-1-implementation-plan.md):
+- **Status:** Fully implemented and ready for testing
+- **Scope:** Single agent, sequential execution, one backend, manual approvals
+- **Components:** Task decomposer, sequential executor, Git manager, state manager, logger
+- **Backends:** TestMockBackend (testing), CCPMBackend (production), ClaudeCodeBackend (production)
+- **Tests:** 44 comprehensive tests covering all components
+- **Success Criteria:** Complete a simple TODO app end-to-end in < 30 minutes
+
+**Gear 2** (Future):
+- Add TechLead agent for better task execution
+- Automated code review
+- Parallel task execution
+
+**Gear 3** (Future):
+- Ever-Thinker improvement cycles
+- Learning system
+- Advanced QA layer
+
+**Gear 4** (Future):
+- Real-time monitoring dashboard
+- Self-healing capabilities
+- Multi-project orchestration
+
+### Current Phase: Gear 1 Implementation Complete ✅
+
+The repository now contains:
+1. **Working Gear 1 Implementation** - All 9 core modules fully implemented (749 lines of production code)
+2. **Comprehensive Test Suite** - 44 tests covering all components (43 fast + 1 optional live test)
+3. **Complete Configuration** - Test, development, and production configurations ready
+4. **Complete PRD** (docs/moderator-prd.md) - 1035 lines defining the full duo-agent system
+5. **Architecture Vision** (docs/archetcture.md) - 263 lines explaining the big picture
+6. **Gear 1 Implementation Plan** (docs/multi-phase-plan/phase1/gear-1-implementation-plan.md) - 1414 lines of detailed specification
+7. **18 Architecture Diagrams** (docs/diagrams/) - Visual representations of all system aspects
+
+**Next Steps:** Test Gear 1 with real projects and begin planning Gear 2.
+
+## Key Documents Guide
+
+### For Understanding the Vision
+- **docs/archetcture.md** - Read this first to understand why Moderator exists and what makes it unique
+- **docs/moderator-prd.md** - Complete product requirements for the full system
+
+### For Understanding Implementation
+- **docs/multi-phase-plan/phase1/gear-1-implementation-plan.md** - Start here for actual implementation
+  - Contains complete data models
+  - Module specifications with code examples
+  - Testing strategy
+  - Validation criteria
+  - 37-hour task breakdown
+
+### For Understanding Architecture
+- **docs/diagrams/README.md** - Index of all 18 diagrams with recommended viewing order
+- **docs/diagrams/component-architecture.md** - System structure (start here)
+- **docs/diagrams/main-execution-loop.md** - How tasks flow through the system
+- **docs/diagrams/ever-thinker-continuous-loop.md** - The unique continuous improvement engine
+
+## Gear 1 Quick Reference
+
+When implementing Gear 1, these are the core modules needed:
+
+```python
+# Core data models (see plan line 99-188)
+- ProjectState: Overall project tracking
+- Task: Unit of work with acceptance criteria
+- WorkLogEntry: Audit trail
+
+# Essential components (see plan line 206-908)
+- models.py: Data structures
+- state_manager.py: File-based persistence (JSON)
+- logger.py: Structured logging
+- decomposer.py: Template-based task breakdown
+- backend.py: Backend adapters (TestMockBackend for tests, CCPM/ClaudeCode for production)
+- git_manager.py: Git operations + PR creation
+- executor.py: Sequential task execution
+- orchestrator.py: Main coordinator
+```
+
+**File-Based State Structure:**
+```
+state/project_{id}/
+  ├── project.json      # ProjectState
+  ├── logs.jsonl        # WorkLogEntry (one per line)
+  └── artifacts/        # Generated code files
+      └── task_{id}/
+          └── generated/
+```
+
+**Key Requirements:**
+- Python 3.9+ (uses modern type hints: `list[str]`, `str | None`)
+- GitHub CLI (`gh`) for PR creation (can be mocked for tests)
+- Git repository
+- **Production:** CCPM API key or Claude Code CLI
+- **Testing:** TestMockBackend (no external dependencies)
+
+**Entry Point:**
 ```bash
-# Install in development mode (from project root)
-pip install -e .
+# Quick test with mock backend
+python main.py "Create a simple TODO app with CLI interface"
 
-# Run the CLI
-moderator execute "Create a REST API"               # Execute new request
-moderator status exec_abc12345                      # Check status
-moderator list-executions                           # List recent runs
-moderator improve exec_abc12345 --rounds 5          # Iterative improvement (NEW)
-moderator improve exec_abc12345 --rounds 3 --db custom.db  # Custom DB path
+# Run tests
+pytest                    # Fast tests with TestMockBackend
+pytest -m live           # Live tests with real backends (requires API key)
 
-# Run tests (requires: pip install pytest)
-pytest                              # Run all tests
-pytest -v                           # Verbose output
-pytest tests/test_orchestrator.py  # Run specific test file
-pytest tests/test_agents.py         # Agent system tests
-pytest tests/test_qa.py             # QA layer tests
-pytest -k "test_name"               # Run tests matching pattern
-pytest -x                           # Stop on first failure
-
-# Run specific test function
-pytest tests/test_orchestrator.py::test_task_decomposition
-
-# Check imports
-python -c "from moderator import Orchestrator"
+# Production with CCPM
+export CCPM_API_KEY="your-key"
+# Edit config/config.yaml to set backend.type: "ccpm"
+python main.py "Create a TODO app"
 ```
 
-## System Architecture
+## Important Design Decisions
 
-The system follows a pipeline architecture:
+### 1. Mock Backends are Test Infrastructure, Not "Stage 1"
 
-1. **CLI** → User commands (execute, status, list-executions, improve)
-2. **Orchestrator** → Main coordination logic + iterative improvement
-3. **Agent System** → Pre-configured Claude CLI agents with personas (NEW in Phase 2)
-   - Generator, Reviewer, Fixer
-   - Security Reviewer, Performance Reviewer, Test Generator
-4. **TaskDecomposer** → Breaks requests into tasks (currently stub: single task only)
-5. **ExecutionRouter** → Routes to backends (currently stub: always Claude Code)
-6. **Backend Adapters** → Execute tasks
-   - Claude Code (real implementation)
-   - CCPM (stub)
-   - Custom (stub)
-7. **QA Layer** → Analyzes generated code
-   - CodeAnalyzer (5+ detection rules)
-   - SecurityScanner (stub)
-   - TestGenerator (stub)
-8. **Ever-Thinker** → Identifies improvements
-   - Improver (basic suggestions)
-   - Learner (stub)
-9. **StateManager** → SQLite persistence
+**Critical Philosophy:** `TestMockBackend` is NOT a temporary implementation for Gear 1. It's **permanent test infrastructure**.
 
-## Core Components
+**Why This Matters:**
+- Tests should be fast and deterministic by default
+- Production backends (CCPM, Claude Code) are expensive and slow
+- CI/CD pipelines need reliable tests without external dependencies
+- Developers need instant feedback loops
 
-### models.py
-Data structures:
-- `Task`: Unit of work with type, dependencies, context
-- `CodeOutput`: Files + metadata from backend execution
-- `Issue`: Detected problem with severity, category, location
-- `Improvement`: Suggested enhancement with priority
-- `ExecutionResult`: Complete execution with output, issues, improvements
-- Enums: `TaskType`, `Severity`, `BackendType`
+**Implementation:**
+- Name clearly: `TestMockBackend` (not just `MockBackend`)
+- Document as test-only: Clear docstrings and comments
+- Configure separately: `test_config.yaml` vs `production_config.yaml`
+- Mark live tests: Use `@pytest.mark.live` for real backend tests
 
-### orchestrator.py
-**Main execution flow** (moderator/orchestrator.py:32):
+### 2. Why File-Based State (Gear 1)?
+- Simpler than SQLite for initial implementation
+- Easy to debug and inspect
+- Can upgrade to database in later gears
+
+### 3. Why Template-Based Decomposition?
+- LLM-based decomposition can be added later
+- Faster and more predictable initially
+- Good enough for validating the workflow
+
+### 4. Why Manual PR Review Gates?
+- Proves the Git workflow works
+- Allows validation of generated code quality
+- Automated review added in Gear 2
+
+### 5. Why Sequential Execution?
+- Eliminates complexity of parallel task management
+- Easier to debug and understand
+- Parallel execution added in Gear 2
+
+## Unique Innovations
+
+### Ever-Thinker (Core Innovation)
+A background process that:
+- Runs during system idle time
+- Analyzes completed work from multiple angles (performance, code quality, UX, testing, docs, architecture)
+- Identifies improvement opportunities
+- Creates PRs for optimizations
+- Learns which improvements get accepted
+- Never considers work "complete"
+
+See: docs/diagrams/ever-thinker-continuous-loop.md for detailed flowchart
+
+### Multi-Backend Orchestration
+Unlike other tools, Moderator can:
+- Use CCPM for rapid prototyping
+- Use Claude Code for refactoring
+- Use Task Master for complex multi-step tasks
+- Use custom agents for specialized domains
+- Automatically select best backend for each task type
+
+### Learning System
+- Tracks outcomes of all tasks
+- Identifies patterns in successful/failed approaches
+- Adjusts strategies based on historical data
+- Shares learned improvements across projects
+- Gets smarter with every use
+
+## Common Development Tasks
+
+### Running Gear 1:
+
+1. **Quick Test with Mock Backend:**
+   ```bash
+   python main.py "Create a calculator CLI with add, subtract, multiply, divide"
+   ```
+
+2. **Run Test Suite:**
+   ```bash
+   pytest                    # All fast tests (default)
+   pytest -v                # Verbose output
+   pytest --cov=src tests/  # With coverage report
+   pytest -m live          # Live tests with real backends
+   ```
+
+3. **Monitor Execution:**
+   ```bash
+   # In separate terminal - watch state
+   watch -n 1 'cat state/proj_*/project.json | python -m json.tool | grep phase'
+
+   # Follow logs
+   tail -f state/proj_*/logs.jsonl
+
+   # Check generated code
+   ls -la state/proj_*/artifacts/task_*/generated/
+   ```
+
+4. **Production Usage:**
+   ```bash
+   # Edit config/config.yaml
+   # Set: backend.type: "ccpm" or "claude_code"
+   # Set: backend.api_key: "your-key"
+
+   python main.py "Your requirements here"
+   ```
+
+### When Extending Gear 1:
+
+1. **Read the implementation plan:**
+   ```bash
+   cat docs/multi-phase-plan/phase1/gear-1-implementation-plan.md
+   ```
+
+2. **Understand current implementation:**
+   - All modules in `src/` directory are complete
+   - Tests in `tests/` directory cover all functionality
+   - Follow existing patterns for consistency
+
+3. **Test incrementally:**
+   - Add unit tests for new components
+   - Update integration tests if workflow changes
+   - Ensure all tests pass before committing
+
+### When Reviewing Architecture:
+
+1. **Start with recommended diagram order** (docs/diagrams/README.md):
+   - Component Architecture → Main Execution Loop → System State Machine → Data Flow Architecture → Git Workflow
+
+2. **Understand the full vision before simplifying:**
+   - Read docs/archetcture.md for the "why"
+   - Read docs/moderator-prd.md for the "what"
+   - Read gear-1-implementation-plan.md for the "how"
+
+## Testing Philosophy
+
+### Mock Backends are Permanent Test Infrastructure
+
+**IMPORTANT:** Mock backends (like `TestMockBackend`) are NOT "training wheels" for early development stages. They are **permanent test infrastructure** that exists alongside production backends.
+
+**Why Mock Backends Exist:**
+- ✅ Fast test execution (no network calls, no API costs)
+- ✅ Deterministic CI/CD pipelines (no flaky external dependencies)
+- ✅ Cost-free development iterations
+- ✅ Sanity checks before expensive LLM calls
+- ✅ Unit testing of orchestration logic without external services
+
+**When to Use Mock vs Live Backends:**
+
 ```python
-def execute(request: str) -> ExecutionResult:
-    1. Create execution record in database
-    2. Decompose request → tasks (currently: single task)
-    3. Execute task via router → output (ClaudeAdapter)
-    4. Analyze code → issues (CodeAnalyzer with 5+ rules)
-    5. Identify improvements (Improver)
-    6. Save results to database
-    7. Update execution status
-    8. Return ExecutionResult
+# Default: Use mocks for fast, deterministic tests
+pytest tests/                    # Runs with TestMockBackend
+
+# Explicitly run expensive "live" tests with real backends
+pytest -m live tests/            # Runs with CCPMBackend, ClaudeCodeBackend, etc.
+pytest -m "not live" tests/      # Skip live tests (default)
 ```
 
-**Iterative improvement flow** (moderator/orchestrator.py:115):
-- See "Iterative Improvement Workflow" section below for details
-- Requires agents.yaml configuration
-- Uses multi-agent review and fix cycle
+### Test Organization
 
-### state_manager.py
-SQLite tables:
-- `executions`: Top-level user requests
-- `tasks`: Individual work units
-- `results`: Generated code output
-- `issues`: Detected problems
-- `improvements`: Suggested enhancements
+**Fast Tests (Default):**
+- Use `TestMockBackend` for backend operations
+- Mock Git/GitHub operations
+- In-memory state management
+- Should complete in seconds
 
-### Backend Architecture
+**Live Tests (Opt-in):**
+- Mark with `@pytest.mark.live` decorator
+- Use real backends (CCPM, Claude Code)
+- Real Git operations
+- May take minutes and incur costs
+- Only run when explicitly requested
 
-All backends inherit from `Backend` abstract base class (moderator/backends/base.py):
-- `execute(task) → CodeOutput`
-- `supports(task_type) → bool`
-- `health_check() → bool`
-
-**ClaudeAdapter** (moderator/backends/claude_adapter.py:11):
-- Executes via subprocess: `claude --dangerously-skip-permissions {description}`
-- Collects generated files from output directory (default: `./claude-generated/`)
-- 5-minute timeout
-- Returns CodeOutput with files dict and metadata
-- Reads all files recursively with UTF-8 encoding
-
-### QA Layer
-
-**CodeAnalyzer** (moderator/qa/analyzer.py):
-Detection rules:
-- Missing test files
-- Missing dependency files (requirements.txt, package.json, etc.)
-- Hardcoded secrets (password, api_key, secret patterns)
-- Missing error handling for risky operations (open, requests, subprocess)
-
-Issues include: severity, category, location, auto_fixable flag, confidence score, fix_suggestion
-
-### Agent System (Phase 2)
-
-**Agent Configuration** (agents.yaml):
-YAML-based configuration defining 6 agents with distinct personas:
-
-1. **generator** - Code Generator (temp: 0.7)
-   - Expert software engineer creating production-ready code
-   - Pragmatic, complete implementations
-
-2. **reviewer** - Code Reviewer (temp: 0.3)
-   - Critical senior reviewer and security auditor
-   - Finds issues, checks edge cases, identifies vulnerabilities
-
-3. **fixer** - Code Fixer (temp: 0.2)
-   - Surgical refactoring specialist
-   - Makes minimal changes to fix specific issues
-
-4. **security_reviewer** - Security Specialist (temp: 0.2, variant: security)
-   - Security-focused auditor with OWASP expertise
-   - Finds SQL injection, XSS, hardcoded secrets, auth issues
-
-5. **performance_reviewer** - Performance Analyst (temp: 0.3, variant: performance)
-   - Performance optimization specialist
-   - Identifies bottlenecks, inefficient algorithms, N+1 queries
-
-6. **test_generator** - Test Engineer (temp: 0.5, variant: tests)
-   - Test-driven development specialist
-   - Generates comprehensive test suites with edge cases
-
-**AgentRegistry** (moderator/agents/registry.py):
-- Loads agents from agents.yaml
-- Provides convenience accessors (registry.generator, registry.reviewer, etc.)
-- Creates ClaudeAgent instances on demand
-
-**ClaudeAgent** (moderator/agents/claude_agent.py):
-- Wraps Claude CLI with agent-specific configuration
-- Builds prompts: system prompt + context + memory + task
-- Executes with configured temperature and max_tokens
-- Returns text responses or collected files
-
-**Iterative Improvement Workflow** (moderator/orchestrator.py:115):
-Multi-agent improvement loop with three specialized reviewers and a fixer:
+### Test Structure
 
 ```python
-def improve_iteratively(result, max_rounds=5):
-    rounds = [result]
-    current_files = result.output.files
+# tests/conftest.py
+@pytest.fixture
+def test_backend():
+    """Fast mock backend - use by default"""
+    return TestMockBackend()
 
-    for round in 1..max_rounds:
-        # Step 1: Multi-agent review
-        issues = []
-        issues += reviewer.execute("Review code...")               # General issues
-        issues += security_reviewer.execute("Security audit...")   # Vulnerabilities
-        issues += performance_reviewer.execute("Performance...")   # Bottlenecks
+@pytest.fixture
+def live_backend():
+    """Real backend - only for @pytest.mark.live tests"""
+    return CCPMBackend(api_key=os.getenv("CCPM_API_KEY"))
 
-        # Step 2: Early exit if quality is acceptable
-        if no critical/high issues: break
+# tests/test_orchestrator.py
+def test_workflow_with_mock(test_backend):
+    """Fast test using mock backend"""
+    orchestrator = Orchestrator(backend=test_backend)
+    result = orchestrator.execute("Create TODO app")
+    assert result.status == "completed"
 
-        # Step 3: Fix top 3 high-priority issues
-        for issue in high_priority[:3]:
-            fixed_files = fixer.execute_with_files(
-                f"Fix: {issue.description} at {issue.location}",
-                current_files
-            )
-            current_files = fixed_files  # Update for next iteration
-
-        # Step 4: Create round result with updated files
-        rounds.append(new_result_with_current_files)
-
-    return rounds  # All iterations including original
+@pytest.mark.live
+@pytest.mark.slow
+def test_workflow_with_real_backend(live_backend):
+    """Integration test with real CCPM API"""
+    orchestrator = Orchestrator(backend=live_backend)
+    result = orchestrator.execute("Create TODO app")
+    # Validate real generated code quality
+    assert validate_production_quality(result)
 ```
 
-**Usage**: `moderator improve exec_abc12345 --rounds 5`
+### pytest Configuration
 
-**Key behaviors**:
-- Stops early if no high-priority issues found
-- Fixes max 3 issues per round to avoid thrashing
-- Each round builds on previous fixes
-- Returns all rounds for comparison
+```ini
+# pytest.ini
+[pytest]
+markers =
+    live: tests that use real backends (expensive, slow)
+    slow: tests that take significant time
 
-### Ever-Thinker
-
-**Improver** (moderator/ever_thinker/improver.py):
-Suggests improvements:
-- Add tests if missing
-- Add README if missing
-- Convert high-severity auto-fixable issues to improvements
-- Prioritizes by priority field (higher = more important)
-
-## Key Design Patterns
-
-### Walking Skeleton Approach
-- Full pipeline works end-to-end
-- Stub implementations for future features
-- Progressive enhancement strategy
-
-### What Works
-- ✅ CLI commands: execute, status, list-executions, **improve** (NEW)
-- ✅ Single task creation and execution
-- ✅ Claude Code backend integration
-- ✅ File collection from generated code
-- ✅ Basic QA analysis (5+ rules)
-- ✅ Improvement suggestions
-- ✅ **Multi-agent iterative improvement** (NEW - Phase 2)
-- ✅ **6 pre-configured agent personas** (NEW)
-- ✅ **Agent-based code review and fixing** (NEW)
-- ✅ SQLite persistence
-- ✅ Status queries
-
-### What's Stubbed
-- ❌ Multi-task decomposition (returns single task)
-- ❌ Backend routing logic (always uses Claude Code)
-- ❌ CCPM and Custom adapters (placeholder only)
-- ❌ Advanced security scanning (basic regex only)
-- ❌ Test generation
-- ❌ Learning system
-- ❌ Parallel execution
-- ❌ Self-healing
-- ❌ PR creation
-
-## Database Schema
-
-```sql
-executions (id, request, status, created_at, completed_at)
-tasks (id, execution_id, description, type, assigned_backend, status, dependencies, context)
-results (id, task_id, backend, files, metadata, execution_time)
-issues (id, result_id, severity, category, location, description, auto_fixable, confidence, fix_suggestion)
-improvements (id, result_id, type, description, priority, auto_applicable, estimated_impact, applied, outcome)
+# Skip live tests by default
+addopts = -m "not live"
 ```
 
-## Common Development Patterns
+### Configuration for Testing
 
-### Adding a New Backend
-1. Create adapter in `moderator/backends/`
-2. Inherit from `Backend` base class
-3. Implement: `execute()`, `supports()`, `health_check()`
-4. Register in `ExecutionRouter.__init__()`
-
-### Adding QA Rules
-Edit `moderator/qa/analyzer.py`:
-- Add detection logic in `analyze()` method
-- Create `Issue` objects with appropriate severity
-- Include fix_suggestion for auto-fixable issues
-
-### Adding Improvement Types
-Edit `moderator/ever_thinker/improver.py`:
-- Add detection logic in `identify_improvements()`
-- Create `Improvement` objects with priority
-- Set auto_applicable flag if can be applied automatically
-
-### Adding New Agents
-Edit `agents.yaml` to add new agent personas:
 ```yaml
-agents:
-  my_new_agent:
-    name: "Agent Name"
-    type: "generator|reviewer|fixer"
-    variant: "optional_variant"  # e.g., "security", "performance"
-    system_prompt: |
-      Your agent's persona and instructions here.
-      Define their role, focus areas, and style.
-    temperature: 0.5
-    max_tokens: 4000
+# config/test_config.yaml
+backend:
+  type: "test_mock"  # For testing only
+
+# config/production_config.yaml
+backend:
+  type: "ccpm"
+  api_key: ${CCPM_API_KEY}
 ```
 
-Then add convenience accessor to `AgentRegistry` if needed.
-
-## Testing
-
-**Requirements**: `pip install pytest`
-
-Tests use pytest with in-memory SQLite (`:memory:`) for isolation:
-- `test_orchestrator.py`: Orchestrator, decomposition, state management
-- `test_backends.py`: Backend adapters (requires `claude` CLI)
-- `test_qa.py`: QA layer analysis rules
-- `test_agents.py`: Agent configuration system (7 tests for Phase 2)
-
-Run individual tests:
-```bash
-pytest tests/test_orchestrator.py::test_task_decomposition -v
-pytest tests/test_agents.py::test_agent_registry_loads_all_agents -v
-```
-
-Test structure follows pytest conventions:
-- Each test file uses fixtures for setup/teardown
-- In-memory database prevents test pollution
-- Backend tests may be skipped if `claude` CLI is unavailable
-
-## Important Notes
-
-1. **Claude Code Requirement**: The `claude` CLI must be available and functional
-   - Verify: `claude --version`
-   - Install if needed: Follow instructions at claude.ai/code
-
-2. **Output Directory**: Claude Code generates files in `./claude-generated/` relative to current working directory
-   - Created automatically during execution
-   - Files are collected and stored in database
-
-3. **Database Location**: `moderator.db` created in **current working directory** (not installation directory)
-   - First run creates schema automatically
-   - Use `--db` flag to specify custom location
-   - Development tests use `:memory:` (ephemeral)
-
-4. **Execution IDs**: Format is `exec_{8-char-hex}` for easy reference
-   - Example: `exec_a1b2c3d4`
-   - Used in status and improve commands
-
-5. **Agent Configuration**: `agents.yaml` must exist in project root for iterative improvement
-   - Contains 6 pre-configured agents with personas
-   - If missing, system falls back to basic execution (no iterative improvement)
-   - See agents.yaml in repo root for reference
-
-6. **Dependencies**:
-   - Required: Click >= 8.0, PyYAML >= 6.0
-   - Dev/Test: pytest (for running tests)
-   - Runtime: `claude` CLI must be in PATH
+### Test Data Location
+- `tests/` directory contains 44 comprehensive tests
+- Uses temporary directories for state during tests
+- Mocks GitHub CLI for PR creation tests
+- Shared fixtures in `tests/conftest.py`
 
 ## Troubleshooting
 
-### Agent System Fails to Load
-- Ensure `agents.yaml` exists in the project root directory
-- Verify YAML syntax is valid
-- Check that PyYAML is installed: `pip list | grep -i pyyaml`
-- If agents.yaml is missing, the system will fall back to basic execution without iterative improvement
+### If Implementation Seems Too Complex
+- **Remember:** Current docs describe the full vision (Gears 1-4)
+- **Solution:** Focus only on Gear 1 plan (docs/multi-phase-plan/phase1/gear-1-implementation-plan.md)
+- **Key:** Ignore multi-agent, QA layer, improvement cycles, learning system for now
 
-### Database Issues
-- Reset database: `rm moderator.db` (will recreate on next run)
-- Check database location: it's created in the current working directory, not the installation directory
-- For development, database is always created fresh in tests (`:memory:`)
+### If Uncertain About Architecture
+- **Check:** Which gear are you implementing?
+- **Gear 1:** Single agent, sequential, template-based, manual review
+- **Later Gears:** Multi-agent, parallel, LLM-based, automated review
 
-### Claude CLI Not Found
-- Install Claude CLI and ensure it's in PATH
-- Verify with: `which claude` and `claude --version`
-- The ClaudeAdapter will fail with a clear error if `claude` command is not available
+### If Lost in Documentation
+1. Start with docs/archetcture.md (vision)
+2. Read gear-1-implementation-plan.md (next steps)
+3. Refer to diagrams only when needed for clarification
 
-## Future Enhancement Areas
+## Future Enhancements
 
-From plan.md:
-1. Multi-task decomposition with LLM
-2. Smart backend routing based on task type/context
-3. CCPM and custom agent integration
-4. Advanced security scanning (bandit, semgrep)
-5. LLM-based test generation
-6. Learning system for improvement patterns
-7. Parallel execution of independent tasks
-8. Self-healing capabilities
-9. Automated PR creation
+The documentation describes the full vision, but implementation is phased:
+
+**Not in Gear 1:**
+- Multi-agent system (Moderator, TechLead, Monitor)
+- Automated code review
+- Multiple backends / backend routing
+- Parallel task execution
+- Improvement cycles / Ever-Thinker
+- Learning system
+- Specialist agents
+- Self-healing
+- Real-time monitoring dashboard
+- Advanced QA (security scanning, test generation)
+
+**Added in Later Gears:**
+- Gear 2: Multi-agent + automated review + parallel execution
+- Gear 3: Ever-Thinker + learning system + advanced QA
+- Gear 4: Monitoring + self-healing + multi-project
+
+## References
+
+### Essential Reading
+- [Gear 1 Implementation Plan](docs/multi-phase-plan/phase1/gear-1-implementation-plan.md) - **Start here for implementation**
+- [Architecture Vision](docs/archetcture.md) - Understanding the "why"
+- [Product Requirements](docs/moderator-prd.md) - Full system specification
+
+### Diagram Documentation
+- [Diagram Index](docs/diagrams/README.md) - Guide to all 18 architecture diagrams
+- [Component Architecture](docs/diagrams/component-architecture.md) - System structure
+- [Main Execution Loop](docs/diagrams/main-execution-loop.md) - Task flow
+- [Ever-Thinker Loop](docs/diagrams/ever-thinker-continuous-loop.md) - Continuous improvement
+
+## Project History
+
+- **October 2024:** Initial PRD and architecture documentation created
+- **October 2024:** Gear 1 implementation plan completed (1414 lines)
+- **October 2024:** Gear 1 implementation completed (749 lines of production code + 44 tests)
+- **Current:** Gear 1 ready for testing and validation
+- **Next:** Test with real projects, gather feedback, begin Gear 2 planning
+
+Previous prototype code has been moved to TO_BE_DELETED/ directory to allow clean start with Gear 1 approach.
+
+## Current Implementation Status
+
+### ✅ Fully Implemented (Gear 1)
+- Core orchestration system
+- Template-based task decomposition
+- Sequential task execution
+- Git workflow integration (branch, commit, PR)
+- File-based state persistence
+- Structured logging with console output
+- Three backend adapters (TestMock, CCPM, ClaudeCode)
+- Comprehensive test suite (44 tests)
+- Configuration management
+- CLI interface
+
+### 🔄 Next Phase (Gear 2)
+- Multi-agent system (Moderator, TechLead agents)
+- Automated code review
+- Parallel task execution
+- Backend routing based on task type
+- Enhanced error recovery
+
+### 🎯 Future (Gear 3+)
+- Ever-Thinker improvement cycles
+- Learning system
+- Self-healing capabilities
+- Real-time monitoring dashboard
+
+## Documentation Organization
+
+### Guidelines for Creating New Documentation
+
+**IMPORTANT:** All gear-specific and phase-specific documentation must be organized in the appropriate subdirectories to avoid cluttering the main docs folder.
+
+### Directory Structure
+
+```
+docs/
+├── moderator-prd.md              # Main PRD (root level - describes full vision)
+├── archetcture.md                # Architecture vision (root level - high-level)
+├── plan.md                       # Original plan (root level - historical)
+├── multi-phase-plan/             # Phased implementation
+│   ├── multi_phase_plan.md      # Overview of all phases
+│   ├── phase1/                   # Gear 1 specific (COMPLETED)
+│   │   ├── gear-1-implementation-plan.md
+│   │   ├── gear-1-sequence-diagram.md
+│   │   ├── gear1-dev-branch-setup.md
+│   │   └── design-issue-separation-of-concerns.md
+│   ├── phase2/                   # Gear 2 specific (FUTURE)
+│   │   └── gear-2-*.md
+│   ├── phase3/                   # Gear 3 specific (FUTURE)
+│   │   └── gear-3-*.md
+│   └── phase4/                   # Gear 4 specific (FUTURE)
+│       └── gear-4-*.md
+└── diagrams/                     # Architecture diagrams (root level - cross-gear)
+    ├── README.md
+    ├── component-architecture.md
+    └── ... (18 diagrams)
+```
+
+### Rules for Document Placement
+
+1. **Root Level (`docs/`)** - Only for documents that span all gears:
+   - Main PRD
+   - Architecture vision
+   - Cross-gear diagrams
+   - General project documentation
+
+2. **Phase Subdirectories (`docs/multi-phase-plan/phaseN/`)** - For gear-specific docs:
+   - Implementation plans
+   - Design decisions
+   - Known issues and workarounds
+   - Sequence diagrams specific to that gear
+   - Setup instructions
+   - Testing strategies
+
+3. **Create New Phase Directory** when starting a new gear:
+   ```bash
+   mkdir -p docs/multi-phase-plan/phase2
+   ```
+
+### Naming Conventions
+
+**Gear-specific docs should be prefixed:**
+- `gear-N-*` for implementation docs (e.g., `gear-2-implementation-plan.md`)
+- `gearN-*` for auxiliary docs (e.g., `gear2-testing-strategy.md`)
+
+**Examples:**
+- ✅ `docs/multi-phase-plan/phase1/gear-1-sequence-diagram.md`
+- ✅ `docs/multi-phase-plan/phase2/gear-2-api-design.md`
+- ❌ `docs/gear-1-sequence-diagram.md` (wrong location)
+- ❌ `docs/sequence-diagram.md` (unclear which gear)
+
+### When to Create Phase-Specific Documentation
+
+Create new docs in `docs/multi-phase-plan/phaseN/` when documenting:
+- Implementation details specific to a gear
+- Workflows unique to a gear
+- Known limitations of a gear
+- Migration guides between gears
+- Testing strategies for a gear
+- Design decisions made during a gear's implementation
+
+### Cross-Referencing
+
+When referencing phase-specific docs from root-level docs:
+```markdown
+See [Gear 1 Sequence Diagram](multi-phase-plan/phase1/gear-1-sequence-diagram.md)
+```
+
+When referencing root-level docs from phase-specific docs:
+```markdown
+See [Architecture Vision](../../archetcture.md)
+```

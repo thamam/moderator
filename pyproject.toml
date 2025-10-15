@@ -5,16 +5,31 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "moderator"
 version = "0.1.0"
-description = "AI Code Generation Orchestration System"
-requires-python = ">=3.9"
+description = "Meta-orchestration system for AI code generation"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "Moderator Team"}
+]
 dependencies = [
-    "click>=8.0.0",
     "pyyaml>=6.0",
 ]
 
-[project.scripts]
-moderator = "moderator.cli:cli"
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-mock>=3.10",
+    "pytest-cov>=4.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
 
 [tool.setuptools.packages.find]
-where = ["."]
+where = ["src"]
 include = ["moderator*"]

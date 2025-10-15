@@ -32,7 +32,8 @@ ENV/
 *.swo
 *~
 
-# Moderator specific
+# Moderator specific - runtime artifacts not version controlled
+state/
 moderator.db
 claude-generated/
 *.log
