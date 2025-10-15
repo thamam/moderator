@@ -146,7 +146,7 @@ class ClaudeCodeBackend(Backend):
         # Step 2: Execute Claude CLI in non-interactive mode
         try:
             result = subprocess.run(
-                [self.cli_path, "--print", task_description],
+                [self.cli_path, "--print", "--dangerously-skip-permissions", task_description],
                 capture_output=True,
                 text=True,
                 timeout=300,  # 5 minute timeout
