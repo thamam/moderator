@@ -248,10 +248,9 @@ Gear 1 is successful when it can:
 For more detailed information:
 - **Implementation Plan**: `docs/multi-phase-plan/phase1/gear-1-implementation-plan.md`
 - **Project Overview**: `CLAUDE.md`
-- **Architecture**: `docs/archetcture.md`
+- **Architecture**: `docs/diagrams/ARCHITECTURE.md`
 - **Full PRD**: `docs/moderator-prd.md`
 - **Diagrams**: `docs/diagrams/`
-
 ## Contributing
 
 This is currently in Gear 1 (simplest implementation). Future gears will add:
