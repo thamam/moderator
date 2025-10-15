@@ -56,7 +56,8 @@ def executor(test_backend, mock_git_manager, state_manager, logger):
         backend=test_backend,
         git_manager=mock_git_manager,
         state_manager=state_manager,
-        logger=logger
+        logger=logger,
+        require_approval=False  # Skip approval for faster tests
     )
 
 
@@ -66,6 +67,7 @@ def test_executor_initialization(executor, test_backend, mock_git_manager, state
     assert executor.git == mock_git_manager
     assert executor.state == state_manager
     assert executor.logger == logger
+    assert executor.require_approval == False
 
 
 def test_execute_task_creates_branch(executor, mock_git_manager):

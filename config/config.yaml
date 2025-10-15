@@ -1,5 +1,8 @@
 # Configuration settings for the moderator system
 # config/config.yaml
+#
+# ACTIVE CONFIGURATION: This file is loaded by default when running main.py
+# Reference examples: test_config.yaml (for testing), production_config.yaml (for production)
 
 # Git repository path (top-level so GitManager can access it)
 repo_path: "."
@@ -10,8 +13,9 @@ project:
 
 # Backend configuration
 backend:
-  type: "test_mock"  # Options: test_mock (testing), ccpm (production)
-  api_key: null  # Required for CCPM backend
+  type: "test_mock"  # Options: test_mock (testing), ccpm (production), claude_code (production)
+  api_key: null      # Required for CCPM backend
+  cli_path: "claude" # Path to Claude CLI executable (for claude_code backend)
 
 # State management
 state_dir: "./state"
