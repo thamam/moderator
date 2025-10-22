@@ -11,12 +11,12 @@ WORKFLOW_PATH: custom-moderator-gears.yaml
 
 ## Current State
 
-CURRENT_PHASE: 4-Implementation
-CURRENT_WORKFLOW: Gear 1 - Production Validation
-CURRENT_AGENT: dev
+CURRENT_PHASE: 3-Solutioning
+CURRENT_WORKFLOW: Phase 1.5 - Architectural Planning
+CURRENT_AGENT: architect
 PHASE_1_COMPLETE: true
 PHASE_2_COMPLETE: true
-PHASE_3_COMPLETE: true
+PHASE_3_COMPLETE: false
 PHASE_4_COMPLETE: false
 
 ## Gear Progress Tracking
@@ -56,9 +56,10 @@ STORIES_DONE: ["gear-1-production-validation"]
 
 ## Next Action
 
-NEXT_ACTION: Implement Phase 1.5 architectural fix (--target flag + .moderator/ directory)
-NEXT_COMMAND: implement-phase-1.5
-NEXT_AGENT: dev
+NEXT_ACTION: Plan Phase 1.5 architectural fix (separation of concerns)
+NEXT_COMMAND: /bmad:bmm:agents:architect
+NEXT_AGENT: architect
+ARCHITECT_TASK: Review design docs and create detailed implementation plan for --target flag + .moderator/ structure
 
 ## Priority Tasks
 
