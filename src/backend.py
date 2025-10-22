@@ -134,12 +134,21 @@ class ClaudeCodeBackend(Backend):
         Returns:
             Dictionary mapping filenames to their contents
         """
+        # Validate Claude CLI is available before execution
+        if not self.health_check():
+            raise RuntimeError(
+                f"Claude CLI not available at: {self.cli_path}. "
+                "Run 'claude --version' to verify installation."
+            )
+
         print(f"[CLAUDE_CODE] Executing: {task_description}")
+        print(f"[CLAUDE_CODE] Working dir: {output_dir}")
+        print(f"[CLAUDE_CODE] Command: {self.cli_path} --print --dangerously-skip-permissions '{task_description}'")
 
         files = {}
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        # Step 1: Create prompt file
+        # Step 1: Create prompt file for reference
         prompt_file = output_dir / "prompt.txt"
         prompt_file.write_text(task_description)
 
@@ -149,22 +158,37 @@ class ClaudeCodeBackend(Backend):
                 [self.cli_path, "--print", "--dangerously-skip-permissions", task_description],
                 capture_output=True,
                 text=True,
-                timeout=300,  # 5 minute timeout
+                timeout=900,  # 15 minute timeout (recommended from orchestration findings)
                 cwd=str(output_dir)
             )
 
+            # Log execution results
+            print(f"[CLAUDE_CODE] Return code: {result.returncode}")
+            print(f"[CLAUDE_CODE] STDOUT length: {len(result.stdout)} chars")
+            print(f"[CLAUDE_CODE] STDERR length: {len(result.stderr)} chars")
+
             if result.returncode != 0:
                 error_msg = result.stderr or result.stdout
-                print(f"[CLAUDE_CODE] Error: {error_msg}")
+                print(f"[CLAUDE_CODE] Error output: {error_msg}")
                 raise RuntimeError(f"Claude CLI failed: {error_msg}")
 
             # Step 3: Read generated files from output directory
             # Claude Code CLI typically writes files directly to the working directory
             for file_path in output_dir.glob("**/*"):
                 if file_path.is_file() and file_path.name != "prompt.txt":
+                    # Skip __pycache__ and other binary/compiled files
+                    if '__pycache__' in str(file_path):
+                        continue
+                    if file_path.suffix in ['.pyc', '.pyo', '.so', '.dll', '.dylib']:
+                        continue
+
                     relative_path = file_path.relative_to(output_dir)
-                    content = file_path.read_text()
-                    files[str(relative_path)] = content
+                    try:
+                        content = file_path.read_text(encoding='utf-8')
+                        files[str(relative_path)] = content
+                    except UnicodeDecodeError:
+                        print(f"[CLAUDE_CODE] Warning: Skipping binary file: {relative_path}")
+                        continue
 
             # If no files were generated, capture the CLI output as a file
             if not files:
@@ -172,11 +196,18 @@ class ClaudeCodeBackend(Backend):
                 output_file.write_text(result.stdout)
                 files["output.txt"] = result.stdout
 
+            # Step 4: Clean up prompt file
+            if prompt_file.exists():
+                prompt_file.unlink()
+
             print(f"[CLAUDE_CODE] Generated {len(files)} file(s)")
+            for filename in files.keys():
+                print(f"[CLAUDE_CODE]   - {filename}")
+
             return files
 
         except subprocess.TimeoutExpired:
-            raise RuntimeError("Claude CLI execution timed out after 5 minutes")
+            raise RuntimeError("Claude CLI execution timed out after 15 minutes")
         except FileNotFoundError:
             raise RuntimeError(f"Claude CLI not found at: {self.cli_path}. "
                              "Install it from: https://docs.anthropic.com/claude/docs/claude-cli")
