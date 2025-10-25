@@ -112,14 +112,16 @@ class ClaudeCodeBackend(Backend):
     Requires 'claude' CLI to be installed and authenticated.
     """
 
-    def __init__(self, cli_path: str = "claude"):
+    def __init__(self, cli_path: str = "claude", timeout_s: int = 900):
         """
         Initialize Claude Code backend.
 
         Args:
             cli_path: Path to claude CLI executable (default: "claude" in PATH)
+            timeout_s: Timeout in seconds for CLI execution (default: 900 = 15 minutes)
         """
         self.cli_path = cli_path
+        self.timeout_s = timeout_s
 
     def execute(self, task_description: str, output_dir: Path) -> dict[str, str]:
         """
@@ -158,7 +160,7 @@ class ClaudeCodeBackend(Backend):
                 [self.cli_path, "--print", "--dangerously-skip-permissions", task_description],
                 capture_output=True,
                 text=True,
-                timeout=900,  # 15 minute timeout (recommended from orchestration findings)
+                timeout=self.timeout_s,  # Configurable timeout
                 cwd=str(output_dir)
             )
 
@@ -207,7 +209,7 @@ class ClaudeCodeBackend(Backend):
             return files
 
         except subprocess.TimeoutExpired:
-            raise RuntimeError("Claude CLI execution timed out after 15 minutes")
+            raise RuntimeError(f"Claude CLI execution timed out after {self.timeout_s} seconds")
         except FileNotFoundError:
             raise RuntimeError(f"Claude CLI not found at: {self.cli_path}. "
                              "Install it from: https://docs.anthropic.com/claude/docs/claude-cli")

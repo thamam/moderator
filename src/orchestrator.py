@@ -67,6 +67,9 @@ class Orchestrator:
 
             # Get user confirmation (if required by config)
             require_approval = self.config.get('git', {}).get('require_approval', True)
+            project_state.require_approval = require_approval  # Store for audit trail
+            self.state_manager.save_project(project_state)
+
             if require_approval:
                 print("\nProceed with execution? (yes/no): ", end='')
                 try:
@@ -141,7 +144,8 @@ class Orchestrator:
         elif backend_type == 'claude_code':
             # Production: Claude Code CLI for code generation
             cli_path = self.config.get('backend', {}).get('cli_path', 'claude')
-            return ClaudeCodeBackend(cli_path)
+            timeout_s = self.config.get('backend', {}).get('timeout', 900)
+            return ClaudeCodeBackend(cli_path, timeout_s)
         elif backend_type == 'test_mock':
             # Testing: Fast, deterministic mock for tests/CI
             return TestMockBackend()
