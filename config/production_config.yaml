@@ -30,8 +30,8 @@ project:
 # --------------------------------------------
 backend:
   type: "claude_code"
-  cli_path: "claude"     # Path to claude executable
-  timeout: 300
+  cli_path: "claude"     # Path to claude executable (uses --dangerously-skip-permissions for automation)
+  timeout: 900           # 15 minutes (recommended from multi-agent orchestration findings)
   retry_attempts: 3
 
 # State management

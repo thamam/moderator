@@ -1,5 +1,7 @@
 """
 Git operations management module.
+
+Phase 1.5: Added validation to ensure repo_path is a valid git repository.
 """
 
 # src/git_manager.py
@@ -10,10 +12,31 @@ from pathlib import Path
 from .models import Task
 
 class GitManager:
-    """Manages Git operations and PR creation"""
+    """
+    Manages Git operations and PR creation.
+
+    Phase 1.5: Operates on target repository, not tool repository.
+    """
 
     def __init__(self, repo_path: str = "."):
-        self.repo_path = Path(repo_path)
+        """
+        Initialize GitManager for target repository.
+
+        Args:
+            repo_path: Path to git repository (typically target_dir in Phase 1.5)
+
+        Raises:
+            ValueError: If repo_path is not a valid git repository
+        """
+        self.repo_path = Path(repo_path).resolve()
+
+        # Validate it's a git repository
+        git_dir = self.repo_path / ".git"
+        if not git_dir.exists():
+            raise ValueError(
+                f"Not a git repository: {self.repo_path}\n"
+                f"Fix: cd {self.repo_path} && git init"
+            )
 
     def _run_git(self, *args) -> subprocess.CompletedProcess:
         """Run git command"""

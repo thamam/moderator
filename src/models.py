@@ -53,6 +53,7 @@ class ProjectState:
     phase: ProjectPhase = ProjectPhase.INITIALIZING
     tasks: list[Task] = field(default_factory=list)
     current_task_index: int = 0
+    require_approval: bool = True  # For audit trail: whether human approval was required
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
     completed_at: str | None = None
 
@@ -63,6 +64,7 @@ class ProjectState:
             'phase': self.phase.value,
             'tasks': [t.to_dict() for t in self.tasks],
             'current_task_index': self.current_task_index,
+            'require_approval': self.require_approval,
             'created_at': self.created_at,
             'completed_at': self.completed_at
         }
@@ -73,6 +75,8 @@ class ProjectState:
         tasks = [Task(**{**t, 'status': TaskStatus(t['status'])})
                  for t in data['tasks']]
         data['tasks'] = tasks
+        # Backward compatibility: default to True if not present
+        data.setdefault('require_approval', True)
         return ProjectState(**data)
 
 
