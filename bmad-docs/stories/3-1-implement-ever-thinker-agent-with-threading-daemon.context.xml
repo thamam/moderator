@@ -1,0 +1,266 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>1</storyId>
+    <title>Implement Ever-Thinker Agent with Threading Daemon</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-08</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>bmad-docs/stories/3-1-implement-ever-thinker-agent-with-threading-daemon.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>Moderator system developer</asA>
+    <iWant>implement the Ever-Thinker Agent as a background daemon thread</iWant>
+    <soThat>the system can continuously analyze completed work during idle time without blocking primary task execution</soThat>
+    <tasks>
+      - Task 1: Create EverThinkerAgent class skeleton (AC: 3.1.1)
+      - Task 2: Implement daemon thread initialization (AC: 3.1.2, 3.1.5)
+      - Task 3: Implement start/stop lifecycle methods (AC: 3.1.2, 3.1.4)
+      - Task 4: Implement idle detection logic (AC: 3.1.3)
+      - Task 5: Implement daemon loop with polling (AC: 3.1.2, 3.1.3)
+      - Task 6: Implement configuration loading (AC: 3.1.6)
+      - Task 7: Add placeholder improvement cycle method
+      - Task 8: Write unit tests for daemon lifecycle
+      - Task 9: Write unit tests for idle detection
+      - Task 10: Write integration test for daemon behavior
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    AC 3.1.1: EverThinkerAgent class exists in src/agents/ever_thinker_agent.py and inherits from BaseAgent
+
+    AC 3.1.2: Daemon thread starts on agent.start() and runs run_daemon_loop() method
+
+    AC 3.1.3: detect_idle_time() returns True only when no tasks are executing and idle_threshold passed
+
+    AC 3.1.4: agent.stop() sets shutdown event and daemon thread exits within 5 seconds
+
+    AC 3.1.5: Daemon thread is marked as daemon (daemon=True) so it doesn't block main thread exit
+
+    AC 3.1.6: Configuration loaded from gear3.ever_thinker section with defaults:
+      - enabled: false
+      - max_cycles: 3
+      - idle_threshold_seconds: 300
+      - perspectives: [performance, code_quality, testing, documentation, ux, architecture]
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>bmad-docs/tech-spec-epic-3.md</path>
+        <title>Epic 3 Technical Specification</title>
+        <section>Story 3.1: Ever-Thinker Agent with Threading Daemon</section>
+        <snippet>Detailed design for EverThinkerAgent class with daemon threading strategy, idle detection, and configuration loading. Includes threading code examples and NFRs for daemon overhead (CPU &lt; 5%, Memory &lt; 50MB when idle).</snippet>
+      </doc>
+      <doc>
+        <path>bmad-docs/tech-spec-epic-3.md</path>
+        <title>Epic 3 Technical Specification</title>
+        <section>EverThinkerAgent Detailed Design</section>
+        <snippet>Threading Strategy: Use threading.Thread with daemon=True, threading.Event for signaling (running, shutdown). Polling interval: 60 seconds. Idle threshold: 300 seconds default.</snippet>
+      </doc>
+      <doc>
+        <path>bmad-docs/tech-spec-epic-3.md</path>
+        <title>Epic 3 Technical Specification</title>
+        <section>Non-Functional Requirements - Performance</section>
+        <snippet>P1: Daemon must use &lt; 5% CPU when idle, Memory &lt; 50MB, polling interval 60 seconds. P3: Graceful shutdown within 5 seconds, no data corruption on abrupt shutdown.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <file>
+        <path>src/agents/base_agent.py</path>
+        <kind>base class</kind>
+        <symbol>BaseAgent</symbol>
+        <lines>12-164</lines>
+        <reason>Abstract base class that EverThinkerAgent must inherit from. Provides message bus subscription, message handling dispatcher, logging integration, and lifecycle methods (start/stop).</reason>
+      </file>
+      <file>
+        <path>src/agents/moderator_agent.py</path>
+        <kind>agent implementation example</kind>
+        <symbol>ModeratorAgent</symbol>
+        <lines>1-300</lines>
+        <reason>Reference implementation of BaseAgent for understanding agent lifecycle patterns, message handling, and integration with Orchestrator.</reason>
+      </file>
+      <file>
+        <path>src/agents/techlead_agent.py</path>
+        <kind>agent implementation example</kind>
+        <symbol>TechLeadAgent</symbol>
+        <lines>1-250</lines>
+        <reason>Second reference implementation showing how agents interact with message bus, handle tasks, and manage state.</reason>
+      </file>
+      <file>
+        <path>src/orchestrator.py</path>
+        <kind>lifecycle management</kind>
+        <symbol>Orchestrator</symbol>
+        <lines>196-414</lines>
+        <reason>Contains agent lifecycle management methods: register_agent(), start_agents(), stop_agents(), check_agent_health(). Ever-Thinker will be registered here as conditional Gear 3 agent.</reason>
+      </file>
+      <file>
+        <path>src/logger.py</path>
+        <kind>structured logging</kind>
+        <symbol>StructuredLogger, EventType</symbol>
+        <lines>14-74</lines>
+        <reason>Contains Gear 3 EventType enums for improvement events: IMPROVEMENT_CYCLE_START, IMPROVEMENT_CYCLE_COMPLETE, IMPROVEMENT_IDENTIFIED. Use these for logging daemon lifecycle and analysis events.</reason>
+      </file>
+      <file>
+        <path>src/models.py</path>
+        <kind>data models</kind>
+        <symbol>ProjectState, Task, TaskStatus, ProjectPhase</symbol>
+        <lines>1-117</lines>
+        <reason>ProjectState contains tasks list needed for idle detection. TaskStatus enum has RUNNING status to check for active tasks. ProjectPhase includes IMPROVEMENT phase for Gear 3.</reason>
+      </file>
+      <file>
+        <path>src/config_validator.py</path>
+        <kind>configuration validation</kind>
+        <symbol>_validate_ever_thinker</symbol>
+        <lines>138-187</lines>
+        <reason>Configuration validation for gear3.ever_thinker section. Validates enabled (bool), max_cycles (int &gt; 0), perspectives (list of valid perspective names).</reason>
+      </file>
+      <file>
+        <path>src/communication/message_bus.py</path>
+        <kind>message bus</kind>
+        <symbol>MessageBus</symbol>
+        <lines>1-200</lines>
+        <reason>Message bus for inter-agent communication. Ever-Thinker will subscribe to TASK_COMPLETED and PR_APPROVED messages (Story 3.5), publish IMPROVEMENT_PROPOSAL messages (Story 3.5).</reason>
+      </file>
+      <file>
+        <path>src/communication/messages.py</path>
+        <kind>message types</kind>
+        <symbol>MessageType, ImprovementProposalPayload</symbol>
+        <lines>101-125</lines>
+        <reason>Defines Gear 3 message types: IMPROVEMENT_PROPOSAL, IMPROVEMENT_FEEDBACK, LEARNING_UPDATE. ImprovementProposalPayload schema for Story 3.5 integration.</reason>
+      </file>
+      <file>
+        <path>src/learning/learning_db.py</path>
+        <kind>learning system database</kind>
+        <symbol>LearningDB</symbol>
+        <lines>1-500</lines>
+        <reason>Learning database for pattern queries and improvement tracking. Story 3.6 will integrate with get_successful_patterns() and acceptance rate queries.</reason>
+      </file>
+      <file>
+        <path>src/learning/improvement_tracker.py</path>
+        <kind>improvement tracking</kind>
+        <symbol>ImprovementTracker</symbol>
+        <lines>1-300</lines>
+        <reason>Tracks improvement proposals, acceptance/rejection with reasons, calculates effectiveness scores. Story 3.6 will use record_proposal(), record_acceptance(), record_rejection().</reason>
+      </file>
+    </code>
+    <dependencies>
+      <python>
+        <package name="pyyaml" version="&gt;=6.0"/>
+        <package name="pytest" version="&gt;=7.0"/>
+        <package name="pytest-mock" version="&gt;=3.10"/>
+        <package name="pytest-cov" version="&gt;=4.0"/>
+        <package name="black" version="&gt;=23.0" optional="true"/>
+        <package name="flake8" version="&gt;=6.0" optional="true"/>
+        <package name="mypy" version="&gt;=1.0" optional="true"/>
+      </python>
+      <stdlib>
+        <module>threading</module>
+        <module>queue</module>
+        <module>time</module>
+        <module>abc</module>
+        <module>dataclasses</module>
+        <module>enum</module>
+      </stdlib>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    1. MUST inherit from BaseAgent - implement abstract handle_message() method
+    2. MUST use daemon thread (daemon=True) to avoid blocking main thread exit
+    3. MUST implement graceful shutdown within 5 seconds timeout
+    4. MUST NOT block primary task execution - run only during idle time
+    5. MUST use threading.Event for signaling (running, shutdown) - NO busy loops
+    6. MUST poll for idle status every 60 seconds (configurable polling_interval)
+    7. MUST track last activity time and compare to idle_threshold_seconds
+    8. MUST load configuration from config.get('gear3', {}).get('ever_thinker', {}) with defaults
+    9. MUST validate configuration values (max_cycles &gt; 0, valid perspective names)
+    10. MUST log lifecycle events using StructuredLogger with Gear 3 EventType enums
+    11. MUST be registered with Orchestrator as conditional agent (enabled=false by default)
+    12. MUST follow agent lifecycle contract: start() initializes, stop() cleans up
+    13. PLACEHOLDER ONLY for Story 3.1: run_improvement_cycle() should be stub (full implementation in Story 3.5)
+    14. DEFER to Story 3.5: Message bus subscriptions, message publishing
+    15. DEFER to Story 3.6: Learning system integration
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>BaseAgent.start()</name>
+      <kind>lifecycle method</kind>
+      <signature>def start(self) -&gt; None</signature>
+      <path>src/agents/base_agent.py:50-66</path>
+      <description>Start the agent. Sets is_running=True, sends AGENT_READY message, logs agent_started event.</description>
+    </interface>
+    <interface>
+      <name>BaseAgent.stop()</name>
+      <kind>lifecycle method</kind>
+      <signature>def stop(self) -&gt; None</signature>
+      <path>src/agents/base_agent.py:68-76</path>
+      <description>Stop the agent. Sets is_running=False, unsubscribes from message bus, logs agent_stopped event.</description>
+    </interface>
+    <interface>
+      <name>BaseAgent.handle_message()</name>
+      <kind>abstract method</kind>
+      <signature>def handle_message(self, message: AgentMessage) -&gt; None</signature>
+      <path>src/agents/base_agent.py:126-134</path>
+      <description>Abstract method - must be implemented by EverThinkerAgent. Handles incoming messages from message bus.</description>
+    </interface>
+    <interface>
+      <name>Orchestrator.register_agent()</name>
+      <kind>registration method</kind>
+      <signature>def register_agent(self, agent_id: str, agent: BaseAgent) -&gt; None</signature>
+      <path>src/orchestrator.py:198-213</path>
+      <description>Register agent with orchestrator. Called in _initialize_agents() for conditional Gear 3 agents.</description>
+    </interface>
+    <interface>
+      <name>Orchestrator.start_agents()</name>
+      <kind>lifecycle method</kind>
+      <signature>def start_agents(self, logger: StructuredLogger) -&gt; None</signature>
+      <path>src/orchestrator.py:236-322</path>
+      <description>Start all registered agents in dependency order. Handles agent start failures gracefully.</description>
+    </interface>
+    <interface>
+      <name>Orchestrator.stop_agents()</name>
+      <kind>lifecycle method</kind>
+      <signature>def stop_agents(self, logger: StructuredLogger) -&gt; None</signature>
+      <path>src/orchestrator.py:324-367</path>
+      <description>Stop all registered agents in reverse dependency order. Handles stop failures gracefully.</description>
+    </interface>
+    <interface>
+      <name>StructuredLogger.log_improvement_cycle_start()</name>
+      <kind>logging method</kind>
+      <signature>def log_improvement_cycle_start(self, cycle_number: int, analysis_perspectives: list[str], **extra_context) -&gt; None</signature>
+      <path>src/logger.py:118-135</path>
+      <description>Log start of Ever-Thinker improvement cycle with EventType.IMPROVEMENT_CYCLE_START.</description>
+    </interface>
+    <interface>
+      <name>StructuredLogger.log_improvement_cycle_complete()</name>
+      <kind>logging method</kind>
+      <signature>def log_improvement_cycle_complete(self, cycle_number: int, improvements_found: int, time_taken: float, **extra_context) -&gt; None</signature>
+      <path>src/logger.py:137-154</path>
+      <description>Log completion of Ever-Thinker improvement cycle with EventType.IMPROVEMENT_CYCLE_COMPLETE.</description>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Testing framework: pytest with pytest-mock for mocking. Follow existing patterns in tests/test_orchestrator_lifecycle.py for agent lifecycle tests. Use pytest fixtures for common setup (message_bus, logger, config). Mock threading components to avoid actual daemon execution in unit tests. Integration tests should verify daemon starts/stops via Orchestrator methods.
+    </standards>
+    <locations>
+      tests/test_ever_thinker_agent.py (new file - unit tests)
+      tests/test_orchestrator_lifecycle.py (modify - add Ever-Thinker integration tests)
+    </locations>
+    <ideas>
+      AC 3.1.1: Test class exists and inherits from BaseAgent
+      AC 3.1.2: Test daemon thread starts on start(), runs run_daemon_loop()
+      AC 3.1.3: Test detect_idle_time() returns False when tasks running, True when idle threshold passed
+      AC 3.1.4: Test stop() sets shutdown event, thread exits within 5 seconds
+      AC 3.1.5: Test daemon thread has daemon=True attribute
+      AC 3.1.6: Test configuration loading with defaults, validation of max_cycles &gt; 0
+      Integration: Test agent registers with Orchestrator, starts/stops via lifecycle methods
+      Integration: Test idle detection triggers improvement cycle placeholder
+      Integration: Test graceful shutdown doesn't leave orphaned threads
+    </ideas>
+  </tests>
+</story-context>

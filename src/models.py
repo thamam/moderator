@@ -16,11 +16,29 @@ class TaskStatus(Enum):
     SKIPPED = "skipped"
 
 class ProjectPhase(Enum):
+    """Project lifecycle phases.
+
+    Gear 1-2 phases:
+    - INITIALIZING: Project setup and initialization
+    - DECOMPOSING: Breaking down requirements into tasks
+    - EXECUTING: Task execution in progress
+    - COMPLETED: All tasks completed successfully
+    - FAILED: Project execution failed
+
+    Gear 3 phases:
+    - IMPROVEMENT: Continuous improvement phase (Ever-Thinker analyzing and proposing improvements)
+    - MONITORING: System health monitoring phase (Monitor agent tracking metrics)
+
+    Phase flow: INITIALIZING → DECOMPOSING → EXECUTING → COMPLETED → IMPROVEMENT → MONITORING
+    Improvement cycles can loop: COMPLETED ↔ IMPROVEMENT
+    """
     INITIALIZING = "initializing"
     DECOMPOSING = "decomposing"
     EXECUTING = "executing"
     COMPLETED = "completed"
-    FAILED = "failed" 
+    FAILED = "failed"
+    IMPROVEMENT = "improvement"  # Gear 3: Ever-Thinker continuous improvement
+    MONITORING = "monitoring"    # Gear 3: Health monitoring and metrics 
 
 @dataclass
 class Task:
@@ -82,13 +100,18 @@ class ProjectState:
 
 @dataclass
 class WorkLogEntry:
-    """Single log entry for audit trail"""
+    """Single log entry for audit trail.
+
+    Supports Gear 2 (basic logging) and Gear 3 (structured event logging).
+    The event_type field is optional for backward compatibility.
+    """
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
     level: str = "INFO"  # DEBUG, INFO, WARN, ERROR
     component: str = ""  # decomposer, executor, git_manager, etc.
     action: str = ""
     details: dict[str, Any] = field(default_factory=dict)
     task_id: str | None = None
+    event_type: str | None = None  # Gear 3: EventType enum value for structured logging
 
     def to_dict(self) -> dict:
         return asdict(self)

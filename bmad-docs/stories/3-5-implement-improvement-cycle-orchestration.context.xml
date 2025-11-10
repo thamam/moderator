@@ -1,0 +1,225 @@
+<story-context id="3-5-implement-improvement-cycle-orchestration" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>5</storyId>
+    <title>Implement Improvement Cycle Orchestration</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-09</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>bmad-docs/stories/3-5-implement-improvement-cycle-orchestration.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>Moderator system developer</asA>
+    <iWant>implement the improvement cycle orchestration workflow within the Ever-Thinker agent</iWant>
+    <soThat>the system can automatically detect idle time, run all analyzers, score improvements, and create PRs for the highest priority improvements</soThat>
+    <tasks>
+      - Task 1: Implement priority scoring algorithm (AC: 3.5.2)
+      - Task 2: Implement analyzer orchestration with parallel execution (AC: 3.5.4, 3.5.5)
+      - Task 3: Implement improvement cycle workflow (AC: 3.5.1)
+      - Task 4: Implement max cycles enforcement (AC: 3.5.3)
+      - Task 5: Write comprehensive tests for improvement cycle orchestration
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC 3.5.1">
+      `run_improvement_cycle()` method exists in `EverThinkerAgent` and executes complete workflow:
+      1. Detect idle time (system not actively processing tasks)
+      2. Select recently completed task for analysis
+      3. Run all 6 analyzers in parallel (Performance, CodeQuality, Testing, Documentation, UX, Architecture)
+      4. Collect and score improvements using priority algorithm
+      5. Create PR for top priority improvement
+      6. Wait for feedback via IMPROVEMENT_FEEDBACK message
+      7. Update learning system with acceptance/rejection outcome
+    </criterion>
+    <criterion id="AC 3.5.2">
+      Priority scoring algorithm implemented with formula:
+      score = impact_weight[improvement.impact] + effort_weight[improvement.effort] + (acceptance_rate * 5)
+      Where impact_weight = {'critical': 10, 'high': 7, 'medium': 4, 'low': 1}
+      effort_weight = {'trivial': 5, 'small': 3, 'medium': 1, 'large': -2}
+      acceptance_rate from learning system (0.0 to 1.0)
+    </criterion>
+    <criterion id="AC 3.5.3">
+      Max cycles configuration respected (stops after `gear3.ever_thinker.max_cycles` improvements)
+    </criterion>
+    <criterion id="AC 3.5.4">
+      All 6 analyzers run in parallel (not sequentially) using concurrent execution for performance
+    </criterion>
+    <criterion id="AC 3.5.5">
+      Failed analyzers don't crash entire cycle (fault isolation with try/except per analyzer)
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="bmad-docs/tech-spec-epic-3.md" section="Story 3.5: Improvement Cycle Orchestration">
+        Detailed acceptance criteria AC 3.5.1 through AC 3.5.5 with workflow steps, priority scoring algorithm, max cycles enforcement, parallel execution requirements, and fault isolation specifications.
+      </doc>
+      <doc path="bmad-docs/tech-spec-epic-3.md" section="Improvement Cycle Orchestrator Design">
+        Complete workflow diagram (11 steps from idle detection to repeat), priority scoring formula with weights, message bus integration patterns, and Learning System integration APIs.
+      </doc>
+      <doc path="config/config.yaml" section="gear3.ever_thinker">
+        Configuration schema for Ever-Thinker including max_cycles setting, enabled flag, and perspectives list.
+      </doc>
+    </docs>
+
+    <code>
+      <file path="src/agents/ever_thinker_agent.py" kind="agent" symbol="EverThinkerAgent">
+        Main Ever-Thinker agent class created in Story 3.1. This story adds run_improvement_cycle(), calculate_priority_score(), and run_all_analyzers() methods to this class.
+      </file>
+      <file path="src/agents/analyzers/performance_analyzer.py" kind="analyzer" symbol="PerformanceAnalyzer">
+        Performance analyzer created in Story 3.2. Implements analyze(task) -> list[Improvement]. Will be called in parallel by run_all_analyzers().
+      </file>
+      <file path="src/agents/analyzers/code_quality_analyzer.py" kind="analyzer" symbol="CodeQualityAnalyzer">
+        Code quality analyzer created in Story 3.3. Detects complexity, duplication, long methods. Part of 6 analyzers run in parallel.
+      </file>
+      <file path="src/agents/analyzers/testing_analyzer.py" kind="analyzer" symbol="TestingAnalyzer">
+        Testing analyzer created in Story 3.3. Identifies coverage gaps, missing edge cases. Part of 6 analyzers run in parallel.
+      </file>
+      <file path="src/agents/analyzers/documentation_analyzer.py" kind="analyzer" symbol="DocumentationAnalyzer">
+        Documentation analyzer created in Story 3.3. Checks docstrings, parameter docs. Part of 6 analyzers run in parallel.
+      </file>
+      <file path="src/agents/analyzers/ux_analyzer.py" kind="analyzer" symbol="UXAnalyzer">
+        UX analyzer created in Story 3.4. Detects user experience issues. Part of 6 analyzers run in parallel.
+      </file>
+      <file path="src/agents/analyzers/architecture_analyzer.py" kind="analyzer" symbol="ArchitectureAnalyzer">
+        Architecture analyzer created in Story 3.4. Detects SOLID violations, God objects. Part of 6 analyzers run in parallel.
+      </file>
+      <file path="src/agents/analyzers/models.py" kind="model" symbol="Improvement">
+        Improvement data model with improvement_type, priority, target_file, impact, effort fields. Used by priority scoring algorithm.
+      </file>
+      <file path="src/agents/analyzers/base_analyzer.py" kind="interface" symbol="Analyzer">
+        ABC defining analyzer interface with analyze(task) abstract method and analyzer_name property. All 6 analyzers implement this.
+      </file>
+      <file path="src/learning/learning_db.py" kind="database" symbol="LearningDB">
+        Learning database from Epic 2. Provides get_acceptance_rate(improvement_type) method for priority scoring algorithm.
+      </file>
+      <file path="src/learning/improvement_tracker.py" kind="tracker" symbol="ImprovementTracker">
+        Improvement tracker from Story 2.4. Provides record_acceptance() and record_rejection() methods for learning updates.
+      </file>
+      <file path="src/communication/message_bus.py" kind="service" symbol="MessageBus">
+        Message bus from Epic 1. Used to publish IMPROVEMENT_PROPOSAL and subscribe to IMPROVEMENT_FEEDBACK messages.
+      </file>
+      <file path="src/communication/messages.py" kind="model" symbol="MessageType">
+        Message type definitions including IMPROVEMENT_PROPOSAL and IMPROVEMENT_FEEDBACK enum values.
+      </file>
+      <file path="src/models.py" kind="model" symbol="Task">
+        Task data model. Parameter to analyze() method - represents completed task to analyze for improvements.
+      </file>
+      <file path="src/config_validator.py" kind="validator" symbol="validate_config">
+        Configuration validator from Story 1.4. Validates gear3.ever_thinker.max_cycles configuration value.
+      </file>
+    </code>
+
+    <dependencies>
+      <python>
+        <package name="concurrent.futures" version="stdlib">Standard library for parallel execution using ThreadPoolExecutor</package>
+        <package name="pyyaml" version=">=6.0">YAML parsing for configuration files</package>
+        <package name="pytest" version=">=7.0">Testing framework</package>
+        <package name="pytest-mock" version=">=3.10">Mocking for tests</package>
+      </python>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>
+      Must use concurrent.futures.ThreadPoolExecutor for parallel analyzer execution (AC 3.5.4) - not sequential execution
+    </constraint>
+    <constraint>
+      Each analyzer must be wrapped in try/except block to isolate failures (AC 3.5.5) - one analyzer failure should not crash the cycle
+    </constraint>
+    <constraint>
+      Priority scoring algorithm must use exact formula from tech spec with specific weights for impact and effort
+    </constraint>
+    <constraint>
+      Must query learning_db.get_acceptance_rate(improvement.type) for historical acceptance rate (0.0 to 1.0)
+    </constraint>
+    <constraint>
+      Must track improvement_cycle_count and enforce gear3.ever_thinker.max_cycles limit (AC 3.5.3)
+    </constraint>
+    <constraint>
+      Must publish IMPROVEMENT_PROPOSAL message and wait for IMPROVEMENT_FEEDBACK response before proceeding
+    </constraint>
+    <constraint>
+      Must record improvement outcome using ImprovementTracker.record_acceptance() or record_rejection() after feedback received
+    </constraint>
+    <constraint>
+      All paths in code must be project-relative (not absolute paths)
+    </constraint>
+    <constraint>
+      Use print() for logging (NOT StructuredLogger) - consistent with analyzer pattern from Stories 3.2-3.4
+    </constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="Analyzer.analyze()" kind="method">
+      <signature>def analyze(self, task: Task) -> list[Improvement]</signature>
+      <path>src/agents/analyzers/base_analyzer.py</path>
+      <description>All 6 analyzers implement this method. Called in parallel by run_all_analyzers().</description>
+    </interface>
+
+    <interface name="LearningDB.get_acceptance_rate()" kind="method">
+      <signature>def get_acceptance_rate(self, improvement_type: ImprovementType) -> float</signature>
+      <path>src/learning/learning_db.py</path>
+      <description>Returns historical acceptance rate (0.0 to 1.0) for given improvement type. Used by priority scoring algorithm.</description>
+    </interface>
+
+    <interface name="ImprovementTracker.record_acceptance()" kind="method">
+      <signature>def record_acceptance(self, improvement_id: str) -> None</signature>
+      <path>src/learning/improvement_tracker.py</path>
+      <description>Records improvement as accepted in learning database. Called after IMPROVEMENT_FEEDBACK with approved=True.</description>
+    </interface>
+
+    <interface name="ImprovementTracker.record_rejection()" kind="method">
+      <signature>def record_rejection(self, improvement_id: str, reason: str) -> None</signature>
+      <path>src/learning/improvement_tracker.py</path>
+      <description>Records improvement as rejected with reason. Called after IMPROVEMENT_FEEDBACK with approved=False.</description>
+    </interface>
+
+    <interface name="MessageBus.publish()" kind="method">
+      <signature>def publish(self, message: AgentMessage) -> None</signature>
+      <path>src/communication/message_bus.py</path>
+      <description>Publishes message to bus. Use for IMPROVEMENT_PROPOSAL messages to Moderator agent.</description>
+    </interface>
+
+    <interface name="MessageBus.subscribe()" kind="method">
+      <signature>def subscribe(self, message_type: MessageType, handler: Callable) -> None</signature>
+      <path>src/communication/message_bus.py</path>
+      <description>Subscribe to message type. Use for IMPROVEMENT_FEEDBACK messages from Moderator.</description>
+    </interface>
+
+    <interface name="Improvement.create()" kind="factory_method">
+      <signature>@classmethod def create(cls, improvement_type, priority, target_file, target_line, title, description, proposed_changes, rationale, impact, effort, analyzer_source) -> Improvement</signature>
+      <path>src/agents/analyzers/models.py</path>
+      <description>Factory method for creating Improvement objects with auto-generated ID and timestamp. All analyzers use this.</description>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      All tests use pytest framework. Tests are organized by class (TestPriorityScoring, TestParallelExecution, TestFaultIsolation, etc.).
+      Use unittest.mock.patch for mocking analyzers, message bus, and learning system.
+      Use tempfile.NamedTemporaryFile for test file creation.
+      Verify concurrency using timing assertions or concurrent.futures.Future inspection.
+      Follow Arrange-Act-Assert pattern.
+      Test both happy path and error cases.
+    </standards>
+
+    <locations>
+      tests/test_improvement_cycle.py (new file for this story)
+      tests/test_ever_thinker_agent.py (may need updates for new methods)
+    </locations>
+
+    <ideas>
+      <idea ac="AC 3.5.2">Test priority scoring with various impact/effort combinations: critical+trivial should score highest, low+large should score lowest, verify acceptance_rate weighting (multiply by 5)</idea>
+      <idea ac="AC 3.5.4">Test parallel execution: Mock all 6 analyzers with delays, verify they run concurrently (total time << sum of delays), use ThreadPoolExecutor inspection</idea>
+      <idea ac="AC 3.5.5">Test fault isolation: Mock one analyzer to raise exception, verify other 5 analyzers still run and return results, verify failed analyzer logged</idea>
+      <idea ac="AC 3.5.3">Test max cycles enforcement: Set max_cycles=3, verify improvement_cycle_count increments, verify stops after 3 cycles, verify log message</idea>
+      <idea ac="AC 3.5.1">Test end-to-end workflow: Mock idle detection returning True, mock task selection, mock all analyzers returning improvements, verify scoring, verify top improvement selected, verify IMPROVEMENT_PROPOSAL published, mock IMPROVEMENT_FEEDBACK, verify learning system updated</idea>
+      <idea>Test empty improvements: If all analyzers return empty lists, verify no PR created, verify appropriate log message</idea>
+      <idea>Test learning system query failure: Mock get_acceptance_rate() to raise exception, verify priority scoring still works (use default rate or skip that component)</idea>
+      <idea>Test message bus integration: Verify IMPROVEMENT_PROPOSAL message has correct payload structure, verify handler registered for IMPROVEMENT_FEEDBACK</idea>
+    </ideas>
+  </tests>
+</story-context>

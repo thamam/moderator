@@ -2,7 +2,8 @@
 Central message dispatcher for agent communication.
 """
 
-from typing import Dict, List, Callable, Optional
+from typing import Dict, List, Callable, Optional, Type, get_type_hints
+from dataclasses import fields, is_dataclass, MISSING
 from datetime import datetime
 import threading
 from .messages import AgentMessage, MessageType
@@ -123,6 +124,47 @@ class MessageBus:
                     to_agent=message.to_agent,
                     error=str(e)
                 )
+
+    def validate_payload(self, payload: Dict, payload_class: Type) -> bool:
+        """
+        Validate payload dictionary against expected payload dataclass schema.
+
+        Args:
+            payload: Payload dictionary to validate
+            payload_class: Expected payload dataclass type
+
+        Returns:
+            True if payload matches schema, False otherwise
+
+        Note:
+            This is a lightweight validation helper. Python dataclasses already
+            enforce type safety at construction time, but this method helps catch
+            issues when payloads are built from external data or dictionaries.
+        """
+        if not is_dataclass(payload_class):
+            self.logger.warn(
+                component="message_bus",
+                action="validation_skipped",
+                reason="Not a dataclass"
+            )
+            return True  # Not a dataclass, skip validation
+
+        # Check required fields exist (fields with no default value or factory)
+        required_fields = {f.name for f in fields(payload_class)
+                          if f.default is MISSING and f.default_factory is MISSING}
+        missing_fields = required_fields - set(payload.keys())
+
+        if missing_fields:
+            self.logger.warn(
+                component="message_bus",
+                action="validation_failed",
+                reason="Missing required fields",
+                missing_fields=list(missing_fields),
+                payload_class=payload_class.__name__
+            )
+            return False
+
+        return True
 
     def create_message(
         self,

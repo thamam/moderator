@@ -1,0 +1,231 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>4</storyId>
+    <title>Implement UX and Architecture Analyzers</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-09</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>bmad-docs/stories/3-4-implement-ux-and-architecture-analyzers.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>Moderator system developer</asA>
+    <iWant>implement two analyzer modules (UX and Architecture) that detect improvement opportunities</iWant>
+    <soThat>the Ever-Thinker can identify user experience issues and architectural problems in generated code</soThat>
+    <tasks>
+- Task 1: Implement UXAnalyzer (AC: 3.4.1)
+  - Create file src/agents/analyzers/ux_analyzer.py
+  - Define UXAnalyzer class inheriting from Analyzer
+  - Implement analyzer_name property returning "ux"
+  - Implement improve_error_messages() method to detect generic errors
+  - Implement suggest_user_feedback() method for progress indicators
+  - Implement detect_usability_issues() method for CLI and validation gaps
+  - Implement main analyze() method calling all detection methods
+  - Return Improvement objects with improvement_type=UX
+- Task 2: Implement ArchitectureAnalyzer (AC: 3.4.2)
+  - Create file src/agents/analyzers/architecture_analyzer.py
+  - Define ArchitectureAnalyzer class inheriting from Analyzer
+  - Implement analyzer_name property returning "architecture"
+  - Implement check_solid_principles() method using AST analysis
+  - Implement detect_pattern_violations() method for God objects
+  - Implement identify_architectural_smells() method for circular dependencies and coupling
+  - Implement main analyze() method calling all detection methods
+  - Return Improvement objects with improvement_type=ARCHITECTURE
+- Task 3: Write comprehensive tests for both analyzers
+- Task 4: Update package exports and verify integration
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+AC 3.4.1: UXAnalyzer class exists in src/agents/analyzers/ux_analyzer.py and detects:
+- Generic error messages that should be more specific and actionable
+- Silent failures that need progress indicators
+- Unclear CLI options that need better help text
+- Missing user input validation with clear error messages
+
+AC 3.4.2: ArchitectureAnalyzer class exists in src/agents/analyzers/architecture_analyzer.py and detects:
+- SOLID principle violations (Single Responsibility, Open/Closed, etc.)
+- God objects with too many responsibilities
+- Circular dependencies between modules
+- Missing abstractions (need for interfaces)
+- Tight coupling between components
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>bmad-docs/tech-spec-epic-3.md</path>
+        <title>Epic 3 Technical Specification</title>
+        <section>6. UX Analyzer (Story 3.4 - Part 1)</section>
+        <snippet>UXAnalyzer improves error messages, suggests user-friendly output, detects usability issues. Key methods: improve_error_messages(), suggest_user_feedback(), detect_usability_issues(). Heuristics: Generic errors → Specific actionable messages, Silent failures → Progress indicators.</snippet>
+      </doc>
+      <doc>
+        <path>bmad-docs/tech-spec-epic-3.md</path>
+        <title>Epic 3 Technical Specification</title>
+        <section>7. Architecture Analyzer (Story 3.4 - Part 2)</section>
+        <snippet>ArchitectureAnalyzer checks SOLID principles, detects design pattern violations, identifies architectural smells. Key methods: check_solid_principles(), detect_pattern_violations(), identify_architectural_smells(). Rules: SRP violations → Split classes, God objects → Decompose, Circular dependencies → Break cycles.</snippet>
+      </doc>
+      <doc>
+        <path>bmad-docs/tech-spec-epic-3.md</path>
+        <title>Epic 3 Technical Specification</title>
+        <section>Improvement Data Model</section>
+        <snippet>Improvement dataclass with factory method create(). Fields: id, improvement_type (enum: PERFORMANCE, CODE_QUALITY, TESTING, DOCUMENTATION, UX, ARCHITECTURE), priority (enum: HIGH, MEDIUM, LOW), target_file, target_line, title, description, proposed_changes, rationale, impact, effort, analyzer_source, timestamp.</snippet>
+      </doc>
+      <doc>
+        <path>bmad-docs/tech-spec-epic-3.md</path>
+        <title>Epic 3 Technical Specification</title>
+        <section>Analyzer Interface</section>
+        <snippet>All analyzers inherit from Analyzer ABC. Required: analyze(task: Task) -> list[Improvement] method, analyzer_name property. Pattern: Use AST parsing (ast module), graceful error handling, priority sorting (HIGH → MEDIUM → LOW), factory pattern (Improvement.create()).</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>src/agents/analyzers/base_analyzer.py</path>
+        <kind>interface</kind>
+        <symbol>Analyzer</symbol>
+        <lines>all</lines>
+        <reason>Abstract base class - both UXAnalyzer and ArchitectureAnalyzer must inherit from this ABC and implement analyze() and analyzer_name</reason>
+      </artifact>
+      <artifact>
+        <path>src/agents/analyzers/models.py</path>
+        <kind>data_model</kind>
+        <symbol>Improvement, ImprovementType, ImprovementPriority</symbol>
+        <lines>all</lines>
+        <reason>Data classes for creating improvement objects - use Improvement.create() factory method with ImprovementType.UX or ImprovementType.ARCHITECTURE</reason>
+      </artifact>
+      <artifact>
+        <path>src/agents/analyzers/code_quality_analyzer.py</path>
+        <kind>reference_implementation</kind>
+        <symbol>CodeQualityAnalyzer</symbol>
+        <lines>all</lines>
+        <reason>Reference implementation from Story 3.3 - follow same patterns: AST parsing, error handling, priority sorting, print() for logging, _extract_python_files() placeholder</reason>
+      </artifact>
+      <artifact>
+        <path>src/agents/analyzers/testing_analyzer.py</path>
+        <kind>reference_implementation</kind>
+        <symbol>TestingAnalyzer</symbol>
+        <lines>all</lines>
+        <reason>Reference implementation from Story 3.3 - demonstrates multi-method analysis pattern and type hint extraction from AST</reason>
+      </artifact>
+      <artifact>
+        <path>src/agents/analyzers/documentation_analyzer.py</path>
+        <kind>reference_implementation</kind>
+        <symbol>DocumentationAnalyzer</symbol>
+        <lines>all</lines>
+        <reason>Reference implementation from Story 3.3 - demonstrates docstring parsing and complexity heuristics (_is_complex_function)</reason>
+      </artifact>
+      <artifact>
+        <path>src/agents/analyzers/__init__.py</path>
+        <kind>package_exports</kind>
+        <symbol>__all__</symbol>
+        <lines>all</lines>
+        <reason>Package initialization - must add UXAnalyzer and ArchitectureAnalyzer to imports and __all__ list following established pattern</reason>
+      </artifact>
+      <artifact>
+        <path>tests/test_code_quality_analyzer.py</path>
+        <kind>test_reference</kind>
+        <symbol>All test classes</symbol>
+        <lines>all</lines>
+        <reason>Test structure reference from Story 3.3 - follow class-based organization (TestAnalyzerInterface, TestDetectionMethod, TestIntegration), use tempfile for test code samples</reason>
+      </artifact>
+      <artifact>
+        <path>src/models.py</path>
+        <kind>data_model</kind>
+        <symbol>Task</symbol>
+        <lines>all</lines>
+        <reason>Task model used as input parameter to analyze() method</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <python>
+        <package name="pytest" usage="test_framework" />
+        <package name="ast" usage="static_code_analysis" note="Built-in module for AST parsing" />
+        <package name="unittest.mock" usage="test_mocking" note="Built-in module" />
+      </python>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint id="1">All analyzers MUST inherit from Analyzer ABC (src/agents/analyzers/base_analyzer.py)</constraint>
+    <constraint id="2">All analyzers MUST implement analyze(task: Task) -> list[Improvement] method and analyzer_name property</constraint>
+    <constraint id="3">Use Python ast module for static analysis - NEVER execute code (security requirement)</constraint>
+    <constraint id="4">Use Improvement.create() factory method for all improvement objects (established pattern)</constraint>
+    <constraint id="5">Sort improvements by priority (HIGH → MEDIUM → LOW) before returning from analyze()</constraint>
+    <constraint id="6">Use print() for logging, NOT StructuredLogger (StructuredLogger requires state_manager parameter not available in analyzer context)</constraint>
+    <constraint id="7">Implement _extract_python_files(task) as placeholder returning empty list (mocked in tests using patch)</constraint>
+    <constraint id="8">Use graceful error handling with try/except for syntax errors (continue processing other files on error)</constraint>
+    <constraint id="9">Use context managers (with open(...)) with UTF-8 encoding for file handling</constraint>
+    <constraint id="10">UXAnalyzer MUST use ImprovementType.UX for all improvements</constraint>
+    <constraint id="11">ArchitectureAnalyzer MUST use ImprovementType.ARCHITECTURE for all improvements</constraint>
+    <constraint id="12">File paths in improvement objects should be project-relative (not absolute paths)</constraint>
+    <constraint id="13">Each analyzer should have ~20-25 comprehensive tests following established structure (interface tests, detection method tests, integration tests)</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Analyzer.analyze</name>
+      <kind>abstract_method</kind>
+      <signature>def analyze(self, task: Task) -> list[Improvement]</signature>
+      <path>src/agents/analyzers/base_analyzer.py</path>
+      <description>Main analysis method - receives completed task, returns list of improvements sorted by priority</description>
+    </interface>
+    <interface>
+      <name>Analyzer.analyzer_name</name>
+      <kind>property</kind>
+      <signature>@property def analyzer_name(self) -> str</signature>
+      <path>src/agents/analyzers/base_analyzer.py</path>
+      <description>Returns analyzer identifier string - use "ux" for UXAnalyzer, "architecture" for ArchitectureAnalyzer</description>
+    </interface>
+    <interface>
+      <name>Improvement.create</name>
+      <kind>factory_method</kind>
+      <signature>@staticmethod def create(improvement_type: ImprovementType, priority: ImprovementPriority, target_file: str, target_line: int | None, title: str, description: str, proposed_changes: str, rationale: str, impact: str, effort: str, analyzer_source: str) -> Improvement</signature>
+      <path>src/agents/analyzers/models.py</path>
+      <description>Factory method for creating Improvement objects with auto-generated ID and timestamp</description>
+    </interface>
+    <interface>
+      <name>ImprovementType enum</name>
+      <kind>enum</kind>
+      <signature>class ImprovementType(Enum): PERFORMANCE, CODE_QUALITY, TESTING, DOCUMENTATION, UX, ARCHITECTURE</signature>
+      <path>src/agents/analyzers/models.py</path>
+      <description>Enum for improvement categories - use UX and ARCHITECTURE for this story</description>
+    </interface>
+    <interface>
+      <name>ImprovementPriority enum</name>
+      <kind>enum</kind>
+      <signature>class ImprovementPriority(Enum): HIGH, MEDIUM, LOW</signature>
+      <path>src/agents/analyzers/models.py</path>
+      <description>Enum for improvement priority levels - use heuristics from tech spec to assign priority</description>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+All analyzers follow established testing patterns from Story 3.3:
+- Class-based test organization (TestAnalyzerInterface, TestDetectionMethod1, TestDetectionMethod2, TestIntegration)
+- Use pytest framework with temporary files for test code samples
+- Interface tests verify: inheritance from Analyzer, analyzer_name property value, analyze method existence
+- Detection method tests verify: specific detection logic with known code patterns, priority assignment correctness, edge cases (syntax errors, empty files)
+- Integration tests verify: analyze() returns sorted improvements, graceful degradation on errors, all improvements have correct ImprovementType
+- Use unittest.mock.patch to mock _extract_python_files() method in tests
+- Each analyzer should have ~20-25 tests total for comprehensive coverage
+    </standards>
+    <locations>
+      <location>tests/test_ux_analyzer.py</location>
+      <location>tests/test_architecture_analyzer.py</location>
+    </locations>
+    <ideas>
+      <idea ac="3.4.1">Test UXAnalyzer.improve_error_messages() detects generic "Error" messages and suggests specific alternatives</idea>
+      <idea ac="3.4.1">Test UXAnalyzer.suggest_user_feedback() detects long-running operations without progress indicators</idea>
+      <idea ac="3.4.1">Test UXAnalyzer.detect_usability_issues() detects CLI argument parsers with missing help text</idea>
+      <idea ac="3.4.1">Test UXAnalyzer.detect_usability_issues() detects missing input validation on user-facing functions</idea>
+      <idea ac="3.4.1">Test UXAnalyzer returns improvements with ImprovementType.UX</idea>
+      <idea ac="3.4.2">Test ArchitectureAnalyzer.check_solid_principles() detects classes with multiple responsibilities (SRP violation)</idea>
+      <idea ac="3.4.2">Test ArchitectureAnalyzer.detect_pattern_violations() detects God objects with > 10 methods</idea>
+      <idea ac="3.4.2">Test ArchitectureAnalyzer.identify_architectural_smells() detects circular imports between modules</idea>
+      <idea ac="3.4.2">Test ArchitectureAnalyzer.identify_architectural_smells() detects tight coupling (direct instantiation vs dependency injection)</idea>
+      <idea ac="3.4.2">Test ArchitectureAnalyzer returns improvements with ImprovementType.ARCHITECTURE</idea>
+    </ideas>
+  </tests>
+</story-context>

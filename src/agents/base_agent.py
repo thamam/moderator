@@ -83,7 +83,7 @@ class BaseAgent(ABC):
             message: Incoming message
         """
         if not self.is_running:
-            self.logger.warning(
+            self.logger.warn(
                 component=self.agent_id,
                 action="message_ignored",
                 message_id=message.message_id,

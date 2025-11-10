@@ -5,6 +5,7 @@ import argparse
 from pathlib import Path
 from src.orchestrator import Orchestrator
 from src.config_loader import load_config
+from src.config_validator import validate_config, ConfigValidationError
 
 def resolve_target_directory(target_arg: str | None) -> Path:
     """
@@ -108,6 +109,9 @@ Examples:
             backend_override=None  # Future: add --backend CLI flag
         )
 
+        # Step 2.5: Validate configuration (Gear 3 validation)
+        validate_config(config)
+
         # Step 3: Override require_approval if --auto-approve flag is set
         if args.auto_approve:
             if 'git' not in config:
@@ -133,8 +137,8 @@ Examples:
         print(f"📁 State: {target_dir}/.moderator/state/{project_state.project_id}/")
         sys.exit(0)
 
-    except ValueError as e:
-        # Validation errors (target directory issues)
+    except (ValueError, ConfigValidationError) as e:
+        # Validation errors (target directory issues, config validation)
         print(f"\n❌ Configuration Error: {e}")
         sys.exit(1)
     except Exception as e:

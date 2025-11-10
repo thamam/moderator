@@ -1,0 +1,321 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.3</storyId>
+    <title>Implement Code Quality, Testing, and Documentation Analyzers</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-09</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>bmad-docs/stories/3-3-implement-code-quality-testing-and-documentation-analyzers.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>Moderator system developer</asA>
+    <iWant>implement three analyzer modules (CodeQuality, Testing, Documentation) that detect improvement opportunities</iWant>
+    <soThat>the Ever-Thinker can identify code quality issues, test coverage gaps, and documentation deficiencies in generated code</soThat>
+    <tasks>
+      - Task 1: Implement CodeQualityAnalyzer (AC: 3.3.1)
+      - Task 2: Implement TestingAnalyzer (AC: 3.3.2)
+      - Task 3: Implement DocumentationAnalyzer (AC: 3.3.3)
+      - Task 4: Write comprehensive tests for all three analyzers
+      - Task 5: Update package exports and verify integration
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="3.3.1">
+      CodeQualityAnalyzer class exists in src/agents/analyzers/code_quality_analyzer.py and detects:
+      - Cyclomatic complexity > 10
+      - Code duplication > 6 lines
+      - Methods > 50 lines
+      - Dead code (unused imports, variables)
+    </criterion>
+    <criterion id="3.3.2">
+      TestingAnalyzer class exists in src/agents/analyzers/testing_analyzer.py and detects:
+      - Functions without tests
+      - Missing edge cases (null, empty, boundary)
+      - No error path testing
+      - Test quality issues (no assertions, poor mocking)
+    </criterion>
+    <criterion id="3.3.3">
+      DocumentationAnalyzer class exists in src/agents/analyzers/documentation_analyzer.py and detects:
+      - Missing docstrings on public functions
+      - Undocumented parameters
+      - Missing return value documentation
+      - Outdated README
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <artifact>
+        <path>bmad-docs/tech-spec-epic-3.md</path>
+        <title>Epic 3 Technical Specification</title>
+        <section>Story 3.3: Code Quality, Testing, and Documentation Analyzers</section>
+        <snippet>
+          CodeQualityAnalyzer responsibilities: Calculate cyclomatic complexity, detect code duplication, identify long methods/classes, find dead code.
+          TestingAnalyzer responsibilities: Identify test coverage gaps, detect missing edge cases, suggest additional test scenarios, validate test quality.
+          DocumentationAnalyzer responsibilities: Check docstring completeness, validate parameter documentation, ensure README updates, detect missing examples.
+        </snippet>
+      </artifact>
+      <artifact>
+        <path>bmad-docs/tech-spec-epic-3.md</path>
+        <title>Epic 3 Technical Specification</title>
+        <section>CodeQualityAnalyzer Metrics</section>
+        <snippet>
+          Cyclomatic complexity > 10 → Refactor (MEDIUM priority)
+          Duplicate code blocks > 6 lines → Extract to function (MEDIUM priority)
+          Methods > 50 lines → Consider splitting (MEDIUM priority)
+          Unused imports/variables → Remove (LOW priority)
+        </snippet>
+      </artifact>
+      <artifact>
+        <path>bmad-docs/tech-spec-epic-3.md</path>
+        <title>Epic 3 Technical Specification</title>
+        <section>TestingAnalyzer Coverage Analysis</section>
+        <snippet>
+          Functions without tests → Add unit tests (HIGH priority for public API)
+          Missing edge cases (null, empty, boundary values) → Add test cases (MEDIUM priority)
+          No error path testing → Add exception tests (HIGH priority for critical functions)
+          Test quality issues (no assertions, poor mocking) → Improve tests (LOW priority)
+        </snippet>
+      </artifact>
+      <artifact>
+        <path>bmad-docs/tech-spec-epic-3.md</path>
+        <title>Epic 3 Technical Specification</title>
+        <section>DocumentationAnalyzer Standards</section>
+        <snippet>
+          Public functions require docstrings (HIGH priority)
+          Parameters must be documented with types (MEDIUM priority)
+          Return values must be documented (MEDIUM priority)
+          README must reflect new functionality (MEDIUM priority)
+          Complex logic needs inline comments (LOW priority)
+        </snippet>
+      </artifact>
+      <artifact>
+        <path>bmad-docs/stories/3-2-implement-performance-analyzer.md</path>
+        <title>Story 3.2: Implement Performance Analyzer</title>
+        <section>Dev Agent Record - Completion Notes</section>
+        <snippet>
+          Infrastructure created: Analyzer base class, Improvement data model, factory method pattern.
+          Testing patterns established: 22 tests, class-based organization, temporary files, edge case coverage.
+          Implementation patterns: AST parsing, graceful error handling, priority sorting, helper methods.
+        </snippet>
+      </artifact>
+    </docs>
+    <code>
+      <artifact>
+        <path>src/agents/analyzers/base_analyzer.py</path>
+        <kind>interface</kind>
+        <symbol>Analyzer</symbol>
+        <lines>16-59</lines>
+        <reason>Abstract base class that all three analyzers must inherit from. Defines analyze() method and analyzer_name property.</reason>
+      </artifact>
+      <artifact>
+        <path>src/agents/analyzers/models.py</path>
+        <kind>dataclass</kind>
+        <symbol>Improvement</symbol>
+        <lines>30-161</lines>
+        <reason>Data model for all improvement suggestions. Use Improvement.create() factory method. Supports ImprovementType.CODE_QUALITY, .TESTING, .DOCUMENTATION.</reason>
+      </artifact>
+      <artifact>
+        <path>src/agents/analyzers/models.py</path>
+        <kind>enum</kind>
+        <symbol>ImprovementType</symbol>
+        <lines>13-20</lines>
+        <reason>Enum with 6 values including CODE_QUALITY, TESTING, DOCUMENTATION. Use for improvement_type field.</reason>
+      </artifact>
+      <artifact>
+        <path>src/agents/analyzers/models.py</path>
+        <kind>enum</kind>
+        <symbol>ImprovementPriority</symbol>
+        <lines>23-27</lines>
+        <reason>Enum with HIGH, MEDIUM, LOW values for prioritizing improvements.</reason>
+      </artifact>
+      <artifact>
+        <path>src/agents/analyzers/performance_analyzer.py</path>
+        <kind>analyzer</kind>
+        <symbol>PerformanceAnalyzer</symbol>
+        <lines>22-420</lines>
+        <reason>Reference implementation showing analyzer pattern: inherit Analyzer, implement analyze() and analyzer_name, use AST parsing, create Improvement objects, sort by priority.</reason>
+      </artifact>
+      <artifact>
+        <path>src/agents/analyzers/__init__.py</path>
+        <kind>package</kind>
+        <symbol>__all__</symbol>
+        <lines>1-17</lines>
+        <reason>Package exports. Add new analyzers to __all__ list: CodeQualityAnalyzer, TestingAnalyzer, DocumentationAnalyzer.</reason>
+      </artifact>
+      <artifact>
+        <path>src/models.py</path>
+        <kind>dataclass</kind>
+        <symbol>Task</symbol>
+        <lines>30-60</lines>
+        <reason>Task model passed to analyze() method. Contains task metadata and artifacts list.</reason>
+      </artifact>
+      <artifact>
+        <path>src/logger.py</path>
+        <kind>class</kind>
+        <symbol>StructuredLogger</symbol>
+        <lines>1-100</lines>
+        <reason>Recommended logging framework (instead of print). Use for warnings and error messages.</reason>
+      </artifact>
+      <artifact>
+        <path>tests/test_performance_analyzer.py</path>
+        <kind>test</kind>
+        <symbol>TestPerformanceAnalyzer</symbol>
+        <lines>1-608</lines>
+        <reason>Reference test structure: 9 test classes, 22 tests, temporary files, class-based organization. Follow this pattern for three new test files.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <python>
+        ast (builtin) - AST parsing for code analysis
+        dataclasses (builtin) - Improvement data model
+        enum (builtin) - ImprovementType and ImprovementPriority enums
+        abc (builtin) - Abstract base classes
+        typing (builtin) - Type hints
+        pytest (dev) - Test framework
+        unittest.mock (dev) - Mocking for tests
+        tempfile (builtin) - Temporary files for testing
+        Optional: radon - Cyclomatic complexity calculation (or implement manually with AST)
+      </python>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint id="1">Analyzer Interface Pattern: All three analyzers MUST inherit from Analyzer ABC and implement analyze(task: Task) -> list[Improvement] method and analyzer_name property</constraint>
+    <constraint id="2">Static Analysis Only: Use Python ast module for safe code analysis. NEVER execute user code. Parse files into AST tree and walk nodes.</constraint>
+    <constraint id="3">Graceful Error Handling: Continue analysis even if individual files have syntax errors. Use except SyntaxError and except Exception with continue.</constraint>
+    <constraint id="4">File Handling: Use context managers (with open) with UTF-8 encoding for all file operations</constraint>
+    <constraint id="5">Priority Sorting: Sort improvements by priority (HIGH → MEDIUM → LOW) before returning from analyze()</constraint>
+    <constraint id="6">Improvement Objects: Use Improvement.create() factory method to auto-generate IDs and timestamps. Set improvement_type to CODE_QUALITY, TESTING, or DOCUMENTATION respectively.</constraint>
+    <constraint id="7">Logging: Use StructuredLogger from src/logger.py instead of print() statements for consistency</constraint>
+    <constraint id="8">Type Hints: Use Python 3.9+ type hint syntax (list[str], str | None) consistently</constraint>
+    <constraint id="9">Helper Methods: Extract reusable logic into private helper methods (e.g., _parse_ast, _find_functions, etc.)</constraint>
+    <constraint id="10">Testing Standards: Follow Story 3.2 pattern - create 3 test files with class-based organization, use temporary files with realistic code samples, cover all acceptance criteria</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Analyzer.analyze</name>
+      <kind>abstract method</kind>
+      <signature>def analyze(self, task: Task) -> list[Improvement]</signature>
+      <path>src/agents/analyzers/base_analyzer.py:26-45</path>
+    </interface>
+    <interface>
+      <name>Analyzer.analyzer_name</name>
+      <kind>property</kind>
+      <signature>@property @abstractmethod def analyzer_name(self) -> str</signature>
+      <path>src/agents/analyzers/base_analyzer.py:47-59</path>
+    </interface>
+    <interface>
+      <name>Improvement.create</name>
+      <kind>factory method</kind>
+      <signature>@classmethod def create(cls, improvement_type, priority, target_file, title, description, proposed_changes, rationale, impact, effort, analyzer_source) -> Improvement</signature>
+      <path>src/agents/analyzers/models.py:84-161</path>
+    </interface>
+    <interface>
+      <name>CodeQualityAnalyzer.calculate_complexity</name>
+      <kind>method</kind>
+      <signature>def calculate_complexity(self, function_node: ast.FunctionDef) -> int</signature>
+      <path>NEW - src/agents/analyzers/code_quality_analyzer.py</path>
+    </interface>
+    <interface>
+      <name>CodeQualityAnalyzer.detect_duplication</name>
+      <kind>method</kind>
+      <signature>def detect_duplication(self, files: list[str]) -> list[Improvement]</signature>
+      <path>NEW - src/agents/analyzers/code_quality_analyzer.py</path>
+    </interface>
+    <interface>
+      <name>CodeQualityAnalyzer.find_long_methods</name>
+      <kind>method</kind>
+      <signature>def find_long_methods(self, code: str, file_path: str) -> list[Improvement]</signature>
+      <path>NEW - src/agents/analyzers/code_quality_analyzer.py</path>
+    </interface>
+    <interface>
+      <name>CodeQualityAnalyzer.detect_dead_code</name>
+      <kind>method</kind>
+      <signature>def detect_dead_code(self, code: str, file_path: str) -> list[Improvement]</signature>
+      <path>NEW - src/agents/analyzers/code_quality_analyzer.py</path>
+    </interface>
+    <interface>
+      <name>TestingAnalyzer.identify_coverage_gaps</name>
+      <kind>method</kind>
+      <signature>def identify_coverage_gaps(self, files: list[str]) -> list[Improvement]</signature>
+      <path>NEW - src/agents/analyzers/testing_analyzer.py</path>
+    </interface>
+    <interface>
+      <name>TestingAnalyzer.suggest_edge_cases</name>
+      <kind>method</kind>
+      <signature>def suggest_edge_cases(self, function_node: ast.FunctionDef, file_path: str) -> list[Improvement]</signature>
+      <path>NEW - src/agents/analyzers/testing_analyzer.py</path>
+    </interface>
+    <interface>
+      <name>TestingAnalyzer.detect_missing_error_tests</name>
+      <kind>method</kind>
+      <signature>def detect_missing_error_tests(self, function_node: ast.FunctionDef, file_path: str) -> list[Improvement]</signature>
+      <path>NEW - src/agents/analyzers/testing_analyzer.py</path>
+    </interface>
+    <interface>
+      <name>TestingAnalyzer.validate_test_quality</name>
+      <kind>method</kind>
+      <signature>def validate_test_quality(self, test_code: str, file_path: str) -> list[Improvement]</signature>
+      <path>NEW - src/agents/analyzers/testing_analyzer.py</path>
+    </interface>
+    <interface>
+      <name>DocumentationAnalyzer.check_docstring_completeness</name>
+      <kind>method</kind>
+      <signature>def check_docstring_completeness(self, code: str, file_path: str) -> list[Improvement]</signature>
+      <path>NEW - src/agents/analyzers/documentation_analyzer.py</path>
+    </interface>
+    <interface>
+      <name>DocumentationAnalyzer.validate_parameter_docs</name>
+      <kind>method</kind>
+      <signature>def validate_parameter_docs(self, function_node: ast.FunctionDef, file_path: str) -> list[Improvement]</signature>
+      <path>NEW - src/agents/analyzers/documentation_analyzer.py</path>
+    </interface>
+    <interface>
+      <name>DocumentationAnalyzer.check_return_value_docs</name>
+      <kind>method</kind>
+      <signature>def check_return_value_docs(self, function_node: ast.FunctionDef, file_path: str) -> list[Improvement]</signature>
+      <path>NEW - src/agents/analyzers/documentation_analyzer.py</path>
+    </interface>
+    <interface>
+      <name>DocumentationAnalyzer.check_readme_updates</name>
+      <kind>method</kind>
+      <signature>def check_readme_updates(self, task: Task) -> list[Improvement]</signature>
+      <path>NEW - src/agents/analyzers/documentation_analyzer.py</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Follow Story 3.2 testing patterns: Use pytest with class-based test organization. Create 3 test files (test_code_quality_analyzer.py, test_testing_analyzer.py, test_documentation_analyzer.py). Each test file should have multiple test classes (TestAnalyzerInterface, TestDetectionMethods, TestIntegration, etc.). Use temporary files with realistic code samples for testing. Cover all acceptance criteria with specific tests. Include edge cases (syntax errors, empty files, no issues found). All tests should use descriptive names and follow Arrange-Act-Assert pattern.
+    </standards>
+    <locations>tests/test_code_quality_analyzer.py, tests/test_testing_analyzer.py, tests/test_documentation_analyzer.py</locations>
+    <ideas>
+      <idea ac="3.3.1">
+        Test calculate_complexity() with simple function (complexity 1) vs complex function with multiple branches (complexity > 10).
+        Test detect_duplication() with file containing duplicate code blocks > 6 lines.
+        Test find_long_methods() with function > 50 lines and function < 50 lines.
+        Test detect_dead_code() with unused imports (import os but never use) and unused variables.
+        Integration test: analyze() aggregates all code quality improvements and returns sorted list.
+      </idea>
+      <idea ac="3.3.2">
+        Test identify_coverage_gaps() with production code file and corresponding test file (some functions tested, some not).
+        Test suggest_edge_cases() with function that should be tested with null/empty/boundary values.
+        Test detect_missing_error_tests() with function that raises exceptions but no except tests.
+        Test validate_test_quality() with weak test (just assert True) vs strong test (specific assertions).
+        Integration test: analyze() identifies all testing improvements and prioritizes by coverage impact.
+      </idea>
+      <idea ac="3.3.3">
+        Test check_docstring_completeness() with public function missing docstring vs private function (should skip).
+        Test validate_parameter_docs() with function docstring missing some parameter descriptions.
+        Test check_return_value_docs() with function that returns value but docstring doesn't document it.
+        Test check_readme_updates() with task that adds new feature but README not updated (heuristic-based).
+        Integration test: analyze() returns all documentation improvements with appropriate priorities.
+      </idea>
+    </ideas>
+  </tests>
+</story-context>

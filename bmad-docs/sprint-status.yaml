@@ -1,0 +1,91 @@
+# generated: 2025-11-07
+# project: moderator
+# project_key: moderator
+# tracking_system: file-system
+# story_location: {project-root}/docs/stories
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic exists in epic file but not contexted
+#   - contexted: Epic tech context created (required before drafting stories)
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - drafted: Story file created in stories folder
+#   - ready-for-dev: Draft approved and story context created
+#   - in-progress: Developer actively working on implementation
+#   - review: Under SM review (via code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - completed: Retrospective has been done
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epics should be 'contexted' before stories can be 'drafted'
+# - Stories can be worked in parallel if team capacity allows
+# - SM typically drafts next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', SM reviews, then Dev moves to 'done'
+
+generated: 2025-11-07
+project: moderator
+project_key: moderator
+tracking_system: file-system
+story_location: "{project-root}/docs/stories"
+
+development_status:
+  # Epic 1: Gear 3 Foundation & Infrastructure
+  epic-1: done
+  1-1-extend-project-state-model-with-gear-3-phases: done
+  1-2-enhance-logger-with-gear-3-event-types: done
+  1-3-extend-message-bus-with-gear-3-event-types: done
+  1-4-enhance-configuration-system-for-gear-3-features: done
+  1-5-extend-orchestrator-with-agent-lifecycle-management: done
+  epic-1-retrospective: optional
+
+  # Epic 2: Learning System & Data Persistence
+  epic-2: done
+  2-1-design-and-implement-sqlite-learning-database-schema: done
+  2-2-implement-thread-safe-database-operations: done
+  2-3-implement-pattern-recognition-and-tracking: done
+  2-4-implement-improvement-outcome-tracking: done
+  epic-2-retrospective: optional
+
+  # Epic 3: Ever-Thinker Continuous Improvement Engine
+  epic-3: done
+  3-1-implement-ever-thinker-agent-with-threading-daemon: done
+  3-2-implement-performance-analyzer: done
+  3-3-implement-code-quality-testing-and-documentation-analyzers: done
+  3-4-implement-ux-and-architecture-analyzers: done
+  3-5-implement-improvement-cycle-orchestration: done
+  3-6-integrate-ever-thinker-with-learning-system: done
+  epic-3-retrospective: optional
+
+  # Epic 4: Advanced QA Integration
+  epic-4: backlog
+  4-1-design-qa-tool-adapter-interface: backlog
+  4-2-implement-pylint-flake8-and-bandit-adapters: backlog
+  4-3-implement-qa-manager-for-orchestration-and-scoring: backlog
+  4-4-integrate-qa-manager-into-pr-review-workflow: backlog
+  4-5-add-qa-configuration-and-documentation: backlog
+  epic-4-retrospective: optional
+
+  # Epic 5: Parallel Execution & Backend Routing
+  epic-5: backlog
+  5-1-design-abstract-task-executor-interface: backlog
+  5-2-implement-threadpool-task-executor: backlog
+  5-3-implement-execution-context-isolation: backlog
+  5-4-implement-rule-based-backend-router: backlog
+  5-5-integrate-parallel-execution-and-backend-routing: backlog
+  epic-5-retrospective: optional
+
+  # Epic 6: System Health Monitoring
+  epic-6: backlog
+  6-1-implement-monitor-agent-with-metrics-collection: backlog
+  6-2-implement-health-score-calculation: backlog
+  6-3-implement-alert-generation-for-anomalies: backlog
+  6-4-integrate-monitor-agent-with-orchestrator: backlog
+  6-5-add-monitoring-dashboard-query-api: backlog
+  epic-6-retrospective: optional

@@ -35,12 +35,13 @@ You must fully embody this agent's persona and follow all activation instruction
     5. Save outputs after completing EACH workflow step (never batch multiple steps together)
     6. If workflow.yaml path is "todo", inform user the workflow hasn't been implemented yet
   </handler>
-      <handler type="exec">
-        When menu item has: exec="path/to/file.md"
-        Actually LOAD and EXECUTE the file at that path - do not improvise
-        Read the complete file and follow all instructions within it
-      </handler>
-
+  <handler type="validate-workflow">
+    When command has: validate-workflow="path/to/workflow.yaml"
+    1. You MUST LOAD the file at: {project-root}/bmad/core/tasks/validate-workflow.xml
+    2. READ its entire contents and EXECUTE all instructions in that file
+    3. Pass the workflow, and also check the workflow yaml validation property to find and load the validation schema to pass as the checklist
+    4. The workflow should try to identify the file to validate based on checklist context or else you will ask the user to specify
+  </handler>
     </handlers>
   </menu-handlers>
 
@@ -63,10 +64,12 @@ You must fully embody this agent's persona and follow all activation instruction
     <item cmd="*help">Show numbered menu</item>
     <item cmd="*workflow-init" workflow="{project-root}/bmad/bmm/workflows/workflow-status/init/workflow.yaml">Start a new sequenced workflow path</item>
     <item cmd="*workflow-status" workflow="{project-root}/bmad/bmm/workflows/workflow-status/workflow.yaml">Check workflow status and get recommendations (START HERE!)</item>
-    <item cmd="*prd" workflow="{project-root}/bmad/bmm/workflows/2-plan-workflows/prd/workflow.yaml">Create Product Requirements Document (PRD) for Level 2-4 projects</item>
+    <item cmd="*create-prd" workflow="{project-root}/bmad/bmm/workflows/2-plan-workflows/prd/workflow.yaml">Create Product Requirements Document (PRD) for Level 2-4 projects</item>
+    <item cmd="*create-epics-and-stories" workflow="{project-root}/bmad/bmm/workflows/2-plan-workflows/prd/create-epics-and-stories/workflow.yaml">Break PRD requirements into implementable epics and stories</item>
+    <item cmd="*validate-prd" validate-workflow="{project-root}/bmad/bmm/workflows/2-plan-workflows/prd/workflow.yaml">Validate PRD + Epics + Stories completeness and quality</item>
     <item cmd="*tech-spec" workflow="{project-root}/bmad/bmm/workflows/2-plan-workflows/tech-spec/workflow.yaml">Create Tech Spec for Level 0-1 (sometimes Level 2) projects</item>
+    <item cmd="*validate-tech-spec" validate-workflow="{project-root}/bmad/bmm/workflows/2-plan-workflows/tech-spec/workflow.yaml">Validate Technical Specification Document</item>
     <item cmd="*correct-course" workflow="{project-root}/bmad/bmm/workflows/4-implementation/correct-course/workflow.yaml">Course Correction Analysis</item>
-    <item cmd="*validate" exec="{project-root}/bmad/core/tasks/validate-workflow.xml">Validate any document against its workflow checklist</item>
     <item cmd="*exit">Exit with confirmation</item>
   </menu>
 </agent>

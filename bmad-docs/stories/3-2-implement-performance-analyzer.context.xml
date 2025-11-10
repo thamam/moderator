@@ -1,0 +1,228 @@
+<story-context id="3-2-implement-performance-analyzer" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.2</storyId>
+    <title>Implement Performance Analyzer</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-09</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>bmad-docs/stories/3-2-implement-performance-analyzer.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>Moderator system developer</asA>
+    <iWant>implement the Performance Analyzer module that detects optimization opportunities</iWant>
+    <soThat>the Ever-Thinker can identify performance bottlenecks and suggest improvements to generated code</soThat>
+    <tasks>
+      - Task 1: Create analyzer directory structure and base interface (AC: 3.2.1)
+      - Task 2: Implement Improvement data model (AC: 3.2.5)
+      - Task 3: Create PerformanceAnalyzer skeleton (AC: 3.2.1)
+      - Task 4: Implement slow operation detection (AC: 3.2.2)
+      - Task 5: Implement caching opportunity detection (AC: 3.2.3)
+      - Task 6: Implement algorithm inefficiency detection (AC: 3.2.4)
+      - Task 7: Implement main analyze() method (AC: 3.2.1, 3.2.5)
+      - Task 8: Write unit tests for data models
+      - Task 9: Write unit tests for PerformanceAnalyzer
+      - Task 10: Write integration test with Ever-Thinker
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    AC 3.2.1: PerformanceAnalyzer class exists in `src/agents/analyzers/performance_analyzer.py` and implements `Analyzer` interface
+    AC 3.2.2: `detect_slow_operations()` identifies O(n²) or worse algorithms in code
+    AC 3.2.3: `suggest_caching_opportunities()` detects repeated function calls with same arguments
+    AC 3.2.4: `detect_algorithm_inefficiencies()` finds inefficient loops and suggests optimizations
+    AC 3.2.5: Returns list of `Improvement` objects with `improvement_type=PERFORMANCE`
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>bmad-docs/tech-spec-epic-3.md</path>
+        <title>Epic 3 Technical Specification - Ever-Thinker Continuous Improvement Engine</title>
+        <section>Story 3.2: Performance Analyzer</section>
+        <snippet>PerformanceAnalyzer detects slow O(n²) algorithms, caching opportunities for repeated function calls, and algorithm inefficiencies like N+1 database queries. Uses Python AST for static code analysis.</snippet>
+      </doc>
+      <doc>
+        <path>bmad-docs/tech-spec-epic-3.md</path>
+        <title>Epic 3 Technical Specification - Ever-Thinker Continuous Improvement Engine</title>
+        <section>Improvement Data Model</section>
+        <snippet>Defines ImprovementType enum (PERFORMANCE, CODE_QUALITY, TESTING, DOCUMENTATION, UX, ARCHITECTURE), ImprovementPriority enum, and Improvement dataclass with fields for type, priority, target_file, description, rationale, impact, effort.</snippet>
+      </doc>
+      <doc>
+        <path>bmad-docs/tech-spec-epic-3.md</path>
+        <title>Epic 3 Technical Specification - Ever-Thinker Continuous Improvement Engine</title>
+        <section>Analyzer Interface</section>
+        <snippet>Base class for all analyzer modules with abstract analyze() method that takes Task and returns list[Improvement], plus analyzer_name property.</snippet>
+      </doc>
+      <doc>
+        <path>bmad-docs/tech-spec-epic-3.md</path>
+        <title>Epic 3 Technical Specification - Ever-Thinker Continuous Improvement Engine</title>
+        <section>Detection Heuristics</section>
+        <snippet>Nested loops indicate O(n²) complexity, repeated function calls suggest caching opportunities, database queries in loops indicate N+1 problem, large data structure iterations should use generators.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>src/agents/ever_thinker_agent.py</path>
+        <kind>agent</kind>
+        <symbol>EverThinkerAgent</symbol>
+        <lines>29-370</lines>
+        <reason>Ever-Thinker agent that will orchestrate PerformanceAnalyzer during improvement cycles (Story 3.5). Provides context for analyzer integration pattern.</reason>
+      </artifact>
+      <artifact>
+        <path>src/agents/ever_thinker_agent.py</path>
+        <kind>method</kind>
+        <symbol>_run_improvement_cycle</symbol>
+        <lines>285-340</lines>
+        <reason>Placeholder method for improvement cycle orchestration. Story 3.5 will implement calling all analyzers including PerformanceAnalyzer.</reason>
+      </artifact>
+      <artifact>
+        <path>src/agents/base_agent.py</path>
+        <kind>abstract_class</kind>
+        <symbol>BaseAgent</symbol>
+        <lines>1-100</lines>
+        <reason>Base class pattern for agents. PerformanceAnalyzer follows similar architectural patterns (ABC, interface contracts).</reason>
+      </artifact>
+      <artifact>
+        <path>src/models.py</path>
+        <kind>dataclass</kind>
+        <symbol>Task</symbol>
+        <lines>30-60</lines>
+        <reason>Task model is the input parameter for analyzer.analyze() method. Contains task metadata, artifacts (files to analyze), and status.</reason>
+      </artifact>
+      <artifact>
+        <path>src/logger.py</path>
+        <kind>class</kind>
+        <symbol>StructuredLogger</symbol>
+        <lines>1-100</lines>
+        <reason>Structured logger with Gear 3 event types (IMPROVEMENT_IDENTIFIED, IMPROVEMENT_CYCLE_START, etc.). Use for logging analyzer findings.</reason>
+      </artifact>
+      <artifact>
+        <path>tests/test_ever_thinker_agent.py</path>
+        <kind>test</kind>
+        <symbol>TestEverThinkerAgentInit</symbol>
+        <lines>110-181</lines>
+        <reason>Example test structure with pytest fixtures, mocking patterns, and test organization. Follow similar patterns for PerformanceAnalyzer tests.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <python>
+        <stdlib>
+          <module>abc</module>
+          <module>ast</module>
+          <module>dataclasses</module>
+          <module>enum</module>
+          <module>typing</module>
+        </stdlib>
+        <thirdparty>
+          <package>pytest</package>
+        </thirdparty>
+      </python>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    1. Analyzers must implement abstract Analyzer base class with analyze() method and analyzer_name property
+    2. Static analysis only - NEVER execute user code, only parse AST
+    3. File access limited to project directory (no system paths like /etc, /home)
+    4. Keep analysis fast - must NOT block Ever-Thinker daemon thread (target &lt;30 seconds per analyzer)
+    5. Return standardized Improvement objects with improvement_type=PERFORMANCE
+    6. Priority scoring: HIGH (O(n³), N+1 queries), MEDIUM (O(n²), caching), LOW (minor optimizations)
+    7. Graceful error handling for invalid Python syntax (log warning, continue analysis)
+    8. All improvements must include actionable descriptions with line numbers and code snippets
+    9. Follow existing code organization: src/agents/analyzers/ directory structure
+    10. Match testing patterns from test_ever_thinker_agent.py (pytest fixtures, mocking, test classes)
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Analyzer</name>
+      <kind>abstract_base_class</kind>
+      <signature>
+        class Analyzer(ABC):
+            @abstractmethod
+            def analyze(self, task: Task) -> list[Improvement]:
+                """Analyze task and return improvement opportunities"""
+                pass
+
+            @property
+            @abstractmethod
+            def analyzer_name(self) -> str:
+                """Return name of this analyzer"""
+                pass
+      </signature>
+      <path>src/agents/analyzers/base_analyzer.py (to be created)</path>
+    </interface>
+    <interface>
+      <name>Improvement</name>
+      <kind>dataclass</kind>
+      <signature>
+        @dataclass
+        class Improvement:
+            improvement_id: str
+            improvement_type: ImprovementType
+            priority: ImprovementPriority
+            target_file: str
+            target_line: int | None
+            title: str
+            description: str
+            proposed_changes: str
+            rationale: str
+            impact: str  # critical | high | medium | low
+            effort: str  # trivial | small | medium | large
+            created_at: str
+            analyzer_source: str
+      </signature>
+      <path>src/agents/analyzers/models.py (to be created)</path>
+    </interface>
+    <interface>
+      <name>PerformanceAnalyzer.detect_slow_operations</name>
+      <kind>method</kind>
+      <signature>def detect_slow_operations(self, files: list[str]) -> list[Improvement]</signature>
+      <path>src/agents/analyzers/performance_analyzer.py (to be created)</path>
+    </interface>
+    <interface>
+      <name>PerformanceAnalyzer.suggest_caching_opportunities</name>
+      <kind>method</kind>
+      <signature>def suggest_caching_opportunities(self, code: str) -> list[Improvement]</signature>
+      <path>src/agents/analyzers/performance_analyzer.py (to be created)</path>
+    </interface>
+    <interface>
+      <name>PerformanceAnalyzer.detect_algorithm_inefficiencies</name>
+      <kind>method</kind>
+      <signature>def detect_algorithm_inefficiencies(self, code: str) -> list[Improvement]</signature>
+      <path>src/agents/analyzers/performance_analyzer.py (to be created)</path>
+    </interface>
+    <interface>
+      <name>PerformanceAnalyzer.analyze</name>
+      <kind>method</kind>
+      <signature>def analyze(self, task: Task) -> list[Improvement]</signature>
+      <path>src/agents/analyzers/performance_analyzer.py (to be created)</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Use pytest framework with fixtures for common dependencies (mock_logger, mock_task, etc.).
+      Organize tests into classes by component (TestImprovementModel, TestPerformanceAnalyzer, etc.).
+      Mock file system access and AST parsing for test isolation.
+      Test both positive cases (detections work) and negative cases (no false positives).
+      Follow patterns from tests/test_ever_thinker_agent.py for structure and mocking.
+      Integration tests should verify analyzer integrates with EverThinkerAgent pattern.
+    </standards>
+    <locations>
+      tests/test_performance_analyzer.py (new file for unit tests)
+      tests/test_analyzers_integration.py (optional - integration tests with Ever-Thinker)
+    </locations>
+    <ideas>
+      AC 3.2.1: Test PerformanceAnalyzer inherits from Analyzer, implements analyzer_name property
+      AC 3.2.2: Test detect_slow_operations finds nested loops (O(n²)), triple-nested (O(n³)), ignores single loops
+      AC 3.2.3: Test suggest_caching_opportunities finds repeated calls with same args, ignores impure functions
+      AC 3.2.4: Test detect_algorithm_inefficiencies finds N+1 queries, string concat in loops, inefficient list ops
+      AC 3.2.5: Test analyze() returns Improvement objects with improvement_type=PERFORMANCE, sorted by priority
+      Data Model Tests: Test ImprovementType enum, ImprovementPriority enum, Improvement dataclass validation
+      Integration Test: Test PerformanceAnalyzer can be instantiated and called with mock Task
+    </ideas>
+  </tests>
+</story-context>
