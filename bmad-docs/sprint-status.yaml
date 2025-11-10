@@ -64,7 +64,7 @@ development_status:
   epic-3-retrospective: optional
 
   # Epic 4: Advanced QA Integration
-  epic-4: backlog
+  epic-4: contexted
   4-1-design-qa-tool-adapter-interface: backlog
   4-2-implement-pylint-flake8-and-bandit-adapters: backlog
   4-3-implement-qa-manager-for-orchestration-and-scoring: backlog
@@ -73,7 +73,7 @@ development_status:
   epic-4-retrospective: optional
 
   # Epic 5: Parallel Execution & Backend Routing
-  epic-5: backlog
+  epic-5: contexted
   5-1-design-abstract-task-executor-interface: backlog
   5-2-implement-threadpool-task-executor: backlog
   5-3-implement-execution-context-isolation: backlog
@@ -82,7 +82,7 @@ development_status:
   epic-5-retrospective: optional
 
   # Epic 6: System Health Monitoring
-  epic-6: backlog
+  epic-6: contexted
   6-1-implement-monitor-agent-with-metrics-collection: backlog
   6-2-implement-health-score-calculation: backlog
   6-3-implement-alert-generation-for-anomalies: backlog
