@@ -358,10 +358,242 @@ For more detailed information:
 - **Architecture**: `docs/diagrams/ARCHITECTURE.md`
 - **Full PRD**: `docs/moderator-prd.md`
 - **Diagrams**: `docs/diagrams/`
+---
+
+# Gear 2: Two-Agent System
+
+**Status:** ✅ Complete and Validated (116 tests passing)
+
+Gear 2 transforms Moderator from a single-orchestrator system into a **collaborative two-agent architecture** with automated quality assurance.
+
+## What is Gear 2?
+
+Gear 2 adds the following capabilities to Gear 1:
+
+- ✅ **Two-Agent Architecture**: Separate Moderator (planning/review) and TechLead (execution) agents
+- ✅ **Message Bus**: Asynchronous pub/sub communication between agents
+- ✅ **Automated PR Review**: Score-based approval system with 5 criteria
+- ✅ **Feedback Loops**: Up to 3 iterations per PR for quality improvement
+- ✅ **Improvement Cycles**: One optimization round per project
+- ✅ **100% Backward Compatible**: Gear 1 mode still works
+
+### Agent Responsibilities
+
+**Moderator Agent:**
+- Decomposes requirements into tasks
+- Assigns tasks to TechLead via message bus
+- Reviews PRs automatically (5-criteria scoring)
+- Provides feedback for improvements
+- Identifies improvement opportunities
+
+**TechLead Agent:**
+- Receives task assignments
+- Executes tasks and creates PRs
+- Incorporates feedback and resubmits
+- Executes improvement cycles
+
+## Quick Start with Gear 2
+
+### Basic Usage
+
+```bash
+# Create a config file for Gear 2
+cat > config/gear2_config.yaml << EOF
+# Gear 2 Configuration
+gear: 2  # Enable two-agent mode
+
+backend:
+  type: "test_mock"  # Or "claude_code" for production
+
+repo_path: "."
+state_dir: "./state"
+
+git:
+  require_approval: false  # For automated workflows
+  pr_draft: true
+
+logging:
+  level: "INFO"
+  console: true
+EOF
+
+# Run with Gear 2
+python main.py --config config/gear2_config.yaml "Create a calculator CLI"
+```
+
+### Production Mode with Gear 2
+
+```bash
+# Use Claude Code backend for real code generation
+cat > config/gear2_production.yaml << EOF
+gear: 2
+
+backend:
+  type: "claude_code"
+  cli_path: "claude"
+  timeout: 900  # 15 minutes per task
+
+repo_path: "."
+state_dir: "./state"
+
+git:
+  require_approval: false
+  pr_draft: true
+EOF
+
+# Execute
+python main.py --config config/gear2_production.yaml -y "Create an expense tracker with CLI and JSON storage"
+```
+
+## How Gear 2 Works
+
+### Workflow Sequence
+
+1. **Decomposition Phase**:
+   - Moderator receives requirements
+   - Breaks down into sequential tasks
+   - Sends first task to TechLead via message bus
+
+2. **Execution Phase**:
+   - TechLead receives TASK_ASSIGNED message
+   - Executes task (generates code, creates PR)
+   - Sends PR_SUBMITTED message to Moderator
+
+3. **Review Phase**:
+   - Moderator reviews PR with 5 criteria:
+     - Functionality (code works correctly)
+     - Testing (adequate test coverage)
+     - Code Quality (clean, maintainable code)
+     - Documentation (clear comments/docs)
+     - Edge Cases (handles errors gracefully)
+   - Calculates score (0-100)
+   - **If score ≥ 80**: Approves PR, task complete
+   - **If score < 80**: Sends PR_FEEDBACK, TechLead incorporates and resubmits (max 3 iterations)
+
+4. **Improvement Phase** (after all tasks complete):
+   - Moderator identifies improvement opportunity
+   - Sends IMPROVEMENT_REQUESTED to TechLead
+   - TechLead executes improvement and creates PR
+   - Moderator reviews and approves
+
+### Message Types
+
+Gear 2 uses 8 message types for inter-agent communication:
+
+- `TASK_ASSIGNED` - Moderator → TechLead (new task)
+- `PR_SUBMITTED` - TechLead → Moderator (PR ready for review)
+- `PR_FEEDBACK` - Moderator → TechLead (score < 80, needs changes)
+- `TASK_COMPLETED` - Moderator → TechLead (PR approved)
+- `IMPROVEMENT_REQUESTED` - Moderator → TechLead (optimization task)
+- `IMPROVEMENT_COMPLETED` - TechLead → Moderator (improvement done)
+- `AGENT_READY` - Agent startup notification
+- `AGENT_ERROR` - Error handling
+
+## Validation
+
+Validate your Gear 2 installation:
+
+```bash
+# Run comprehensive validation (9 checks)
+python scripts/validate_gear2_week1b.py
+```
+
+**Validation Checks:**
+1. ✅ New modules exist (8 modules)
+2. ✅ Test suite passing (116 tests)
+3. ✅ Message bus functional
+4. ✅ Moderator agent functional
+5. ✅ TechLead agent functional
+6. ✅ PR reviewer functional (5 criteria, threshold 80)
+7. ✅ Improvement engine functional
+8. ✅ Integration tests present (3 tests)
+9. ✅ Backward compatibility maintained
+
+## Configuration
+
+### Gear Selection
+
+```yaml
+# config/config.yaml
+
+# Gear 1 (single agent, manual review)
+gear: 1
+
+# OR Gear 2 (two agents, automated review)
+gear: 2
+```
+
+### Gear 2 Specific Settings
+
+The system automatically uses these defaults for Gear 2:
+- Message bus with pub/sub architecture
+- PR approval threshold: 80 (out of 100)
+- Max feedback iterations: 3 per PR
+- Improvement cycles: 1 per project
+
+## Monitoring Gear 2 Execution
+
+### View Agent Communication
+
+```bash
+# Follow logs to see message bus activity
+tail -f state/proj_*/logs.jsonl | grep message_bus
+
+# Example output:
+# ℹ️ [message_bus] message_sent
+#    message_id: msg_abc123
+#    message_type: task_assigned
+#    from_agent: moderator
+#    to_agent: techlead
+```
+
+### Monitor PR Review Scores
+
+```bash
+# Filter for PR review events
+tail -f state/proj_*/logs.jsonl | grep pr_reviewer
+
+# Example output:
+# ℹ️ [pr_reviewer] review_completed
+#    pr_number: 123
+#    total_score: 85
+#    approved: True
+#    blocking_count: 0
+```
+
+## Testing Gear 2
+
+```bash
+# Run all tests (includes Gear 2 integration tests)
+pytest
+
+# Run only Gear 2 specific tests
+pytest tests/test_message_bus.py
+pytest tests/test_moderator_agent.py
+pytest tests/test_techlead_agent.py
+pytest tests/test_pr_reviewer.py
+pytest tests/test_two_agent_integration.py
+
+# Run validation
+python scripts/validate_gear2_week1b.py
+```
+
+## Success Criteria
+
+Gear 2 is successful when it can:
+- ✅ Decompose requirements (Moderator agent)
+- ✅ Execute tasks asynchronously (TechLead agent)
+- ✅ Review PRs automatically with scoring
+- ✅ Iterate with feedback (up to 3 times)
+- ✅ Identify and execute improvements
+- ✅ Maintain backward compatibility with Gear 1
+- ✅ Pass all 116 tests (79 existing + 37 new)
+
+---
+
 ## Contributing
 
-This is currently in Gear 1 (simplest implementation). Future gears will add:
-- Gear 2: Multi-agent + automated review + parallel execution
+This project is currently at Gear 2 (two-agent system with automated review). Future gears will add:
 - Gear 3: Ever-Thinker + learning system + advanced QA
 - Gear 4: Monitoring + self-healing + multi-project
 

@@ -31,3 +31,65 @@ git:
   auto_commit: false
   pr_draft: true
   require_approval: false  # For automated testing
+
+# Gear 3 Configuration - All features ENABLED for comprehensive testing
+# Test configuration validates all Gear 3 code paths
+gear3:
+  # Ever-Thinker: ENABLED for testing improvement cycles
+  ever_thinker:
+    enabled: true  # Enable for testing
+    max_cycles: 2  # Limited cycles for faster tests
+    perspectives:  # All perspectives enabled for comprehensive testing
+      - performance
+      - code_quality
+      - testing
+      - documentation
+      - ux
+      - architecture
+
+  # Quality Assurance: All tools enabled for testing
+  qa:
+    tools:
+      - pylint    # Test pylint integration
+      - flake8    # Test flake8 integration
+      - bandit    # Test bandit integration
+    thresholds:
+      error: 0    # Strict: no errors allowed
+      warning: 5  # Allow some warnings for testing
+    fail_on_error: true
+
+  # Parallel Execution: ENABLED for testing concurrent execution
+  parallel:
+    enabled: true
+    max_workers: 2  # Limited for predictable test behavior
+    timeout: 300    # 5 minutes (shorter timeout for tests)
+
+  # Learning System: Enabled with test database
+  learning:
+    db_path: "./test_state/test_learning.db"  # Use test-specific database
+    pattern_threshold: 0.6  # Lower threshold for easier pattern detection in tests
+
+  # Monitoring: ENABLED for testing health tracking
+  monitoring:
+    enabled: true
+    metrics:
+      - success_rate
+      - error_rate
+      - token_usage
+      - task_duration
+    alert_thresholds:
+      success_rate: 0.7   # Lower threshold for test scenarios
+      error_rate: 0.3     # Higher tolerance in tests
+
+  # Backend Routing: Test routing logic
+  backend_routing:
+    rules:
+      - task_type: prototyping
+        backend: test_mock  # Use test_mock for all routing in tests
+      - task_type: refactoring
+        backend: test_mock
+      - task_type: testing
+        backend: test_mock
+    preferences:
+      default_backend: test_mock     # Always use test_mock in tests
+      fallback_backend: test_mock    # Fallback also test_mock

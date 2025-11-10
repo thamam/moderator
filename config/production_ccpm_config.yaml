@@ -39,3 +39,53 @@ git:
 rate_limit:
   requests_per_minute: 10
   cooldown_seconds: 60
+
+# Gear 3 Configuration - CCPM Backend preferences
+gear3:
+  ever_thinker:
+    enabled: false
+    max_cycles: 3
+    perspectives:
+      - performance
+      - code_quality
+      - testing
+
+  qa:
+    tools:
+      - pylint
+      - flake8
+    thresholds:
+      error: 0
+      warning: 20
+    fail_on_error: true
+
+  parallel:
+    enabled: false
+    max_workers: 4
+    timeout: 3600
+
+  learning:
+    db_path: "./state/learning.db"
+    pattern_threshold: 0.75
+
+  monitoring:
+    enabled: false
+    metrics:
+      - success_rate
+      - error_rate
+      - token_usage
+    alert_thresholds:
+      success_rate: 0.85
+      error_rate: 0.15
+
+  backend_routing:
+    rules:
+      - task_type: prototyping
+        backend: ccpm  # Use CCPM for prototyping
+      - task_type: refactoring
+        backend: ccpm
+      - task_type: testing
+        backend: ccpm
+    preferences:
+      default_backend: ccpm
+      fallback_backend: ccpm

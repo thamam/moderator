@@ -1,0 +1,84 @@
+{
+  "project_id": "proj_514269df",
+  "requirements": "Requirements 1",
+  "phase": "decomposing",
+  "tasks": [
+    {
+      "id": "task_001_c0e251",
+      "description": "Set up project structure and dependencies. Context: Requirements 1",
+      "acceptance_criteria": [
+        "Directory structure created",
+        "Dependencies file (requirements.txt/package.json) created",
+        "Basic configuration files present"
+      ],
+      "status": "pending",
+      "branch_name": null,
+      "pr_url": null,
+      "pr_number": null,
+      "files_generated": [],
+      "created_at": "2025-10-25T16:41:21.428815",
+      "started_at": null,
+      "completed_at": null,
+      "error": null
+    },
+    {
+      "id": "task_002_ad4437",
+      "description": "Implement core data models and database schema. Context: Requirements 1",
+      "acceptance_criteria": [
+        "Data models defined",
+        "Database schema created",
+        "Basic CRUD operations work"
+      ],
+      "status": "pending",
+      "branch_name": null,
+      "pr_url": null,
+      "pr_number": null,
+      "files_generated": [],
+      "created_at": "2025-10-25T16:41:21.428822",
+      "started_at": null,
+      "completed_at": null,
+      "error": null
+    },
+    {
+      "id": "task_003_ae3e17",
+      "description": "Create main application logic and API endpoints. Context: Requirements 1",
+      "acceptance_criteria": [
+        "API endpoints implemented",
+        "Business logic complete",
+        "Error handling in place"
+      ],
+      "status": "pending",
+      "branch_name": null,
+      "pr_url": null,
+      "pr_number": null,
+      "files_generated": [],
+      "created_at": "2025-10-25T16:41:21.428825",
+      "started_at": null,
+      "completed_at": null,
+      "error": null
+    },
+    {
+      "id": "task_004_295298",
+      "description": "Add tests and documentation. Context: Requirements 1",
+      "acceptance_criteria": [
+        "Unit tests added",
+        "Integration tests added",
+        "README with usage instructions",
+        "API documentation"
+      ],
+      "status": "pending",
+      "branch_name": null,
+      "pr_url": null,
+      "pr_number": null,
+      "files_generated": [],
+      "created_at": "2025-10-25T16:41:21.428828",
+      "started_at": null,
+      "completed_at": null,
+      "error": null
+    }
+  ],
+  "current_task_index": 0,
+  "require_approval": true,
+  "created_at": "2025-10-25T16:41:21.428639",
+  "completed_at": null
+}

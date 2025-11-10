@@ -693,6 +693,178 @@ See `MULTI_AGENT_ORCHESTRATION_FINDINGS.md` for comprehensive 8KB analysis inclu
 
 **Verdict:** ⭐⭐⭐⭐⭐ Multi-agent orchestration is PRODUCTION-READY for Gear 1!
 
+## Gear 3 Configuration
+
+**Status:** Configuration system implemented (Story 1.4 complete)
+**Files:** `config/config.yaml`, `src/config_validator.py`
+
+### Overview
+
+Gear 3 introduces optional configuration for advanced features:
+- Ever-Thinker continuous improvement engine
+- Quality assurance tool integration (pylint, flake8, bandit)
+- Parallel task execution
+- Learning system with pattern recognition
+- System health monitoring
+- Intelligent backend routing
+
+All Gear 3 features are **optional** and **disabled by default** to ensure 100% backward compatibility with Gear 2.
+
+### Configuration Sections
+
+All Gear 3 configuration lives under the `gear3:` top-level key in `config.yaml`:
+
+```yaml
+gear3:
+  ever_thinker:    # Continuous improvement engine
+  qa:              # Quality assurance tools
+  parallel:        # Concurrent task execution
+  learning:        # Pattern recognition database
+  monitoring:      # System health tracking
+  backend_routing: # Intelligent backend selection
+```
+
+See `config/config.yaml` for the complete configuration schema with inline documentation.
+
+### Backward Compatibility Guarantees
+
+**Zero-Friction Migration:**
+1. **Missing `gear3` section = Gear 2 mode** - System runs exactly as Gear 2
+2. **Existing configs work unchanged** - No modifications required to Gear 2 configs
+3. **Gradual adoption** - Enable features individually as needed
+4. **Automatic validation** - Configuration errors caught at startup with clear messages
+
+**Migration Path:**
+- **Gear 2 → Gear 3:** Simply add `gear3:` section with desired features enabled
+- **No breaking changes:** All Gear 2 fields (`repo_path`, `project`, `backend`, `state_dir`, `logging`) remain unchanged
+- **Rollback:** Remove `gear3` section to return to Gear 2 mode
+
+### Example Configurations
+
+**Gear 2 Configuration (still valid):**
+```yaml
+repo_path: "."
+project:
+  name: "my-project"
+backend:
+  type: "test_mock"
+state_dir: "./state"
+logging:
+  level: "INFO"
+# No gear3 section - runs in Gear 2 mode
+```
+
+**Gear 3 Configuration (gradual adoption):**
+```yaml
+repo_path: "."
+project:
+  name: "my-project"
+backend:
+  type: "claude_code"
+state_dir: "./state"
+logging:
+  level: "INFO"
+
+gear3:
+  # Enable only monitoring initially
+  monitoring:
+    enabled: true
+    metrics:
+      - success_rate
+      - error_rate
+    alert_thresholds:
+      success_rate: 0.85
+      error_rate: 0.15
+
+  # All other features remain disabled (default)
+  ever_thinker:
+    enabled: false
+  qa:
+    tools: []
+  parallel:
+    enabled: false
+```
+
+### Configuration Files
+
+- **`config/config.yaml`** - Default configuration (Gear 3 available, all features disabled)
+- **`config/test_config.yaml`** - Test configuration (all Gear 3 features enabled for testing)
+- **`config/production_config.yaml`** - Production template (conservative defaults)
+- **`config/production_ccpm_config.yaml`** - CCPM backend specific
+- **`config/production_claude_config.yaml`** - Claude Code backend specific
+
+### Configuration Validation
+
+Configuration is automatically validated at startup. Invalid values trigger clear error messages:
+
+```python
+# Example validation error
+Configuration error at 'gear3.parallel.max_workers': Must be between 1 and 32
+  Expected: 1-32
+  Actual: 64
+```
+
+**Validation Rules:**
+- **Type checking:** Boolean, integer, float, string, list types validated
+- **Range checking:** Numeric values must be within specified ranges
+- **Enum checking:** String values must match allowed options
+- **Field paths:** Error messages include exact field location (e.g., `gear3.qa.tools`)
+
+See `src/config_validator.py` for complete validation logic.
+
+### Common Use Cases
+
+**Enable QA Tools for Quality Gates:**
+```yaml
+gear3:
+  qa:
+    tools:
+      - pylint
+      - flake8
+    thresholds:
+      error: 0      # Block on any errors
+      warning: 20   # Allow up to 20 warnings
+    fail_on_error: true
+```
+
+**Enable Parallel Execution for Large Projects:**
+```yaml
+gear3:
+  parallel:
+    enabled: true
+    max_workers: 8  # Based on CPU cores
+    timeout: 3600   # 1 hour timeout
+```
+
+**Enable Ever-Thinker for Continuous Improvement:**
+```yaml
+gear3:
+  ever_thinker:
+    enabled: true
+    max_cycles: 3
+    perspectives:
+      - performance
+      - code_quality
+      - testing
+```
+
+### Troubleshooting
+
+**Configuration won't load:**
+- Check YAML syntax (indentation, colons, hyphens)
+- Ensure `gear3` is at root level, not nested under another key
+- Run with `--config config/test_config.yaml` to test with known-good config
+
+**Validation errors:**
+- Read error message carefully - includes field path and expected values
+- Check `config/test_config.yaml` for valid example values
+- Verify numeric ranges (e.g., `max_workers: 1-32`, `pattern_threshold: 0.0-1.0`)
+
+**Gear 3 features not activating:**
+- Verify `gear3` section exists in config
+- Check `enabled: true` for specific feature subsection
+- Confirm validation passes at startup (no error messages)
+
 ## Documentation Organization
 
 ### Guidelines for Creating New Documentation

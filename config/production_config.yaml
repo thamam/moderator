@@ -55,3 +55,60 @@ git:
 rate_limit:
   requests_per_minute: 10
   cooldown_seconds: 60
+
+# Gear 3 Configuration - Conservative production defaults (all disabled)
+# Enable features individually as needed after testing
+gear3:
+  # Ever-Thinker: Disabled by default in production
+  ever_thinker:
+    enabled: false  # Enable after validating improvement quality
+    max_cycles: 3   # Conservative: limit improvement cycles
+    perspectives:   # Can be reduced based on project needs
+      - performance
+      - code_quality
+      - testing
+
+  # Quality Assurance: Disabled by default (enable for quality gates)
+  qa:
+    tools:
+      - pylint
+      - flake8
+    thresholds:
+      error: 0      # Strict: no errors allowed
+      warning: 20   # Allow moderate warnings
+    fail_on_error: true
+
+  # Parallel Execution: Disabled by default (enable for large projects)
+  parallel:
+    enabled: false  # Enable after testing concurrent execution
+    max_workers: 4  # Conservative: based on typical CPU cores
+    timeout: 3600   # 1 hour (longer timeout for production tasks)
+
+  # Learning System: Production database path
+  learning:
+    db_path: "./state/learning.db"  # Production learning database
+    pattern_threshold: 0.75  # High confidence threshold for production
+
+  # Monitoring: Disabled by default (enable for observability)
+  monitoring:
+    enabled: false  # Enable for production monitoring
+    metrics:
+      - success_rate
+      - error_rate
+      - token_usage
+    alert_thresholds:
+      success_rate: 0.85  # Alert if success rate < 85%
+      error_rate: 0.15    # Alert if error rate > 15%
+
+  # Backend Routing: Production backend preferences
+  backend_routing:
+    rules:
+      - task_type: prototyping
+        backend: claude_code
+      - task_type: refactoring
+        backend: claude_code
+      - task_type: testing
+        backend: claude_code
+    preferences:
+      default_backend: claude_code  # Production default
+      fallback_backend: claude_code # Same backend for consistency

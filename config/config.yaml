@@ -24,3 +24,65 @@ state_dir: "./state"
 logging:
   level: "INFO"  # DEBUG, INFO, WARN, ERROR
   console: true
+
+# Gear 3 Configuration
+# All Gear 3 features are optional and disabled by default for backward compatibility
+# Missing gear3 section = Gear 2 mode (no Gear 3 features active)
+gear3:
+  # Ever-Thinker: Continuous improvement engine (background analysis and optimization)
+  ever_thinker:
+    enabled: false  # Set to true to enable continuous improvement cycles
+    max_cycles: 3   # Maximum improvement cycles per project (1-10)
+    perspectives:   # Analysis perspectives for improvement identification
+      - performance      # Analyze code performance and optimization opportunities
+      - code_quality     # Review code patterns, complexity, and maintainability
+      - testing          # Assess test coverage and testing strategy
+      - documentation    # Evaluate documentation completeness and clarity
+      - ux               # Review user experience and interface design
+      - architecture     # Analyze system design and architectural patterns
+
+  # Quality Assurance: Automated code quality tools integration
+  qa:
+    tools:          # QA tools to run (valid: pylint, flake8, bandit)
+      - pylint
+      - flake8
+    thresholds:     # Severity thresholds for failing builds
+      error: 0      # Block on any errors (0 = no errors allowed)
+      warning: 10   # Allow up to 10 warnings before blocking
+    fail_on_error: true  # Whether to fail builds on QA errors
+
+  # Parallel Execution: Concurrent task processing for faster completion
+  parallel:
+    enabled: false  # Set to true for concurrent task execution
+    max_workers: 4  # Number of concurrent tasks (1-32, based on CPU cores)
+    timeout: 3600   # Task timeout in seconds (default: 1 hour)
+
+  # Learning System: Pattern recognition and improvement tracking
+  learning:
+    db_path: "./state/learning.db"  # Path to SQLite learning database
+    pattern_threshold: 0.7  # Confidence threshold for pattern detection (0.0-1.0)
+
+  # Monitoring: System health tracking and alerting
+  monitoring:
+    enabled: false
+    metrics:        # Metrics to track
+      - success_rate     # Task success rate tracking
+      - error_rate       # Error frequency monitoring
+      - token_usage      # LLM token consumption tracking
+      - task_duration    # Task execution time tracking
+    alert_thresholds:
+      success_rate: 0.8   # Alert if success rate drops below 80%
+      error_rate: 0.2     # Alert if error rate exceeds 20%
+
+  # Backend Routing: Intelligent backend selection per task type
+  backend_routing:
+    rules:          # Routing rules mapping task types to backends
+      - task_type: prototyping
+        backend: ccpm
+      - task_type: refactoring
+        backend: claude_code
+      - task_type: testing
+        backend: claude_code
+    preferences:    # Default preferences
+      default_backend: claude_code    # Default backend if no rule matches
+      fallback_backend: ccpm          # Fallback if primary backend fails
