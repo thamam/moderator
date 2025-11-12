@@ -1,8 +1,9 @@
-# Moderator - Gear 3 Epics
+# Moderator - Gear 3 & Gear 4 Epics
 
-Date: November 7, 2025
+Date: November 7, 2025 (Updated: November 12, 2025)
 Project: Moderator
-Phase: Gear 3 - Learning & Continuous Improvement
+Phase: Gear 3 - Learning & Continuous Improvement (Complete)
+       Gear 4 - Real-Time Dashboard & Self-Healing (In Planning)
 
 ---
 
@@ -234,22 +235,105 @@ Phase: Gear 3 - Learning & Continuous Improvement
 
 ---
 
+## Epic 7: Real-Time Terminal UI Dashboard (Gear 4)
+
+**Goal:** Implement interactive terminal dashboard using Textual framework to visualize system health, metrics trends, and alerts in real-time.
+
+**Value:** Provides operators with live visibility into system health and performance enabling quick diagnosis and proactive intervention.
+
+**Framework:** Textual (Python TUI framework with Rich integration)
+**Launch Mechanism:** Standalone command (`python -m src.dashboard.monitor_dashboard`)
+**Interaction Model:** Hybrid (auto-refresh every 3s + keyboard shortcuts for panel expansion)
+**Delegation-Friendly:** Self-contained stories with clear API boundaries, suitable for Claude Code web sessions
+
+### Story 7.1: Implement Dashboard Framework and Configuration
+
+**Description:** Create Textual App foundation with configuration loading, auto-refresh mechanism (3s default), keyboard shortcuts (Tab/Shift+Tab/Enter/Q), and panel layout architecture.
+
+**Value:** Establishes reusable dashboard framework that all subsequent panels can plug into, enabling rapid panel development.
+
+**Technical Details:**
+- Textual App class with event handling
+- Config schema: refresh_rate, enabled_panels, theme
+- Panel registry system for dynamic loading
+- Auto-refresh timer with configurable interval
+- Standard keyboard navigation bindings
+
+### Story 7.2: Implement Health Score Panel
+
+**Description:** Create top-priority Health Score panel using MonitorAgent.get_current_health() API to display overall health score, status indicator, component breakdown, and last update timestamp.
+
+**Value:** Provides immediate visibility into system health with color-coded status (green/yellow/red) enabling quick assessment.
+
+**API Integration:**
+- Query: `MonitorAgent.get_current_health()`
+- Display: Health score (0-100), status badge, component scores table
+- Visual: Color gradient (green ≥80, yellow 60-79, red <60)
+
+### Story 7.3: Implement Metrics Trends Panel
+
+**Description:** Create Metrics Trends panel using MonitorAgent.get_metrics_history() and get_metrics_summary() to display time-series sparklines, current values, trends (improving/stable/degrading), and summary statistics.
+
+**Value:** Enables trend analysis and performance monitoring showing whether system health is improving or degrading over time.
+
+**API Integration:**
+- Query: `MonitorAgent.get_metrics_history(hours=24)`, `get_metrics_summary(hours=24)`
+- Display: 5 metric sparklines, current/avg/min/max values, trend arrows
+- Visualization: ASCII sparklines for time-series data
+
+### Story 7.4: Implement Alerts Panel
+
+**Description:** Create Alerts panel using MonitorAgent.get_active_alerts() and get_alerts_summary() to display active alerts count, grouped by severity (critical/warning), recent alerts list with acknowledge capability.
+
+**Value:** Highlights critical issues requiring immediate attention and provides alert history for root cause analysis.
+
+**API Integration:**
+- Query: `MonitorAgent.get_active_alerts()`, `get_alerts_summary(hours=24)`
+- Display: Alert counts by severity, 5 most recent alerts, alert timestamps
+- Interaction: Expandable panel shows full alert details
+
+### Story 7.5: Implement Component Health and Final Polish
+
+**Description:** Create Component Health panel showing per-component status (task executor, backend router, learning system, QA manager), add keyboard shortcuts help screen, theme customization, and error handling.
+
+**Value:** Completes dashboard with granular component visibility and polish features making it production-ready.
+
+**Technical Details:**
+- Component health indicators (operational/degraded/error)
+- Help screen (press '?' key)
+- Error boundaries for panel failures
+- Manual verification checklist for UX quality
+
+---
+
 ## Epic Summary
+
+### Gear 3 Epics (Complete)
 
 | Epic | Title | Stories | Status |
 |------|-------|---------|--------|
-| 1 | Gear 3 Foundation & Infrastructure | 5 | Backlog |
-| 2 | Learning System & Data Persistence | 4 | Backlog |
-| 3 | Ever-Thinker Continuous Improvement Engine | 6 | Backlog |
-| 4 | Advanced QA Integration | 5 | Backlog |
-| 5 | Parallel Execution & Backend Routing | 5 | Backlog |
-| 6 | System Health Monitoring | 5 | Backlog |
+| 1 | Gear 3 Foundation & Infrastructure | 5 | ✅ Done |
+| 2 | Learning System & Data Persistence | 4 | ✅ Done |
+| 3 | Ever-Thinker Continuous Improvement Engine | 6 | ✅ Done |
+| 4 | Advanced QA Integration | 5 | ✅ Done |
+| 5 | Parallel Execution & Backend Routing | 5 | ✅ Done |
+| 6 | System Health Monitoring | 5 | ✅ Done |
 
-**Total Stories:** 30
+**Gear 3 Total:** 30 stories (100% complete)
+
+### Gear 4 Epics (In Planning)
+
+| Epic | Title | Stories | Status |
+|------|-------|---------|--------|
+| 7 | Real-Time Terminal UI Dashboard | 5 | 📋 Backlog |
+
+**Gear 4 Total:** 5 stories (0% complete, ready for delegation)
 
 ---
 
 ## Dependencies
+
+### Gear 3 Dependencies (Complete)
 
 ```
 Epic 1 (Foundation)
@@ -263,9 +347,21 @@ Epic 5 (Parallel Execution) ← Independent
 Epic 6 (Monitoring) ← Independent
 ```
 
-**Recommended Implementation Order:**
-1. Epic 1 → Epic 2 → Epic 3 (Core learning loop)
-2. Epic 4, 5, 6 in parallel (Independent features)
+**Implementation Order (Complete):**
+1. ✅ Epic 1 → Epic 2 → Epic 3 (Core learning loop)
+2. ✅ Epic 4, 5, 6 in parallel (Independent features)
+
+### Gear 4 Dependencies
+
+```
+Epic 6 (Monitoring) ← Required by Epic 7
+  ↓
+Epic 7 (Terminal UI Dashboard) ← Depends on MonitorAgent APIs from Epic 6
+```
+
+**Implementation Order (In Progress):**
+1. ✅ Epic 6 complete (provides MonitorAgent query APIs)
+2. 📋 Epic 7 ready for implementation (delegation-friendly)
 
 ---
 
@@ -282,3 +378,5 @@ Epic 6 (Monitoring) ← Independent
 **Epic 5 Success:** Tasks execute in parallel when independent, correct backend selected per task type, 50%+ faster than sequential execution.
 
 **Epic 6 Success:** Monitor agent tracks health metrics, health score calculated accurately, alerts generated for anomalies, dashboard API available.
+
+**Epic 7 Success:** Terminal UI dashboard launches independently, displays real-time health/metrics/alerts, auto-refreshes every 3s, keyboard navigation works, all panels render correctly, suitable for delegation to Claude Code web sessions.

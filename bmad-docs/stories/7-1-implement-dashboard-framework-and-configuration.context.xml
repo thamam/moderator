@@ -1,0 +1,474 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context>
+  <metadata>
+    <story-id>7.1</story-id>
+    <story-key>7-1-implement-dashboard-framework-and-configuration</story-key>
+    <epic-id>7</epic-id>
+    <title>Implement Dashboard Framework and Configuration</title>
+    <status>ready-for-dev</status>
+    <generated-date>2025-11-12</generated-date>
+  </metadata>
+
+  <story>
+    <as-a>system operator</as-a>
+    <i-want>a Textual-based dashboard framework with configuration and auto-refresh</i-want>
+    <so-that>I can build panels that automatically display real-time system health data</so-that>
+  </story>
+
+  <acceptance-criteria>
+    <criterion id="7.1.1">
+      <title>Create Textual App Class with Main Event Loop</title>
+      <details>
+        - Create MonitorDashboardApp(App) class in src/dashboard/monitor_dashboard.py
+        - Implement compose() method defining panel layout (vertical stack)
+        - Implement on_mount() lifecycle hook for initialization
+        - Set app title: "Moderator - System Health Dashboard"
+        - Set sub-title: "Real-time monitoring (Auto-refresh: 3s)"
+        - Implement __main__ entry point for standalone launch
+        - Verify: python -m src.dashboard.monitor_dashboard launches dashboard
+      </details>
+    </criterion>
+    <criterion id="7.1.2">
+      <title>Implement Configuration Loading from config.yaml</title>
+      <details>
+        - Create DashboardConfig dataclass in src/dashboard/config.py
+        - Schema: enabled, refresh_rate, enabled_panels, theme, keyboard_shortcuts
+        - Load from config/config.yaml under gear4.dashboard section
+        - Provide defaults if gear4 section missing (backward compatibility)
+        - Validate configuration values (refresh_rate > 0, theme in ["dark", "light"])
+        - Raise clear ConfigurationError for invalid values
+      </details>
+    </criterion>
+    <criterion id="7.1.3">
+      <title>Add Auto-Refresh Mechanism</title>
+      <details>
+        - Use self.set_interval(refresh_rate, self._refresh_data) in on_mount()
+        - _refresh_data() method broadcasts refresh event to all panels
+        - Configurable interval from config (default 3 seconds)
+        - Update sub-title with last refresh timestamp on each refresh
+        - Verify: Timestamp updates every 3 seconds automatically
+      </details>
+    </criterion>
+    <criterion id="7.1.4">
+      <title>Implement Keyboard Shortcuts</title>
+      <details>
+        - Define BINDINGS: ("q", "quit", "Quit"), ("?", "toggle_help", "Help")
+        - Tab/Shift+Tab: Built-in Textual navigation (test only)
+        - Enter: Built-in Textual expansion (test only)
+        - Press Q: Dashboard exits cleanly
+        - Press ?: Help screen shows (placeholder in 7.1, full in 7.5)
+      </details>
+    </criterion>
+    <criterion id="7.1.5">
+      <title>Create Abstract BasePanel Class</title>
+      <details>
+        - Create BasePanel(Widget) in src/dashboard/panels/base_panel.py
+        - Abstract method: refresh() - Subclasses fetch data from MonitorAgent
+        - Abstract method: render_content() -> str - Subclasses render panel UI
+        - Reactive property: is_expanded = reactive(False)
+        - Reactive property: error_message = reactive(None)
+        - Implement render() that calls render_content() and handles errors
+        - Cannot instantiate BasePanel directly (abstract class)
+      </details>
+    </criterion>
+    <criterion id="7.1.6">
+      <title>Implement Panel Registry and Layout</title>
+      <details>
+        - PANEL_REGISTRY dict mapping panel names to panel classes
+        - Layout: Vertical container with panels stacked top-to-bottom
+        - Order: Health → Metrics → Alerts → Components
+        - Filter panels based on enabled_panels config
+        - Placeholder panels for Stories 7.2-7.5 (display panel name only)
+        - Verify: All 4 placeholder panels render in correct order
+      </details>
+    </criterion>
+  </acceptance-criteria>
+
+  <tasks>
+    <task id="1" ac="7.1.1">
+      <title>Create Textual App foundation</title>
+      <subtasks>
+        - Create src/dashboard/__init__.py package
+        - Create src/dashboard/monitor_dashboard.py
+        - Import: from textual.app import App, ComposeResult
+        - Import: from textual.widgets import Header, Footer
+        - Import: from textual.containers import VerticalScroll
+        - Define MonitorDashboardApp(App) class
+        - Implement compose() method with Header, VerticalScroll, Footer
+        - Implement on_mount() lifecycle hook
+        - Set self.title and self.sub_title
+        - Add if __name__ == "__main__": app.run() entry point
+      </subtasks>
+    </task>
+    <task id="2" ac="7.1.2">
+      <title>Implement configuration system</title>
+      <subtasks>
+        - Create src/dashboard/config.py
+        - Import: from dataclasses import dataclass, field
+        - Define DashboardConfig dataclass with typed fields
+        - Implement load_dashboard_config(config_path: str) function
+        - Load YAML from config/config.yaml
+        - Extract gear4.dashboard section (if exists)
+        - Apply defaults for missing fields
+        - Validate refresh_rate > 0, theme in ["dark", "light"]
+        - Raise ConfigurationError with clear message on invalid values
+      </subtasks>
+    </task>
+    <task id="3" ac="7.1.3">
+      <title>Add auto-refresh timer</title>
+      <subtasks>
+        - In MonitorDashboardApp.on_mount():
+        - Call self.set_interval(self.config.refresh_rate, self._refresh_data)
+        - Implement _refresh_data(self) -> None method
+        - Broadcast refresh event to all panels: self.query(BasePanel)
+        - Update self.sub_title with f"Last refresh: {datetime.now()}"
+        - Verify timer triggers every config.refresh_rate seconds
+      </subtasks>
+    </task>
+    <task id="4" ac="7.1.4">
+      <title>Implement keyboard shortcuts</title>
+      <subtasks>
+        - Define BINDINGS class attribute in MonitorDashboardApp
+        - Add ("q", "quit", "Quit") binding
+        - Add ("?", "toggle_help", "Help") binding
+        - Implement action_toggle_help(self) -> None (placeholder: show Static "Help coming in Story 7.5")
+        - Test: Press Q quits app (built-in quit action)
+        - Test: Press ? shows placeholder help message
+        - Test: Tab/Shift+Tab cycles panel focus (built-in)
+      </subtasks>
+    </task>
+    <task id="5" ac="7.1.5">
+      <title>Create BasePanel abstract class</title>
+      <subtasks>
+        - Create src/dashboard/panels/__init__.py package
+        - Create src/dashboard/panels/base_panel.py
+        - Import: from abc import ABC, abstractmethod
+        - Import: from textual.reactive import reactive
+        - Import: from textual.widget import Widget
+        - Define BasePanel(Widget, ABC) class
+        - Add reactive properties: is_expanded, error_message
+        - Define @abstractmethod async def refresh(self) -> None
+        - Define @abstractmethod def render_content(self) -> str
+        - Implement render(self) -> str with error handling
+        - Verify: Cannot instantiate BasePanel (raises TypeError)
+      </subtasks>
+    </task>
+    <task id="6" ac="7.1.6">
+      <title>Implement panel registry and placeholder panels</title>
+      <subtasks>
+        - Create placeholder panel classes in monitor_dashboard.py:
+          - HealthPanelPlaceholder(BasePanel)
+          - MetricsPanelPlaceholder(BasePanel)
+          - AlertsPanelPlaceholder(BasePanel)
+          - ComponentsPanelPlaceholder(BasePanel)
+        - Each placeholder implements refresh() (no-op) and render_content() (return panel name)
+        - Define PANEL_REGISTRY = {"health": HealthPanelPlaceholder, ...}
+        - In compose(): iterate config.enabled_panels, yield panels from registry
+        - Use VerticalScroll container for panel layout
+        - Verify: All 4 panels render in order (Health, Metrics, Alerts, Components)
+      </subtasks>
+    </task>
+    <task id="7" ac="all">
+      <title>Add CSS styling</title>
+      <subtasks>
+        - Define CSS class attribute in MonitorDashboardApp
+        - Screen: background $surface
+        - #main-container: height 100%, padding 1
+        - .panel: border solid green, height auto, margin 1, padding 1
+        - Apply styling to all panels
+      </subtasks>
+    </task>
+    <task id="8" ac="all">
+      <title>Write comprehensive tests</title>
+      <subtasks>
+        - Create tests/test_dashboard_config.py (5 tests)
+        - Test config loads from valid YAML
+        - Test config uses defaults when gear4 missing
+        - Test config validation (refresh_rate > 0)
+        - Test config raises error for invalid theme
+        - Test enabled_panels filtering
+        - Create tests/test_base_panel.py (4 tests)
+        - Test BasePanel cannot be instantiated
+        - Test subclass must implement abstract methods
+        - Test error_message reactive property
+        - Test is_expanded reactive property
+        - Create tests/test_dashboard_app.py (6 tests)
+        - Test App initializes with config
+        - Test placeholder panels render in order
+        - Test auto-refresh timer triggers
+        - Test keyboard shortcut Q quits
+        - Test panel registry filtering
+        - Test error handling for missing panel
+      </subtasks>
+    </task>
+  </tasks>
+
+  <artifacts>
+    <documentation>
+      <doc path="bmad-docs/epic-7-terminal-dashboard-architecture.md">
+        Complete Epic 7 architecture with technology stack, decisions, API specs
+      </doc>
+      <doc path="bmad-docs/stories/7-1-implement-dashboard-framework-and-configuration.md">
+        Full story specification with acceptance criteria and implementation details
+      </doc>
+      <doc path="config/config.yaml">
+        Configuration structure (will add gear4.dashboard section)
+      </doc>
+    </documentation>
+
+    <code>
+      <file path="src/orchestrator.py">
+        Orchestrator with agent lifecycle management (used in Story 7.5)
+      </file>
+      <file path="src/agents/monitor_agent.py">
+        MonitorAgent with query APIs (used in Stories 7.2-7.4, not 7.1)
+      </file>
+    </code>
+
+    <tests>
+      <file path="tests/conftest.py">
+        Shared test fixtures
+      </file>
+    </tests>
+  </artifacts>
+
+  <interfaces>
+    <interface name="MonitorDashboardApp">
+      <location>src/dashboard/monitor_dashboard.py</location>
+      <new-class>
+        <signature>class MonitorDashboardApp(App)</signature>
+        <description>Main Textual App for dashboard with auto-refresh and keyboard shortcuts</description>
+        <attributes>
+          <attribute>
+            <name>CSS: str</name>
+            <description>Textual CSS styling for screen, container, panels</description>
+          </attribute>
+          <attribute>
+            <name>BINDINGS: list[tuple]</name>
+            <description>Keyboard shortcut bindings (Q=quit, ?=help)</description>
+          </attribute>
+          <attribute>
+            <name>config: DashboardConfig</name>
+            <description>Dashboard configuration from config.yaml</description>
+          </attribute>
+        </attributes>
+        <methods>
+          <method>
+            <signature>def compose(self) -> ComposeResult</signature>
+            <description>Define panel layout: Header, VerticalScroll with panels, Footer</description>
+          </method>
+          <method>
+            <signature>def on_mount(self) -> None</signature>
+            <description>Initialize app: set title, start auto-refresh timer</description>
+          </method>
+          <method>
+            <signature>def _refresh_data(self) -> None</signature>
+            <description>Refresh all panels, update sub-title timestamp</description>
+          </method>
+          <method>
+            <signature>def action_toggle_help(self) -> None</signature>
+            <description>Show/hide help screen (placeholder in 7.1, full in 7.5)</description>
+          </method>
+        </methods>
+      </new-class>
+    </interface>
+
+    <interface name="DashboardConfig">
+      <location>src/dashboard/config.py</location>
+      <new-class>
+        <signature>@dataclass class DashboardConfig</signature>
+        <description>Dashboard configuration schema</description>
+        <fields>
+          <field>
+            <name>enabled: bool = False</name>
+            <description>Enable dashboard (default: False for backward compatibility)</description>
+          </field>
+          <field>
+            <name>refresh_rate: int = 3</name>
+            <description>Auto-refresh interval in seconds</description>
+          </field>
+          <field>
+            <name>enabled_panels: list[str] = field(default_factory=lambda: ["health", "metrics", "alerts", "components"])</name>
+            <description>List of panels to display</description>
+          </field>
+          <field>
+            <name>theme: str = "dark"</name>
+            <description>UI theme: "dark" or "light"</description>
+          </field>
+        </fields>
+      </new-class>
+      <new-function>
+        <signature>def load_dashboard_config(config_path: str = "config/config.yaml") -> DashboardConfig</signature>
+        <description>Load dashboard configuration from YAML with defaults and validation</description>
+        <returns>DashboardConfig instance with validated configuration</returns>
+        <raises>ConfigurationError if validation fails</raises>
+      </new-function>
+    </interface>
+
+    <interface name="BasePanel">
+      <location>src/dashboard/panels/base_panel.py</location>
+      <new-class>
+        <signature>class BasePanel(Widget, ABC)</signature>
+        <description>Abstract base class for all dashboard panels</description>
+        <reactive-properties>
+          <property>
+            <name>is_expanded: reactive[bool] = reactive(False)</name>
+            <description>Track panel expansion state (Enter key toggles)</description>
+          </property>
+          <property>
+            <name>error_message: reactive[str | None] = reactive(None)</name>
+            <description>Display error message if panel fails to load data</description>
+          </property>
+        </reactive-properties>
+        <abstract-methods>
+          <method>
+            <signature>@abstractmethod async def refresh(self) -> None</signature>
+            <description>Fetch fresh data from MonitorAgent. Subclasses must implement.</description>
+          </method>
+          <method>
+            <signature>@abstractmethod def render_content(self) -> str</signature>
+            <description>Render panel content as Rich markup. Subclasses must implement.</description>
+          </method>
+        </abstract-methods>
+        <concrete-methods>
+          <method>
+            <signature>def render(self) -> str</signature>
+            <description>Main render method with error handling. Calls render_content() if no error.</description>
+          </method>
+        </concrete-methods>
+      </new-class>
+    </interface>
+  </interfaces>
+
+  <constraints>
+    <constraint type="framework">
+      Must use Textual framework >= 0.40.0 for terminal UI
+    </constraint>
+    <constraint type="launch">
+      Dashboard must launch via: python -m src.dashboard.monitor_dashboard
+    </constraint>
+    <constraint type="compatibility">
+      gear4.dashboard section optional in config (backward compatibility)
+    </constraint>
+    <constraint type="abstraction">
+      BasePanel must be abstract (cannot instantiate directly)
+    </constraint>
+    <constraint type="layout">
+      Panel order fixed: Health → Metrics → Alerts → Components
+    </constraint>
+    <constraint type="refresh">
+      Auto-refresh must be configurable (default 3 seconds)
+    </constraint>
+  </constraints>
+
+  <testing-guidance>
+    <unit-tests>
+      <test>Test DashboardConfig loads from valid YAML</test>
+      <test>Test DashboardConfig uses defaults when gear4 section missing</test>
+      <test>Test DashboardConfig validation: refresh_rate > 0</test>
+      <test>Test DashboardConfig raises error for invalid theme</test>
+      <test>Test enabled_panels filtering works</test>
+      <test>Test BasePanel cannot be instantiated (abstract)</test>
+      <test>Test BasePanel subclass must implement refresh() and render_content()</test>
+      <test>Test BasePanel.error_message reactive property triggers re-render</test>
+      <test>Test BasePanel.is_expanded reactive property works</test>
+      <test>Test MonitorDashboardApp initializes with config</test>
+      <test>Test placeholder panels render in correct order</test>
+      <test>Test auto-refresh timer triggers _refresh_data()</test>
+      <test>Test keyboard shortcut Q quits app</test>
+      <test>Test panel registry filters based on enabled_panels</test>
+      <test>Test error handling for missing panel in registry</test>
+    </unit-tests>
+
+    <manual-verification>
+      <test>Launch: python -m src.dashboard.monitor_dashboard</test>
+      <test>Dashboard displays 4 placeholder panels (Health, Metrics, Alerts, Components)</test>
+      <test>Title: "Moderator - System Health Dashboard"</test>
+      <test>Sub-title shows last refresh time (updates every 3s)</test>
+      <test>Press Q: Dashboard exits cleanly</test>
+      <test>Press ?: Help placeholder shows</test>
+      <test>Tab key: Focus cycles between panels (visual highlight)</test>
+    </manual-verification>
+
+    <test-patterns>
+      <pattern>Use pytest for all tests</pattern>
+      <pattern>Mock config loading with temp YAML files</pattern>
+      <pattern>Use pytest.raises for validation error tests</pattern>
+      <pattern>Test reactive properties by setting value and checking watch_ methods</pattern>
+    </test-patterns>
+
+    <coverage-target>95%+ for dashboard framework code</coverage-target>
+  </testing-guidance>
+
+  <dev-notes>
+    <note type="foundation">
+      This is the foundation story - all subsequent stories depend on BasePanel abstraction
+    </note>
+    <note type="placeholder">
+      Placeholder panels only display panel name - real panels implemented in Stories 7.2-7.5
+    </note>
+    <note type="textual">
+      Textual App provides built-in: Tab/Shift+Tab navigation, Q quit action, CSS styling
+    </note>
+    <note type="reactive">
+      Reactive properties automatically trigger UI re-render when value changes
+    </note>
+    <note type="testing">
+      Textual provides app.run_test() for unit testing apps without launching UI
+    </note>
+    <note type="checkpoint">
+      Checkpoint before Story 7.2: Dashboard launches, keyboard shortcuts work, BasePanel clean
+    </note>
+  </dev-notes>
+
+  <dependencies>
+    <dependency type="python">
+      textual>=0.40.0 - Terminal UI framework
+    </dependency>
+    <dependency type="python">
+      rich>=13.0.0 - Rich text formatting (Textual dependency)
+    </dependency>
+    <dependency type="python">
+      pyyaml - YAML configuration parsing (already installed)
+    </dependency>
+  </dependencies>
+
+  <external-references>
+    <reference>
+      <title>Textual Framework Documentation</title>
+      <url>https://textual.textualize.io/</url>
+      <relevance>Complete Textual API reference, widget catalog, reactive programming guide</relevance>
+    </reference>
+    <reference>
+      <title>Textual App Basics</title>
+      <url>https://textual.textualize.io/guide/app/</url>
+      <relevance>App lifecycle, compose() method, on_mount() hook, bindings</relevance>
+    </reference>
+    <reference>
+      <title>Textual Reactivity</title>
+      <url>https://textual.textualize.io/guide/reactivity/</url>
+      <relevance>Reactive properties, watch_ methods, automatic UI updates</relevance>
+    </reference>
+    <reference>
+      <title>Textual CSS</title>
+      <url>https://textual.textualize.io/guide/CSS/</url>
+      <relevance>CSS syntax, styling widgets, layout control</relevance>
+    </reference>
+  </external-references>
+
+  <delegation-notes>
+    <checkpoint>
+      <title>Story 7.1 Complete</title>
+      <criteria>
+        - Dashboard launches via: python -m src.dashboard.monitor_dashboard
+        - All 15 unit tests passing
+        - Keyboard shortcuts work (Q quits, Tab navigates)
+        - Auto-refresh updates timestamp every 3s
+        - BasePanel abstraction is clean and extensible
+      </criteria>
+    </checkpoint>
+    <next-story>
+      Story 7.2: Implement Health Score Panel (depends on BasePanel)
+    </next-story>
+  </delegation-notes>
+</story-context>
