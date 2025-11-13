@@ -93,3 +93,21 @@ gear3:
     preferences:
       default_backend: test_mock     # Always use test_mock in tests
       fallback_backend: test_mock    # Fallback also test_mock
+
+# Gear 4 Configuration - ENABLED for testing
+gear4:
+  # Terminal UI Dashboard (Epic 7)
+  dashboard:
+    enabled: true             # Enable dashboard for testing
+    refresh_rate: 1           # Fast refresh for tests (1 second)
+    enabled_panels:           # All panels enabled
+      - health
+      - metrics
+      - alerts
+      - components
+    theme: "dark"             # Test with dark theme
+    keyboard_shortcuts:
+      navigate: "tab"
+      expand: "enter"
+      quit: "q"
+      help: "?"
