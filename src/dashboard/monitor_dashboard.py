@@ -6,6 +6,7 @@ from textual.containers import VerticalScroll
 from textual.widgets import Header, Footer, Static
 from src.dashboard.config import load_dashboard_config, DashboardConfig
 from src.dashboard.panels.base_panel import BasePanel
+from src.dashboard.panels.health_panel import HealthPanel
 
 
 # Placeholder panels for Stories 7.2-7.5
@@ -59,7 +60,7 @@ class ComponentsPanelPlaceholder(BasePanel):
 
 # Panel registry
 PANEL_REGISTRY = {
-    "health": HealthPanelPlaceholder,
+    "health": HealthPanel,  # Story 7.2 - Implemented
     "metrics": MetricsPanelPlaceholder,
     "alerts": AlertsPanelPlaceholder,
     "components": ComponentsPanelPlaceholder,
