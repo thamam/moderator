@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context>
+  <metadata>
+    <story-id>7.2</story-id>
+    <story-key>7-2-implement-health-score-panel</story-key>
+    <epic-id>7</epic-id>
+    <title>Implement Health Score Panel</title>
+    <status>ready-for-dev</status>
+    <generated-date>2025-11-13</generated-date>
+  </metadata>
+
+  <story>
+    <as-a>system operator</as-a>
+    <i-want>a Health Score panel displaying overall system health with color-coded status</i-want>
+    <so-that>I can quickly assess system health at a glance</so-that>
+  </story>
+
+  <acceptance-criteria>
+    <criterion id="7.2.1">
+      <title>Create HealthPanel Widget</title>
+      <details>
+        - Create HealthPanel(BasePanel) class in src/dashboard/panels/health_panel.py
+        - Implement refresh_data() to call MonitorAgent.get_current_health()
+        - Implement render_content() to display health data
+        - Store health data in reactive properties (health_score, status, component_scores, last_update)
+        - Pass MonitorAgent instance via constructor
+      </details>
+    </criterion>
+    <criterion id="7.2.2">
+      <title>Display Health Score Prominently</title>
+      <details>
+        - Display health score (0-100) in large/bold font
+        - Status badge next to score: "HEALTHY" / "DEGRADED" / "CRITICAL"
+        - Color gradient based on score:
+          * Green: score >= 80 (healthy)
+          * Yellow: 60 <= score &lt; 80 (degraded)
+          * Red: score &lt; 60 (critical)
+        - Use Rich markup for styling
+      </details>
+    </criterion>
+    <criterion id="7.2.3">
+      <title>Show Component Scores Table</title>
+      <details>
+        - Render component_scores as formatted table
+        - Columns: Component Name | Score | Status Icon
+        - 5 rows for 5 components:
+          * task_success_rate (0-1 range, display as %)
+          * task_error_rate (0-1 range, display as %)
+          * average_execution_time (seconds, display with 's')
+          * pr_approval_rate (0-1 range, display as %)
+          * qa_score_average (0-100 range, display as '/100')
+        - Color-code status icons (🟢/🟡/🔴)
+      </details>
+    </criterion>
+    <criterion id="7.2.4">
+      <title>Display Last Update Timestamp</title>
+      <details>
+        - Show timestamp from API response
+        - Format: "Last updated: 2025-11-13 14:32:15"
+        - Display in muted color (gray/dim)
+        - Position at bottom of panel
+        - Updates every 3 seconds via auto-refresh
+      </details>
+    </criterion>
+    <criterion id="7.2.5">
+      <title>Handle Empty Data Gracefully</title>
+      <details>
+        - If get_current_health() returns None: Display "No health data available"
+        - Show friendly message: "Run system for 5+ minutes to collect health metrics"
+        - Display in yellow color (not error, just no data yet)
+        - Maintain panel structure (don't crash)
+      </details>
+    </criterion>
+  </acceptance-criteria>
+
+  <tasks>
+    <task id="1" ac="7.2.1">
+      <title>Create HealthPanel class</title>
+      <subtasks>
+        - Create src/dashboard/panels/health_panel.py
+        - Import BasePanel, MonitorAgent, reactive
+        - Define HealthPanel(BasePanel) class
+        - Add reactive properties: health_score, status, component_scores, last_update
+        - Implement __init__(monitor_agent: MonitorAgent)
+        - Implement async refresh_data() to call MonitorAgent.get_current_health()
+        - Store API response data in reactive properties
+        - Set error_message on exception
+      </subtasks>
+    </task>
+    <task id="2" ac="7.2.2">
+      <title>Implement health score display</title>
+      <subtasks>
+        - Implement _get_color_for_score(score: float) -> str helper
+        - Return "green" if score >= 80
+        - Return "yellow" if 60 <= score &lt; 80
+        - Return "red" if score &lt; 60
+        - In render_content(): Display score with color and bold
+        - Display status badge with same color
+        - Use Rich markup: [green bold]Health Score: 85.5[/]
+      </subtasks>
+    </task>
+    <task id="3" ac="7.2.3">
+      <title>Implement component scores table</title>
+      <subtasks>
+        - Create src/dashboard/utils/formatters.py
+        - Implement format_percentage(value: float) -> str (0-1 to "95.0%")
+        - Implement format_seconds(value: float) -> str (45.3 to "45.3s")
+        - Implement format_score(value: float) -> str (82.1 to "82.1/100")
+        - Implement get_status_icon(value: float, metric_type: str) -> str
+        - In render_content(): Render component_scores as table
+        - Use Rich Table or formatted string with columns
+        - Apply formatters to each component value
+      </subtasks>
+    </task>
+    <task id="4" ac="7.2.4">
+      <title>Add timestamp display</title>
+      <subtasks>
+        - In render_content(): Add timestamp line at bottom
+        - Format: f"[dim]Last updated: {self.last_update}[/]"
+        - Use ISO format from API response (no parsing needed)
+        - Verify timestamp updates every 3 seconds
+      </subtasks>
+    </task>
+    <task id="5" ac="7.2.5">
+      <title>Handle empty data case</title>
+      <subtasks>
+        - In render_content(): Check if self.last_update is empty/None
+        - If no data: Return "[yellow]No health data available[/]" message
+        - Add friendly instruction: "[dim]Run system for 5+ minutes[/]"
+        - Ensure no crashes or exceptions
+      </subtasks>
+    </task>
+    <task id="6" ac="all">
+      <title>Integrate HealthPanel into dashboard</title>
+      <subtasks>
+        - Open src/dashboard/monitor_dashboard.py
+        - Import HealthPanel from panels.health_panel
+        - Import MonitorAgent
+        - In MonitorDashboardApp.__init__(): Initialize MonitorAgent
+        - Replace HealthPanelPlaceholder with HealthPanel in PANEL_REGISTRY
+        - Pass monitor_agent to HealthPanel constructor
+        - Verify health panel renders with real data
+      </subtasks>
+    </task>
+    <task id="7" ac="all">
+      <title>Write comprehensive tests</title>
+      <subtasks>
+        - Create tests/test_health_panel.py (6 tests)
+        - Test with valid health data (health_score, status, component_scores)
+        - Test with no data (get_current_health returns None)
+        - Test color mapping: green (score >= 80)
+        - Test color mapping: yellow (60 <= score &lt; 80)
+        - Test color mapping: red (score &lt; 60)
+        - Test component scores table rendering
+        - Use Mock for MonitorAgent
+      </subtasks>
+    </task>
+  </tasks>
+
+  <artifacts>
+    <documentation>
+      <doc path="bmad-docs/stories/7-2-implement-health-score-panel.md">
+        Full story specification with acceptance criteria and implementation details
+      </doc>
+      <doc path="bmad-docs/epic-7-terminal-dashboard-architecture.md">
+        Section 6.2: Story 7.2 detailed breakdown with API integration specs
+      </doc>
+    </documentation>
+
+    <code>
+      <file path="src/dashboard/panels/base_panel.py">
+        BasePanel abstract class (from Story 7.1)
+      </file>
+      <file path="src/agents/monitor_agent.py">
+        MonitorAgent with get_current_health() API (Epic 6 Story 6.5)
+      </file>
+      <file path="src/dashboard/monitor_dashboard.py">
+        Main dashboard app (will be updated to use HealthPanel)
+      </file>
+    </code>
+
+    <tests>
+      <file path="tests/conftest.py">
+        Shared test fixtures
+      </file>
+    </tests>
+  </artifacts>
+
+  <interfaces>
+    <interface name="HealthPanel">
+      <location>src/dashboard/panels/health_panel.py</location>
+      <new-class>
+        <signature>class HealthPanel(BasePanel)</signature>
+        <description>Health Score panel displaying overall system health</description>
+        <reactive-properties>
+          <property>
+            <name>health_score: reactive[float] = reactive(0.0)</name>
+            <description>Overall health score 0-100</description>
+          </property>
+          <property>
+            <name>status: reactive[str] = reactive("unknown")</name>
+            <description>Health status: "healthy" | "degraded" | "critical"</description>
+          </property>
+          <property>
+            <name>component_scores: reactive[dict] = reactive({})</name>
+            <description>Per-component scores dictionary</description>
+          </property>
+          <property>
+            <name>last_update: reactive[str] = reactive("")</name>
+            <description>ISO timestamp of last update</description>
+          </property>
+        </reactive-properties>
+        <methods>
+          <method>
+            <signature>def __init__(self, monitor_agent: MonitorAgent, **kwargs)</signature>
+            <description>Initialize with MonitorAgent instance</description>
+          </method>
+          <method>
+            <signature>async def refresh_data(self) -> None</signature>
+            <description>Fetch latest health data from MonitorAgent</description>
+          </method>
+          <method>
+            <signature>def render_content(self) -> str</signature>
+            <description>Render health panel as Rich markup</description>
+          </method>
+          <method>
+            <signature>def _get_color_for_score(self, score: float) -> str</signature>
+            <description>Map score to color: green/yellow/red</description>
+          </method>
+        </methods>
+      </new-class>
+    </interface>
+
+    <interface name="Formatters">
+      <location>src/dashboard/utils/formatters.py</location>
+      <new-functions>
+        <function>
+          <signature>def format_percentage(value: float) -> str</signature>
+          <description>Convert 0-1 float to percentage string (e.g., 0.95 -> "95.0%")</description>
+        </function>
+        <function>
+          <signature>def format_seconds(value: float) -> str</signature>
+          <description>Format seconds with 's' suffix (e.g., 45.3 -> "45.3s")</description>
+        </function>
+        <function>
+          <signature>def format_score(value: float) -> str</signature>
+          <description>Format 0-100 score with '/100' (e.g., 82.1 -> "82.1/100")</description>
+        </function>
+        <function>
+          <signature>def get_status_icon(value: float, metric_type: str) -> str</signature>
+          <description>Get status icon (🟢/🟡/🔴) based on value and metric type</description>
+        </function>
+      </new-functions>
+    </interface>
+
+    <interface name="MonitorAgent.get_current_health">
+      <location>src/agents/monitor_agent.py</location>
+      <existing-method>
+        <signature>def get_current_health(self) -> dict | None</signature>
+        <description>Get latest health score and status (Epic 6 Story 6.5)</description>
+        <returns>
+          {
+            "health_score": float,      # 0-100
+            "status": str,              # "healthy" | "degraded" | "critical"
+            "timestamp": str,           # ISO format "2025-11-13T14:32:15"
+            "component_scores": {
+              "task_success_rate": float,         # 0-1 range
+              "task_error_rate": float,           # 0-1 range
+              "average_execution_time": float,    # seconds
+              "pr_approval_rate": float,          # 0-1 range
+              "qa_score_average": float           # 0-100 range
+            },
+            "metrics_count": int
+          }
+          Or None if no health data exists
+        </returns>
+      </existing-method>
+    </interface>
+  </interfaces>
+
+  <constraints>
+    <constraint type="dependency">
+      Depends on Story 7.1 (BasePanel abstract class must exist)
+    </constraint>
+    <constraint type="api">
+      Depends on Epic 6 Story 6.5 (MonitorAgent.get_current_health() API)
+    </constraint>
+    <constraint type="color">
+      Color thresholds: green >= 80, yellow 60-79, red &lt; 60
+    </constraint>
+    <constraint type="format">
+      Component scores formatted: percentages (%), seconds (s), scores (/100)
+    </constraint>
+    <constraint type="error-handling">
+      Handle None response gracefully with friendly message
+    </constraint>
+  </constraints>
+
+  <testing-guidance>
+    <unit-tests>
+      <test>Test HealthPanel with valid health data</test>
+      <test>Test HealthPanel with no data (None response)</test>
+      <test>Test color mapping: green for score >= 80</test>
+      <test>Test color mapping: yellow for score 60-79</test>
+      <test>Test color mapping: red for score &lt; 60</test>
+      <test>Test component scores table rendering with formatters</test>
+    </unit-tests>
+
+    <manual-verification>
+      <test>Health score displays in large/bold font</test>
+      <test>Status badge matches color (HEALTHY/DEGRADED/CRITICAL)</test>
+      <test>Color matches score (green/yellow/red)</test>
+      <test>Component scores table has 5 rows</test>
+      <test>All scores formatted correctly (%, s, /100)</test>
+      <test>Status icons color-coded (🟢/🟡/🔴)</test>
+      <test>Timestamp displays and updates every 3s</test>
+      <test>No data case shows friendly message</test>
+    </manual-verification>
+
+    <test-patterns>
+      <pattern>Mock MonitorAgent.get_current_health() with test data</pattern>
+      <pattern>Use reactive property assertions (panel.health_score == expected)</pattern>
+      <pattern>Test render_content() output contains expected Rich markup</pattern>
+      <pattern>Test color logic separately from rendering</pattern>
+    </test-patterns>
+
+    <coverage-target>95%+ for health_panel.py and formatters.py</coverage-target>
+  </testing-guidance>
+
+  <dev-notes>
+    <note type="dependency">
+      Story 7.1 must be complete (BasePanel exists)
+    </note>
+    <note type="api">
+      MonitorAgent.get_current_health() available from Epic 6 Story 6.5
+    </note>
+    <note type="simplicity">
+      This is simpler than Story 7.1 (single API, clear formatting)
+    </note>
+    <note type="visual">
+      Visual verification important (colors, table layout)
+    </note>
+    <note type="checkpoint">
+      Checkpoint: Health panel renders with real MonitorAgent data
+    </note>
+  </dev-notes>
+
+  <dependencies>
+    <dependency type="python">
+      textual>=0.40.0 - Already installed in Story 7.1
+    </dependency>
+    <dependency type="python">
+      rich>=13.0.0 - Already installed in Story 7.1
+    </dependency>
+    <dependency type="story">
+      Story 7.1 complete - BasePanel abstract class
+    </dependency>
+    <dependency type="epic">
+      Epic 6 Story 6.5 - MonitorAgent.get_current_health() API
+    </dependency>
+  </dependencies>
+
+  <external-references>
+    <reference>
+      <title>Rich Markup Syntax</title>
+      <url>https://rich.readthedocs.io/en/stable/markup.html</url>
+      <relevance>Color syntax, bold text, dim text for panel rendering</relevance>
+    </reference>
+    <reference>
+      <title>Textual Reactive Properties</title>
+      <url>https://textual.textualize.io/guide/reactivity/</url>
+      <relevance>Reactive properties auto-trigger UI updates</relevance>
+    </reference>
+  </external-references>
+
+  <delegation-notes>
+    <checkpoint>
+      <title>Story 7.2 Complete</title>
+      <criteria>
+        - Health panel renders with real MonitorAgent data
+        - All 6 unit tests passing
+        - Colors match health status (visual verification)
+        - Component scores table formats correctly
+        - Timestamp updates every 3 seconds
+      </criteria>
+    </checkpoint>
+    <next-story>
+      Story 7.3: Implement Metrics Trends Panel (1 day, most complex - sparklines)
+    </next-story>
+  </delegation-notes>
+</story-context>
