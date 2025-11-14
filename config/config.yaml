@@ -86,3 +86,21 @@ gear3:
     preferences:    # Default preferences
       default_backend: claude_code    # Default backend if no rule matches
       fallback_backend: ccpm          # Fallback if primary backend fails
+
+# Gear 4 Configuration (Future)
+gear4:
+  # Terminal UI Dashboard (Epic 7)
+  dashboard:
+    enabled: false            # Enable dashboard (default: false for backward compatibility)
+    refresh_rate: 3           # Auto-refresh interval in seconds (default: 3)
+    enabled_panels:           # List of panels to display (default: all)
+      - health               # Health Score Panel
+      - metrics              # Metrics Trends Panel
+      - alerts               # Alerts Panel
+      - components           # Component Health Panel
+    theme: "dark"             # UI theme: "dark" or "light" (default: dark)
+    keyboard_shortcuts:
+      navigate: "tab"         # Navigate panels (default: Tab/Shift+Tab)
+      expand: "enter"         # Expand panel (default: Enter)
+      quit: "q"               # Quit dashboard (default: Q)
+      help: "?"               # Toggle help (default: ?)
