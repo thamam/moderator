@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context>
+  <metadata>
+    <story-id>7.3</story-id>
+    <story-key>7-3-implement-metrics-trends-panel</story-key>
+    <epic-id>7</epic-id>
+    <title>Implement Metrics Trends Panel</title>
+    <status>ready-for-dev</status>
+    <generated-date>2025-11-14</generated-date>
+  </metadata>
+
+  <story>
+    <as-a>system operator</as-a>
+    <i-want>a Metrics Trends panel displaying time-series data with sparklines and trend indicators</i-want>
+    <so-that>I can monitor system performance trends and identify degradation over time</so-that>
+  </story>
+
+  <acceptance-criteria>
+    <criterion id="7.3.1">
+      <title>Create MetricsPanel Widget</title>
+      <details>
+        - Create MetricsPanel(BasePanel) class in src/dashboard/panels/metrics_panel.py
+        - Implement refresh_data() to call MonitorAgent.get_metrics_history(hours=24) and get_metrics_summary(hours=24)
+        - Store metrics data in reactive properties (metrics_history, metrics_summary)
+        - Render 5 metrics: success_rate, error_rate, token_usage, task_duration, health_score
+      </details>
+    </criterion>
+    <criterion id="7.3.2">
+      <title>Display ASCII Sparklines for Each Metric</title>
+      <details>
+        - Render ASCII sparkline for each metric using metrics_history data
+        - Sparkline width: 40 characters (fits 24 hours of hourly data)
+        - Use Unicode block characters: ▁▂▃▄▅▆▇█ for different heights
+        - Color-code sparklines based on metric type:
+          * Green: success_rate, health_score (higher is better)
+          * Red: error_rate (lower is better)
+          * Blue: token_usage, task_duration (neutral)
+        - Handle missing data points with gaps or interpolation
+      </details>
+    </criterion>
+    <criterion id="7.3.3">
+      <title>Show Current/Avg/Min/Max Statistics</title>
+      <details>
+        - For each metric, display 4 statistics from metrics_summary:
+          * Current: Latest value (rightmost point in sparkline)
+          * Avg: Mean value over time window
+          * Min: Minimum value in time window
+          * Max: Maximum value in time window
+        - Format values appropriately:
+          * Percentages: 0-100% (success_rate, error_rate)
+          * Tokens: comma-separated integers (token_usage)
+          * Duration: seconds with 1 decimal (task_duration)
+          * Score: 0-100 integer (health_score)
+        - Display in compact table format: "Cur: 85% | Avg: 82% | Min: 75% | Max: 92%"
+      </details>
+    </criterion>
+    <criterion id="7.3.4">
+      <title>Display Trend Indicators</title>
+      <details>
+        - Calculate trend from metrics_history (compare last 6 hours vs previous 6 hours)
+        - Display trend arrow next to metric name:
+          * ↗ Improving (good for success_rate, health_score; bad for error_rate)
+          * → Stable (change &lt; 5%)
+          * ↘ Degrading (bad for success_rate, health_score; good for error_rate)
+        - Color-code arrows:
+          * Green: Positive trend
+          * Yellow: Stable
+          * Red: Negative trend
+        - Show percentage change: "↗ +8%" or "↘ -12%"
+      </details>
+    </criterion>
+    <criterion id="7.3.5">
+      <title>Handle Empty/Insufficient Data</title>
+      <details>
+        - If get_metrics_history() returns empty: Display "No metrics data available"
+        - If data points &lt; 12: Show warning "Collecting metrics... (need 12+ hours for accurate trends)"
+        - For metrics with gaps: Interpolate missing points or show gaps in sparkline
+        - Gracefully handle API errors: Show error message but don't crash panel
+      </details>
+    </criterion>
+  </acceptance-criteria>
+
+  <tasks>
+    <task id="1" ac="7.3.1">
+      <title>Create MetricsPanel class</title>
+      <subtasks>
+        - Create src/dashboard/panels/metrics_panel.py
+        - Define MetricsPanel(BasePanel) class
+        - Add reactive properties: metrics_history, metrics_summary
+        - Implement refresh_data() calling MonitorAgent APIs
+        - Handle API response parsing
+      </subtasks>
+    </task>
+    <task id="2" ac="7.3.2">
+      <title>Implement ASCII sparkline renderer</title>
+      <subtasks>
+        - Create src/dashboard/utils/sparkline.py
+        - Implement generate_sparkline(data_points: list[float], width: int = 40) -> str
+        - Normalize data to 0-7 range (8 block heights)
+        - Map to Unicode blocks: ▁▂▃▄▅▆▇█
+        - Handle edge cases: empty data, single point, all same values
+        - Add color wrapping utility: colorize_sparkline(sparkline: str, color: str)
+      </subtasks>
+    </task>
+    <task id="3" ac="7.3.3">
+      <title>Implement statistics formatting</title>
+      <subtasks>
+        - Add to src/dashboard/utils/formatters.py (reuse from Story 7.2)
+        - Implement format_percentage(value: float) -> str (e.g., "85.3%")
+        - Implement format_token_count(value: int) -> str (e.g., "1,234,567")
+        - Implement format_duration(value: float) -> str (e.g., "12.5s")
+        - Implement format_metric_stats(current, avg, min, max, metric_type) -> str
+      </subtasks>
+    </task>
+    <task id="4" ac="7.3.4">
+      <title>Implement trend calculation and rendering</title>
+      <subtasks>
+        - Create calculate_trend(history: list[dict]) -> tuple[str, float, str]
+          * Returns: (arrow, percentage_change, color)
+        - Compare last 6 data points vs previous 6 data points
+        - Determine if improving/stable/degrading based on metric type
+        - Format trend display: "↗ +8%" with color
+        - Handle insufficient data for trend (return "→ N/A")
+      </subtasks>
+    </task>
+    <task id="5" ac="7.3.1,7.3.2,7.3.3,7.3.4">
+      <title>Integrate components into MetricsPanel.render_content()</title>
+      <subtasks>
+        - Implement render_content() method
+        - Render 5 metrics in vertical list format
+        - For each metric:
+          * Header: "Metric Name [trend arrow]"
+          * Sparkline: colored ASCII sparkline
+          * Stats: "Cur: X | Avg: Y | Min: Z | Max: W"
+        - Use Rich Table or manual formatting
+        - Add spacing between metrics
+        - Update monitor_dashboard.py to replace MetricsPanelPlaceholder
+      </subtasks>
+    </task>
+    <task id="6" ac="7.3.5">
+      <title>Write comprehensive tests</title>
+      <subtasks>
+        - Create tests/test_metrics_panel.py
+        - Test 1: test_metrics_panel_with_full_data (24 hours data, all 5 metrics)
+        - Test 2: test_metrics_panel_with_no_data (empty response)
+        - Test 3: test_sparkline_generation (various data patterns)
+        - Test 4: test_trend_calculation (improving/stable/degrading scenarios)
+        - Test 5: test_statistics_formatting (all metric types)
+        - Test 6: test_metrics_panel_with_insufficient_data (&lt; 12 hours)
+        - Test 7: test_sparkline_edge_cases (empty, single point, all same)
+      </subtasks>
+    </task>
+  </tasks>
+
+  <technical-context>
+    <epic>Epic 7: Real-Time Terminal UI Dashboard (Gear 4)</epic>
+    <depends-on>
+      - Story 7.1: Dashboard framework (BasePanel, monitor_dashboard.py, config)
+      - Story 7.2: Formatter utilities (src/dashboard/utils/formatters.py)
+      - Epic 6: MonitorAgent with metrics APIs
+    </depends-on>
+    <provides>
+      - MetricsPanel widget for dashboard
+      - ASCII sparkline visualization utility
+      - Trend analysis for time-series data
+    </provides>
+  </technical-context>
+
+  <interfaces>
+    <interface name="MetricsPanel">
+      <inherits>BasePanel</inherits>
+      <reactive-properties>
+        <property>metrics_history: reactive[dict] = reactive({})</property>
+        <property>metrics_summary: reactive[dict] = reactive({})</property>
+      </reactive-properties>
+      <methods>
+        <method>
+          <name>refresh_data</name>
+          <signature>async def refresh_data(self) -> None</signature>
+          <description>Fetch metrics history and summary from MonitorAgent</description>
+        </method>
+        <method>
+          <name>render_content</name>
+          <signature>def render_content(self) -> str</signature>
+          <description>Render metrics with sparklines, stats, and trends</description>
+        </method>
+      </methods>
+    </interface>
+
+    <interface name="MonitorAgent API (from Epic 6)">
+      <method>
+        <name>get_metrics_history</name>
+        <signature>def get_metrics_history(self, hours: int = 24) -> dict</signature>
+        <returns>
+          {
+            "success_rate": [{"timestamp": "2025-11-14T12:00:00Z", "value": 0.85}, ...],
+            "error_rate": [...],
+            "token_usage": [...],
+            "task_duration": [...],
+            "health_score": [...]
+          }
+        </returns>
+      </method>
+      <method>
+        <name>get_metrics_summary</name>
+        <signature>def get_metrics_summary(self, hours: int = 24) -> dict</signature>
+        <returns>
+          {
+            "success_rate": {"current": 0.85, "avg": 0.82, "min": 0.75, "max": 0.92},
+            "error_rate": {...},
+            "token_usage": {...},
+            "task_duration": {...},
+            "health_score": {...}
+          }
+        </returns>
+      </method>
+    </interface>
+
+    <interface name="Sparkline Utility">
+      <function>
+        <name>generate_sparkline</name>
+        <signature>def generate_sparkline(data_points: list[float], width: int = 40) -> str</signature>
+        <description>Generate ASCII sparkline using Unicode block characters</description>
+        <example>
+          generate_sparkline([0.5, 0.7, 0.9, 0.6, 0.8], width=5)
+          # Returns: "▄▆█▅▇"
+        </example>
+      </function>
+      <function>
+        <name>colorize_sparkline</name>
+        <signature>def colorize_sparkline(sparkline: str, color: str) -> str</signature>
+        <description>Wrap sparkline in Rich color markup</description>
+        <example>
+          colorize_sparkline("▄▆█▅▇", "green")
+          # Returns: "[green]▄▆█▅▇[/green]"
+        </example>
+      </function>
+    </interface>
+  </interfaces>
+
+  <validation-checklist>
+    <item>MetricsPanel class created and inherits from BasePanel</item>
+    <item>refresh_data() calls MonitorAgent.get_metrics_history() and get_metrics_summary()</item>
+    <item>Sparkline generation works with various data patterns</item>
+    <item>All 5 metrics render with sparklines, stats, and trends</item>
+    <item>Trend calculation logic is correct for each metric type</item>
+    <item>Statistics formatting is accurate for all metric types</item>
+    <item>Empty/insufficient data handled gracefully</item>
+    <item>7 unit tests written and passing</item>
+    <item>MetricsPanel integrated into monitor_dashboard.py</item>
+    <item>All dashboard tests passing (Story 7.1 + 7.2 + 7.3)</item>
+  </validation-checklist>
+
+  <notes>
+    <note>Story 7.3 is the most complex story in Epic 7 due to ASCII sparkline visualization</note>
+    <note>Sparklines use Unicode block characters (▁▂▃▄▅▆▇█) which may have font rendering differences</note>
+    <note>Trend calculation should account for metric direction (higher is better vs lower is better)</note>
+    <note>MonitorAgent APIs may not be fully implemented yet - use placeholder data for testing</note>
+    <note>Consider adding sparkline smoothing for noisy data (optional enhancement)</note>
+  </notes>
+</story-context>
