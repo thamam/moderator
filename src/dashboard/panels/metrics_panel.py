@@ -20,6 +20,16 @@ class MetricsPanel(BasePanel):
         metrics_summary: Statistical summary of metrics
     """
 
+    # Static configuration for metrics display
+    # Format: (metric_key, metric_label, metric_type, sparkline_color)
+    METRICS_CONFIG = [
+        ("success_rate", "Task Success Rate", "percentage", "green"),
+        ("error_rate", "Task Error Rate", "percentage", "red"),
+        ("token_usage", "Token Usage", "tokens", "blue"),
+        ("task_duration", "Avg Task Duration", "duration", "blue"),
+        ("health_score", "System Health Score", "score", "green"),
+    ]
+
     def __init__(self, **kwargs):
         """Initialize MetricsPanel."""
         super().__init__(**kwargs)
@@ -61,19 +71,9 @@ class MetricsPanel(BasePanel):
 [dim]System needs to run for 24+ hours to collect trend data.[/]
             """
 
-        # Define metrics configuration
-        # (metric_key, metric_label, metric_type, sparkline_color)
-        metrics_config = [
-            ("success_rate", "Task Success Rate", "percentage", "green"),
-            ("error_rate", "Task Error Rate", "percentage", "red"),
-            ("token_usage", "Token Usage", "tokens", "blue"),
-            ("task_duration", "Avg Task Duration", "duration", "blue"),
-            ("health_score", "System Health Score", "score", "green"),
-        ]
-
         output = []
 
-        for metric_key, metric_label, metric_type, sparkline_color in metrics_config:
+        for metric_key, metric_label, metric_type, sparkline_color in self.METRICS_CONFIG:
             history = self.metrics_history.get(metric_key, [])
             summary = self.metrics_summary.get(metric_key, {})
 

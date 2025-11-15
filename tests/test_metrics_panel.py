@@ -67,14 +67,15 @@ def test_colorize_sparkline():
 def test_trend_calculation_improving():
     """Test trend calculation for improving metrics."""
     # Improving success rate (good trend)
-    history = [{"value": 0.70 + i * 0.02} for i in range(12)]
+    # API returns DESC order (newest first), so create data in reverse
+    history = [{"value": 0.92 - i * 0.02} for i in range(12)]
     arrow, pct, color = calculate_trend(history, "success_rate")
     assert arrow == "↗"  # Up arrow
     assert pct > 5.0  # Significant improvement
     assert color == "green"  # Good trend
 
     # Improving health score
-    history = [{"value": 70 + i * 2} for i in range(12)]
+    history = [{"value": 92 - i * 2} for i in range(12)]
     arrow, pct, color = calculate_trend(history, "health_score")
     assert arrow == "↗"
     assert color == "green"
@@ -83,21 +84,24 @@ def test_trend_calculation_improving():
 def test_trend_calculation_degrading():
     """Test trend calculation for degrading metrics."""
     # Degrading success rate (bad trend)
-    history = [{"value": 0.90 - i * 0.02} for i in range(12)]
+    # API returns DESC order (newest first), so newest values are lower
+    history = [{"value": 0.68 + i * 0.02} for i in range(12)]
     arrow, pct, color = calculate_trend(history, "success_rate")
     assert arrow == "↘"  # Down arrow
     assert pct < -5.0  # Significant degradation
     assert color == "red"  # Bad trend
 
     # Increasing error rate (bad trend - error rate going up)
-    history = [{"value": 0.10 + i * 0.01} for i in range(12)]
+    # DESC order: newest (higher) first
+    history = [{"value": 0.21 - i * 0.01} for i in range(12)]
     arrow, pct, color = calculate_trend(history, "error_rate")
     assert arrow == "↘"  # Down arrow (bad for error_rate)
     assert pct > 5.0  # Value increased
     assert color == "red"  # Bad trend
 
     # Decreasing error rate (good trend - error rate going down)
-    history = [{"value": 0.30 - i * 0.01} for i in range(12)]
+    # DESC order: newest (lower) first
+    history = [{"value": 0.19 + i * 0.01} for i in range(12)]
     arrow, pct, color = calculate_trend(history, "error_rate")
     assert arrow == "↗"  # Up arrow (good for error_rate)
     assert pct < -5.0  # Value decreased
@@ -107,6 +111,7 @@ def test_trend_calculation_degrading():
 def test_trend_calculation_stable_and_insufficient():
     """Test trend calculation for stable metrics and insufficient data."""
     # Stable metric (< 5% change)
+    # DESC order doesn't matter for stable oscillating data
     history = [{"value": 0.85 + (i % 2) * 0.01} for i in range(12)]
     arrow, pct, color = calculate_trend(history, "success_rate")
     assert arrow == "→"  # Horizontal arrow
@@ -155,9 +160,10 @@ def test_metrics_panel_with_full_data():
     panel = MetricsPanel()
 
     # Mock full metrics data for success_rate
+    # API returns DESC order (newest first), so create data in reverse
     panel.metrics_history = {
         "success_rate": [
-            {"value": 0.80 + i * 0.01, "timestamp": f"2025-11-14T{i:02d}:00:00Z"}
+            {"value": 0.95 - i * 0.01, "timestamp": f"2025-11-14T{23-i:02d}:00:00Z"}
             for i in range(24)
         ]
     }

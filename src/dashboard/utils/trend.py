@@ -32,16 +32,24 @@ def calculate_trend(history: list[dict], metric_name: str) -> Tuple[str, float, 
     if len(history) < 12:
         return ("→", 0.0, "yellow")  # Insufficient data
 
-    # Split into two halves: old (first 6) vs new (last 6)
-    old_half = [h["value"] for h in history[:6]]
-    new_half = [h["value"] for h in history[-6:]]
+    # Split into two halves for comparison
+    # History is ordered DESC (newest first), so:
+    # - history[:6] = last 6 (newest)
+    # - history[6:12] = previous 6 (older)
+    new_half = [h["value"] for h in history[:6]]
+    old_half = [h["value"] for h in history[6:12]]
 
     old_avg = sum(old_half) / len(old_half)
     new_avg = sum(new_half) / len(new_half)
 
     # Calculate percentage change
     if old_avg == 0:
-        percentage_change = 0.0
+        # Handle change from zero baseline
+        if new_avg == 0:
+            percentage_change = 0.0
+        else:
+            # Significant change from zero - use 100% as proxy for "infinite" increase
+            percentage_change = 100.0 if new_avg > 0 else -100.0
     else:
         percentage_change = ((new_avg - old_avg) / old_avg) * 100
 
