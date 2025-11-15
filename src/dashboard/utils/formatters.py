@@ -70,3 +70,90 @@ def format_score(score: float, precision: int = 1) -> str:
         str: Formatted score (e.g., "85.3")
     """
     return f"{score:.{precision}f}"
+
+
+def format_percentage(value: float) -> str:
+    """Format 0-1 float as percentage.
+
+    Args:
+        value: Float value in 0-1 range
+
+    Returns:
+        str: Formatted percentage (e.g., "85.3%")
+
+    Examples:
+        >>> format_percentage(0.853)
+        '85.3%'
+        >>> format_percentage(0.9)
+        '90.0%'
+    """
+    return f"{value * 100:.1f}%"
+
+
+def format_token_count(value: int) -> str:
+    """Format integer with comma separators.
+
+    Args:
+        value: Integer value
+
+    Returns:
+        str: Formatted with commas (e.g., "1,234,567")
+
+    Examples:
+        >>> format_token_count(1234567)
+        '1,234,567'
+        >>> format_token_count(42)
+        '42'
+    """
+    return f"{value:,}"
+
+
+def format_duration(value: float) -> str:
+    """Format seconds with 1 decimal place.
+
+    Args:
+        value: Duration in seconds
+
+    Returns:
+        str: Formatted duration (e.g., "12.5s")
+
+    Examples:
+        >>> format_duration(12.456)
+        '12.5s'
+        >>> format_duration(0.3)
+        '0.3s'
+    """
+    return f"{value:.1f}s"
+
+
+def format_metric_stats(
+    current: float, avg: float, min_val: float, max_val: float, metric_type: str
+) -> str:
+    """Format metric statistics in compact format.
+
+    Args:
+        current: Current/latest value
+        avg: Average value
+        min_val: Minimum value
+        max_val: Maximum value
+        metric_type: One of: "percentage", "tokens", "duration", "score"
+
+    Returns:
+        str: Formatted stats like "Cur: 85% | Avg: 82% | Min: 75% | Max: 92%"
+
+    Examples:
+        >>> format_metric_stats(0.85, 0.82, 0.75, 0.92, "percentage")
+        'Cur: 85.0% | Avg: 82.0% | Min: 75.0% | Max: 92.0%'
+    """
+    formatters = {
+        "percentage": format_percentage,
+        "tokens": lambda x: format_token_count(int(x)),
+        "duration": format_duration,
+        "score": lambda x: f"{int(x)}/100",
+    }
+
+    formatter = formatters.get(metric_type, str)
+    return (
+        f"Cur: {formatter(current)} | Avg: {formatter(avg)} | "
+        f"Min: {formatter(min_val)} | Max: {formatter(max_val)}"
+    )

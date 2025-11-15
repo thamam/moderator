@@ -7,33 +7,10 @@ from textual.widgets import Header, Footer, Static
 from src.dashboard.config import load_dashboard_config, DashboardConfig
 from src.dashboard.panels.base_panel import BasePanel
 from src.dashboard.panels.health_panel import HealthPanel
+from src.dashboard.panels.metrics_panel import MetricsPanel
 
 
-# Placeholder panels for Stories 7.2-7.5
-class HealthPanelPlaceholder(BasePanel):
-    """Placeholder for Health Score Panel (Story 7.2)."""
-
-    async def refresh_data(self) -> None:
-        """Refresh panel data (no-op for placeholder)."""
-        pass  # No-op for placeholder
-
-    def render_content(self) -> str:
-        """Render placeholder content."""
-        return "[yellow]Health Score Panel[/]\n[dim]Coming in Story 7.2[/]"
-
-
-class MetricsPanelPlaceholder(BasePanel):
-    """Placeholder for Metrics Trends Panel (Story 7.3)."""
-
-    async def refresh_data(self) -> None:
-        """Refresh panel data (no-op for placeholder)."""
-        pass
-
-    def render_content(self) -> str:
-        """Render placeholder content."""
-        return "[yellow]Metrics Trends Panel[/]\n[dim]Coming in Story 7.3[/]"
-
-
+# Placeholder panels for Stories 7.4-7.5
 class AlertsPanelPlaceholder(BasePanel):
     """Placeholder for Alerts Panel (Story 7.4)."""
 
@@ -61,7 +38,7 @@ class ComponentsPanelPlaceholder(BasePanel):
 # Panel registry
 PANEL_REGISTRY = {
     "health": HealthPanel,  # Story 7.2 - Implemented
-    "metrics": MetricsPanelPlaceholder,
+    "metrics": MetricsPanel,  # Story 7.3 - Implemented
     "alerts": AlertsPanelPlaceholder,
     "components": ComponentsPanelPlaceholder,
 }
