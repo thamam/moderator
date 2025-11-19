@@ -8,39 +8,17 @@ from src.dashboard.config import load_dashboard_config, DashboardConfig
 from src.dashboard.panels.base_panel import BasePanel
 from src.dashboard.panels.health_panel import HealthPanel
 from src.dashboard.panels.metrics_panel import MetricsPanel
-
-
-# Placeholder panels for Stories 7.4-7.5
-class AlertsPanelPlaceholder(BasePanel):
-    """Placeholder for Alerts Panel (Story 7.4)."""
-
-    async def refresh_data(self) -> None:
-        """Refresh panel data (no-op for placeholder)."""
-        pass
-
-    def render_content(self) -> str:
-        """Render placeholder content."""
-        return "[yellow]Alerts Panel[/]\n[dim]Coming in Story 7.4[/]"
-
-
-class ComponentsPanelPlaceholder(BasePanel):
-    """Placeholder for Components Panel (Story 7.5)."""
-
-    async def refresh_data(self) -> None:
-        """Refresh panel data (no-op for placeholder)."""
-        pass
-
-    def render_content(self) -> str:
-        """Render placeholder content."""
-        return "[yellow]Components Panel[/]\n[dim]Coming in Story 7.5[/]"
+from src.dashboard.panels.alerts_panel import AlertsPanel
+from src.dashboard.panels.components_panel import ComponentsPanel
+from src.dashboard.screens.help_screen import HelpScreen
 
 
 # Panel registry
 PANEL_REGISTRY = {
     "health": HealthPanel,  # Story 7.2 - Implemented
     "metrics": MetricsPanel,  # Story 7.3 - Implemented
-    "alerts": AlertsPanelPlaceholder,
-    "components": ComponentsPanelPlaceholder,
+    "alerts": AlertsPanel,  # Story 7.4 - Implemented
+    "components": ComponentsPanel,  # Story 7.5 - Implemented
 }
 
 
@@ -123,29 +101,38 @@ class MonitorDashboardApp(App):
         # Start auto-refresh timer
         self.set_interval(self.config.refresh_rate, self._refresh_data)
 
-    def _refresh_data(self) -> None:
-        """Refresh all panels.
+    async def _refresh_data(self) -> None:
+        """Refresh all panels with error boundaries.
 
         Called every refresh_rate seconds by the auto-refresh timer.
         Updates the sub-title with the last refresh timestamp and
         triggers a refresh on all panels.
+
+        Error boundaries (AC 7.5.4):
+        - Each panel refresh is wrapped in try/except
+        - Panel errors don't crash the dashboard
+        - Errors are logged and displayed in the failed panel
         """
         self.last_refresh = datetime.now()
         self.sub_title = f"Last refresh: {self.last_refresh.strftime('%H:%M:%S')}"
 
-        # Refresh all panels
+        # Refresh all panels with error boundaries (AC 7.5.4)
         for panel in self.query(BasePanel):
-            self.call_later(panel.refresh_data)  # Async refresh
+            try:
+                await panel.refresh_data()
+            except Exception as e:
+                # Panel error doesn't crash dashboard (graceful degradation)
+                panel.error_message = f"Error loading panel: {str(e)}"
+                self.log.error(f"Panel {panel.id} refresh failed: {e}")
+                # Other panels continue to work
 
     def action_toggle_help(self) -> None:
-        """Show/hide help screen.
+        """Show/hide help screen (AC 7.5.3).
 
-        Placeholder implementation for Story 7.1.
-        Full help screen will be implemented in Story 7.5.
+        Displays a modal overlay with keyboard shortcuts.
+        Press '?' or ESC to close.
         """
-        # Placeholder: just show a notification
-        # Full help screen implemented in Story 7.5
-        self.notify("Help screen coming in Story 7.5!\nPress Q to quit.", timeout=3)
+        self.push_screen(HelpScreen())
 
 
 if __name__ == "__main__":

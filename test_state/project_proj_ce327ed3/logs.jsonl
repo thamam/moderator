@@ -1,3 +1,0 @@
-{"timestamp": "2025-11-07T22:10:15.636519", "level": "INFO", "component": "orchestrator", "action": "project_started", "details": {"project_id": "proj_ce327ed3", "requirements": "Requirements 1"}, "task_id": null, "event_type": null}
-{"timestamp": "2025-11-07T22:10:15.636693", "level": "INFO", "component": "orchestrator", "action": "decomposition_complete", "details": {"task_count": 4}, "task_id": null, "event_type": null}
-{"timestamp": "2025-11-07T22:10:15.637005", "level": "WARN", "component": "orchestrator", "action": "execution_cancelled_by_user", "details": {}, "task_id": null, "event_type": null}

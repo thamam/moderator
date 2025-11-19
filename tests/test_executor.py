@@ -82,7 +82,7 @@ def test_execute_task_creates_branch(executor, mock_git_manager):
     with patch('builtins.input', return_value=''):
         executor.execute_task(task, "test_project")
 
-    mock_git_manager.create_branch.assert_called_once_with(task)
+    mock_git_manager.create_branch.assert_called_once_with(task, 'dev')
 
 
 def test_execute_task_calls_backend(executor, test_backend):
@@ -124,7 +124,7 @@ def test_execute_task_creates_pr(executor, mock_git_manager):
     with patch('builtins.input', return_value=''):
         executor.execute_task(task, "test_project")
 
-    mock_git_manager.create_pr.assert_called_once_with(task)
+    mock_git_manager.create_pr.assert_called_once_with(task, 'dev')
     assert task.pr_url == "https://github.com/test/test/pull/1"
     assert task.pr_number == 1
 

@@ -19,12 +19,14 @@ class SequentialExecutor:
                  git_manager: GitManager,
                  state_manager: StateManager,
                  logger: StructuredLogger,
-                 require_approval: bool = True):
+                 require_approval: bool = True,
+                 base_branch: str = "dev"):
         self.backend = backend
         self.git = git_manager
         self.state = state_manager
         self.logger = logger
         self.require_approval = require_approval
+        self.base_branch = base_branch
 
     def execute_all(self, project_state: ProjectState) -> None:
         """Execute all tasks sequentially"""
@@ -69,9 +71,9 @@ class SequentialExecutor:
 
         task.status = TaskStatus.RUNNING
 
-        # Step 1: Create git branch
+        # Step 1: Create git branch from base branch
         self.logger.info("executor", "creating_branch", task_id=task.id)
-        branch_name = self.git.create_branch(task)
+        branch_name = self.git.create_branch(task, self.base_branch)
         task.branch_name = branch_name
 
         # Step 2: Execute via backend
@@ -95,9 +97,9 @@ class SequentialExecutor:
         else:
             raise Exception("Branch name not set - cannot push branch")
 
-        # Step 5: Create PR
+        # Step 5: Create PR against base branch
         self.logger.info("executor", "creating_pr", task_id=task.id)
-        pr_url, pr_number = self.git.create_pr(task)
+        pr_url, pr_number = self.git.create_pr(task, self.base_branch)
         task.pr_url = pr_url
         task.pr_number = pr_number
 

@@ -144,12 +144,17 @@ class Orchestrator:
             backend = self._create_backend()
             git_manager = GitManager(self.config.get('repo_path', '.'))
 
+            # Get base branch from config (default: "dev")
+            git_config = self.config.get('git', {})
+            base_branch = git_config.get('default_branch', 'dev')
+
             executor = SequentialExecutor(
                 backend=backend,
                 git_manager=git_manager,
                 state_manager=self.state_manager,
                 logger=logger,
-                require_approval=require_approval
+                require_approval=require_approval,
+                base_branch=base_branch
             )
 
             executor.execute_all(project_state)
