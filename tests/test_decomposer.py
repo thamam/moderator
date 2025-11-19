@@ -3,7 +3,8 @@ Test module for decomposer functionality.
 """
 
 import pytest
-from src.decomposer import SimpleDecomposer, ProjectType
+from unittest.mock import patch, MagicMock
+from src.decomposer import SimpleDecomposer, ProjectType, AgentDecomposer, MockAgentDecomposer
 from src.models import TaskStatus
 
 
@@ -229,3 +230,320 @@ def test_task_structure_is_valid():
         assert hasattr(task, 'started_at')
         assert hasattr(task, 'completed_at')
         assert hasattr(task, 'error')
+
+
+# ============================================================================
+# MockAgentDecomposer Tests
+# ============================================================================
+
+def test_mock_agent_decomposer_creates_tasks():
+    """Test that MockAgentDecomposer creates tasks"""
+    decomposer = MockAgentDecomposer()
+    tasks = decomposer.decompose("Create a simple web app")
+
+    assert len(tasks) > 0
+    assert all(t.status == TaskStatus.PENDING for t in tasks)
+    assert all(t.id.startswith("task_") for t in tasks)
+    assert all(len(t.acceptance_criteria) > 0 for t in tasks)
+
+
+def test_mock_agent_decomposer_api_detection():
+    """Test that MockAgentDecomposer detects API projects"""
+    decomposer = MockAgentDecomposer()
+
+    tasks = decomposer.decompose("Create an API endpoint for user management")
+
+    # Should use API template with 5 tasks
+    assert len(tasks) == 5
+    # Check for API-specific content
+    descriptions = [t.description.lower() for t in tasks]
+    assert any("endpoint" in d or "api" in d for d in descriptions)
+
+
+def test_mock_agent_decomposer_cli_detection():
+    """Test that MockAgentDecomposer detects CLI projects"""
+    decomposer = MockAgentDecomposer()
+
+    tasks = decomposer.decompose("Build a command line tool for file processing")
+
+    # Should use CLI template with 5 tasks
+    assert len(tasks) == 5
+    # Check for CLI-specific content
+    descriptions = [t.description.lower() for t in tasks]
+    assert any("cli" in d or "command" in d for d in descriptions)
+
+
+def test_mock_agent_decomposer_web_detection():
+    """Test that MockAgentDecomposer detects web projects"""
+    decomposer = MockAgentDecomposer()
+
+    tasks = decomposer.decompose("Create a web frontend with React")
+
+    # Should use web template with 5 tasks
+    assert len(tasks) == 5
+    # Check for web-specific content
+    descriptions = [t.description.lower() for t in tasks]
+    assert any("frontend" in d or "component" in d for d in descriptions)
+
+
+def test_mock_agent_decomposer_generic_fallback():
+    """Test that MockAgentDecomposer uses generic template for unknown projects"""
+    decomposer = MockAgentDecomposer()
+
+    tasks = decomposer.decompose("Build something cool")
+
+    # Should use generic template with 5 tasks
+    assert len(tasks) == 5
+
+
+def test_mock_agent_decomposer_preserves_requirements():
+    """Test that MockAgentDecomposer includes requirements in task descriptions"""
+    decomposer = MockAgentDecomposer()
+    requirements = "Create a unique project with special features"
+
+    tasks = decomposer.decompose(requirements)
+
+    # All tasks should include the requirements in context
+    assert all(requirements in task.description for task in tasks)
+
+
+# ============================================================================
+# AgentDecomposer Tests
+# ============================================================================
+
+def test_agent_decomposer_fallback_when_cli_unavailable():
+    """Test that AgentDecomposer falls back to SimpleDecomposer when CLI is unavailable"""
+    decomposer = AgentDecomposer(cli_path="nonexistent_cli")
+
+    tasks = decomposer.decompose("Create a web app")
+
+    # Should fall back to SimpleDecomposer (4 tasks from WEB_APP_TEMPLATE)
+    assert len(tasks) == 4
+    assert all(t.status == TaskStatus.PENDING for t in tasks)
+
+
+def test_agent_decomposer_parse_valid_json():
+    """Test that AgentDecomposer can parse valid JSON response"""
+    decomposer = AgentDecomposer()
+
+    json_response = '''
+    {
+        "tasks": [
+            {
+                "description": "Set up project structure",
+                "acceptance_criteria": ["Directory created", "Dependencies installed"]
+            },
+            {
+                "description": "Implement core logic",
+                "acceptance_criteria": ["Functions implemented", "Tests pass"]
+            }
+        ]
+    }
+    '''
+
+    tasks = decomposer._parse_response(json_response, "Test requirements")
+
+    assert len(tasks) == 2
+    assert "Set up project structure" in tasks[0].description
+    assert "Implement core logic" in tasks[1].description
+    assert len(tasks[0].acceptance_criteria) == 2
+    assert len(tasks[1].acceptance_criteria) == 2
+
+
+def test_agent_decomposer_parse_json_in_code_block():
+    """Test that AgentDecomposer can extract JSON from markdown code blocks"""
+    decomposer = AgentDecomposer()
+
+    response = '''
+    Here is the task breakdown:
+
+    ```json
+    {
+        "tasks": [
+            {
+                "description": "Task 1",
+                "acceptance_criteria": ["Criterion 1"]
+            }
+        ]
+    }
+    ```
+
+    Let me know if you need any changes.
+    '''
+
+    tasks = decomposer._parse_response(response, "Test")
+
+    assert len(tasks) == 1
+    assert "Task 1" in tasks[0].description
+
+
+def test_agent_decomposer_parse_invalid_json_returns_none():
+    """Test that AgentDecomposer returns None for invalid JSON"""
+    decomposer = AgentDecomposer()
+
+    invalid_response = "This is not JSON at all"
+
+    tasks = decomposer._parse_response(invalid_response, "Test")
+
+    assert tasks is None
+
+
+def test_agent_decomposer_parse_missing_tasks_array():
+    """Test that AgentDecomposer handles missing tasks array"""
+    decomposer = AgentDecomposer()
+
+    response = '{"something": "else"}'
+
+    tasks = decomposer._parse_response(response, "Test")
+
+    assert tasks is None
+
+
+def test_agent_decomposer_handles_missing_acceptance_criteria():
+    """Test that AgentDecomposer provides default criteria when missing"""
+    decomposer = AgentDecomposer()
+
+    response = '''
+    {
+        "tasks": [
+            {
+                "description": "Task without criteria"
+            }
+        ]
+    }
+    '''
+
+    tasks = decomposer._parse_response(response, "Test")
+
+    assert len(tasks) == 1
+    assert len(tasks[0].acceptance_criteria) >= 1  # Should have default criteria
+
+
+def test_agent_decomposer_extract_json_pure_json():
+    """Test JSON extraction from pure JSON response"""
+    decomposer = AgentDecomposer()
+
+    pure_json = '{"tasks": [{"description": "Test", "acceptance_criteria": ["Pass"]}]}'
+
+    result = decomposer._extract_json(pure_json)
+
+    assert result is not None
+    assert '"tasks"' in result
+
+
+def test_agent_decomposer_extract_json_with_text():
+    """Test JSON extraction from response with surrounding text"""
+    decomposer = AgentDecomposer()
+
+    response = '''
+    Here's your task breakdown:
+
+    {"tasks": [{"description": "Task", "acceptance_criteria": ["Done"]}]}
+
+    Hope this helps!
+    '''
+
+    result = decomposer._extract_json(response)
+
+    assert result is not None
+
+
+def test_agent_decomposer_unique_task_ids():
+    """Test that AgentDecomposer generates unique task IDs"""
+    decomposer = AgentDecomposer()
+
+    response = '''
+    {
+        "tasks": [
+            {"description": "Task 1", "acceptance_criteria": ["C1"]},
+            {"description": "Task 2", "acceptance_criteria": ["C2"]},
+            {"description": "Task 3", "acceptance_criteria": ["C3"]}
+        ]
+    }
+    '''
+
+    tasks = decomposer._parse_response(response, "Test")
+
+    task_ids = [t.id for t in tasks]
+    assert len(task_ids) == len(set(task_ids))  # All unique
+
+
+@patch('subprocess.run')
+def test_agent_decomposer_with_mock_cli(mock_run):
+    """Test AgentDecomposer with mocked CLI execution"""
+    # Mock the health check
+    mock_version_result = MagicMock()
+    mock_version_result.returncode = 0
+
+    # Mock the actual CLI call
+    mock_execute_result = MagicMock()
+    mock_execute_result.returncode = 0
+    mock_execute_result.stdout = '''
+    {
+        "tasks": [
+            {
+                "description": "Initialize project",
+                "acceptance_criteria": ["Project created"]
+            },
+            {
+                "description": "Build feature",
+                "acceptance_criteria": ["Feature complete"]
+            }
+        ]
+    }
+    '''
+    mock_execute_result.stderr = ""
+
+    # Health check called first, then execute
+    mock_run.side_effect = [mock_version_result, mock_execute_result]
+
+    decomposer = AgentDecomposer()
+    tasks = decomposer.decompose("Create a calculator")
+
+    assert len(tasks) == 2
+    assert "Initialize project" in tasks[0].description
+    assert "Build feature" in tasks[1].description
+
+
+@patch('subprocess.run')
+def test_agent_decomposer_cli_failure_fallback(mock_run):
+    """Test that AgentDecomposer falls back on CLI failure"""
+    # Mock health check success
+    mock_version_result = MagicMock()
+    mock_version_result.returncode = 0
+
+    # Mock CLI execution failure
+    mock_execute_result = MagicMock()
+    mock_execute_result.returncode = 1
+    mock_execute_result.stdout = ""
+    mock_execute_result.stderr = "CLI error"
+
+    mock_run.side_effect = [mock_version_result, mock_execute_result]
+
+    decomposer = AgentDecomposer()
+    tasks = decomposer.decompose("Create something")
+
+    # Should fall back to SimpleDecomposer (3 tasks for SCRIPT template)
+    assert len(tasks) == 3
+
+
+def test_agent_decomposer_handles_string_criteria():
+    """Test that AgentDecomposer handles acceptance_criteria as a string"""
+    decomposer = AgentDecomposer()
+
+    response = '''
+    {
+        "tasks": [
+            {
+                "description": "Single criterion task",
+                "acceptance_criteria": "Just one criterion"
+            }
+        ]
+    }
+    '''
+
+    tasks = decomposer._parse_response(response, "Test")
+
+    assert len(tasks) == 1
+    assert isinstance(tasks[0].acceptance_criteria, list)
+    assert len(tasks[0].acceptance_criteria) == 1
