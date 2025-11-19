@@ -6,6 +6,7 @@ from pathlib import Path
 from src.orchestrator import Orchestrator
 from src.config_loader import load_config
 from src.config_validator import validate_config, ConfigValidationError
+from src.langgraph import LangGraphOrchestrator
 
 def resolve_target_directory(target_arg: str | None) -> Path:
     """
@@ -96,6 +97,46 @@ Examples:
         help='Skip interactive approval prompts (auto-approve all tasks)'
     )
 
+    # LangGraph options
+    parser.add_argument(
+        '--langgraph',
+        action='store_true',
+        help='Use LangGraph orchestrator with supervisor oversight'
+    )
+
+    parser.add_argument(
+        '--resume',
+        type=str,
+        default=None,
+        metavar='THREAD_ID',
+        help='Resume a paused LangGraph execution by thread ID'
+    )
+
+    parser.add_argument(
+        '--approve',
+        action='store_true',
+        help='Approve pending checkpoint when resuming (use with --resume)'
+    )
+
+    parser.add_argument(
+        '--reject',
+        action='store_true',
+        help='Reject pending checkpoint when resuming (use with --resume)'
+    )
+
+    parser.add_argument(
+        '--feedback',
+        type=str,
+        default=None,
+        help='Feedback to provide when approving/rejecting (use with --resume)'
+    )
+
+    parser.add_argument(
+        '--show-graph',
+        action='store_true',
+        help='Show the LangGraph execution graph (Mermaid diagram)'
+    )
+
     args = parser.parse_args()
 
     try:
@@ -124,17 +165,67 @@ Examples:
         config['repo_path'] = str(target_dir)  # GitManager uses repo_path
         config['state_dir'] = str(target_dir / '.moderator' / 'state')
 
-        # Step 5: Create orchestrator
-        orch = Orchestrator(config)
+        # Step 5: Choose orchestrator type
+        if args.langgraph or args.resume:
+            # Use LangGraph orchestrator
+            orch = LangGraphOrchestrator(config, target_dir)
 
-        # Step 6: Execute
-        print(f"🚀 Starting Moderator on: {target_dir}")
-        print(f"📝 Requirements: {args.requirements}\n")
+            # Show graph if requested
+            if args.show_graph:
+                print("📊 LangGraph Execution Graph (Mermaid):\n")
+                print(orch.get_graph_visualization())
+                print()
 
-        project_state = orch.execute(args.requirements)
+            # Handle resume
+            if args.resume:
+                print(f"🔄 Resuming execution: {args.resume}")
 
-        print(f"\n✅ Success! Project ID: {project_state.project_id}")
-        print(f"📁 State: {target_dir}/.moderator/state/{project_state.project_id}/")
+                # Determine approval status
+                if args.approve:
+                    approved = True
+                elif args.reject:
+                    approved = False
+                else:
+                    # Default to approve if neither specified
+                    approved = True
+
+                project_state = orch.resume(
+                    thread_id=args.resume,
+                    approved=approved,
+                    feedback=args.feedback,
+                )
+            else:
+                # New execution with LangGraph
+                print(f"🚀 Starting Moderator (LangGraph) on: {target_dir}")
+                print(f"📝 Requirements: {args.requirements}\n")
+
+                project_state = orch.execute(args.requirements)
+
+            # Check if execution paused for approval
+            if hasattr(project_state, 'phase') and 'awaiting' in str(project_state.phase).lower():
+                print(f"\n⏸️  Execution paused for approval")
+                print(f"📋 Thread ID: {project_state.project_id}")
+                print(f"\nTo resume with approval:")
+                print(f"  python main.py --resume {project_state.project_id} --approve")
+                print(f"\nTo resume with rejection:")
+                print(f"  python main.py --resume {project_state.project_id} --reject --feedback 'reason'")
+            else:
+                print(f"\n✅ Success! Project ID: {project_state.project_id}")
+                print(f"📁 State: {target_dir}/.moderator/state/{project_state.project_id}/")
+
+        else:
+            # Use standard orchestrator (Gear 1/2)
+            orch = Orchestrator(config)
+
+            # Step 6: Execute
+            print(f"🚀 Starting Moderator on: {target_dir}")
+            print(f"📝 Requirements: {args.requirements}\n")
+
+            project_state = orch.execute(args.requirements)
+
+            print(f"\n✅ Success! Project ID: {project_state.project_id}")
+            print(f"📁 State: {target_dir}/.moderator/state/{project_state.project_id}/")
+
         sys.exit(0)
 
     except (ValueError, ConfigValidationError) as e:

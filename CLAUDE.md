@@ -28,7 +28,14 @@ moderator/
 │   ├── backend.py                # Backend adapters (TestMock, CCPM, ClaudeCode)
 │   ├── git_manager.py            # Git operations & PR creation
 │   ├── state_manager.py          # File-based persistence
-│   └── logger.py                 # Structured logging
+│   ├── logger.py                 # Structured logging
+│   └── langgraph/                # LangGraph orchestration wrapper
+│       ├── __init__.py           # Module exports
+│       ├── state.py              # State schema definitions
+│       ├── nodes.py              # Graph node implementations
+│       ├── orchestrator.py       # LangGraphOrchestrator class
+│       ├── supervisor.py         # Supervisor agent logic
+│       └── tracing.py            # LangSmith tracing configuration
 ├── config/                       # Configuration files
 │   ├── config.yaml              # Default configuration
 │   ├── test_config.yaml         # Test environment
@@ -864,6 +871,190 @@ gear3:
 - Verify `gear3` section exists in config
 - Check `enabled: true` for specific feature subsection
 - Confirm validation passes at startup (no error messages)
+
+## LangGraph Orchestration Wrapper
+
+**Status:** Implemented
+**Files:** `src/langgraph/` module
+
+### Overview
+
+The LangGraph orchestration wrapper provides a supervisory layer that acts as "human-like oversight" for the entire Moderator workflow. It uses:
+
+- **LangGraph** - Stateful graph orchestration with checkpoint/resume capability
+- **LangSmith** - Debugging and observability through trace visualization
+- **Supervisor Agent** - LLM-powered decision-making for automated review
+
+### Key Features
+
+1. **Interrupt Points**: Execution pauses at key decision points for human review
+2. **Automated Supervision**: LLM supervisor evaluates task decomposition and PR quality
+3. **Checkpoint/Resume**: State is persisted, allowing interrupted workflows to resume
+4. **Confidence Scoring**: Low-confidence decisions automatically escalate to human approval
+5. **LangSmith Integration**: Full execution traces for debugging
+
+### Architecture
+
+```
+User Request
+     ↓
+LangGraphOrchestrator
+     ↓
+┌─────────────────────────────────────┐
+│  State Graph (LangGraph)            │
+│  ┌─────────┐    ┌──────────────┐   │
+│  │Initialize│───→│ Decompose    │   │
+│  └─────────┘    └──────┬───────┘   │
+│                        ↓            │
+│                 ┌──────────────┐    │
+│                 │Supervisor    │    │
+│                 │Review        │    │
+│                 └──────┬───────┘    │
+│                        ↓            │
+│    ┌─────────┐  ┌──────────────┐   │
+│    │ Human   │←─┤If confidence │   │
+│    │Approval │  │   < 70%      │   │
+│    └────┬────┘  └──────────────┘   │
+│         ↓                           │
+│  ┌─────────────┐   ┌──────────┐    │
+│  │Execute Task │──→│ Complete │    │
+│  └─────────────┘   └──────────┘    │
+└─────────────────────────────────────┘
+     ↓
+LangSmith Tracing (optional)
+```
+
+### CLI Usage
+
+```bash
+# Use LangGraph orchestrator (new)
+python main.py --langgraph "Create a TODO app" --target ~/my-project
+
+# Show execution graph
+python main.py --langgraph --show-graph "Create a TODO app"
+
+# Resume paused execution with approval
+python main.py --resume proj_abc123 --approve
+
+# Resume with rejection and feedback
+python main.py --resume proj_abc123 --reject --feedback "Need more detail on task 2"
+
+# Standard orchestrator (existing behavior)
+python main.py "Create a TODO app" --target ~/my-project
+```
+
+### Configuration
+
+```yaml
+# config/config.yaml
+langgraph:
+  supervisor:
+    model: "claude-sonnet-4-20250514"   # LLM for supervisor decisions
+    temperature: 0.3                    # Lower = more consistent
+    confidence_threshold: 70            # Below this triggers human approval
+
+  checkpoints:
+    backend: "memory"                   # "memory" or "sqlite"
+    path: ".moderator/checkpoints/orchestrator.db"
+
+  langsmith:
+    project: "moderator-orchestration"
+    tracing: true                       # Requires LANGSMITH_API_KEY
+```
+
+### Environment Variables
+
+```bash
+# For supervisor agent (required for LLM decisions)
+export ANTHROPIC_API_KEY="your-key"
+
+# For LangSmith tracing (optional)
+export LANGSMITH_API_KEY="your-key"
+```
+
+### Supervisor Decision Flow
+
+The supervisor agent evaluates:
+
+1. **Decomposition Review**
+   - Coverage: Do tasks cover all requirements?
+   - Granularity: Are tasks appropriately sized?
+   - Clarity: Are descriptions actionable?
+   - Acceptance Criteria: Are criteria testable?
+
+2. **PR Review**
+   - Completion: Does work satisfy acceptance criteria?
+   - Quality: Are files properly structured?
+   - Risks: Any obvious issues?
+
+**Decision Outcomes:**
+- `approve` (confidence ≥ threshold): Continue execution
+- `suggest_improvement`: Add recommendations
+- `reject` (confidence < threshold): Request revisions
+- `escalate`: Require human approval
+
+### State Schema
+
+```python
+class OrchestratorState(TypedDict):
+    # Core project
+    project_id: str
+    requirements: str
+    phase: str  # initializing, decomposing, executing, etc.
+    tasks: list[TaskDict]
+    current_task_index: int
+
+    # Supervisor
+    supervisor_messages: list[BaseMessage]
+    supervisor_decisions: list[dict]
+
+    # Approval
+    pending_approval: bool
+    approval_request: dict | None
+    approval_history: list[dict]
+
+    # Checkpoints
+    checkpoint_id: str | None
+```
+
+### Testing
+
+```bash
+# Run LangGraph tests
+pytest tests/test_langgraph.py -v
+
+# Run with mock supervisor (no API calls)
+pytest tests/test_langgraph.py::TestSupervisorAgent -v
+```
+
+### When to Use LangGraph Mode
+
+**Use LangGraph when:**
+- You want automated quality assessment of generated code
+- You need checkpoint/resume capability for long workflows
+- You want visibility into decision-making through LangSmith traces
+- You want confidence-based escalation to human review
+
+**Use standard orchestrator when:**
+- Running quick tests with mock backend
+- You don't need supervisor oversight
+- Running in fully automated CI/CD pipelines with `--auto-approve`
+
+### Troubleshooting
+
+**Supervisor not making decisions:**
+- Check `ANTHROPIC_API_KEY` is set
+- Verify `langgraph.supervisor.model` is valid
+- Check logs for API errors
+
+**Checkpoints not persisting:**
+- Use `backend: "sqlite"` instead of `"memory"`
+- Verify checkpoint path is writable
+
+**LangSmith traces not appearing:**
+- Set `LANGSMITH_API_KEY` environment variable
+- Check `langgraph.langsmith.tracing: true`
+- Verify project name exists in LangSmith
 
 ## Documentation Organization
 

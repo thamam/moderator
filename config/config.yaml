@@ -104,3 +104,24 @@ gear4:
       expand: "enter"         # Expand panel (default: Enter)
       quit: "q"               # Quit dashboard (default: Q)
       help: "?"               # Toggle help (default: ?)
+
+# LangGraph Orchestration Configuration
+# Provides human-like supervision through stateful graph execution
+langgraph:
+  # Supervisor agent configuration
+  supervisor:
+    model: "claude-sonnet-4-20250514"  # Model to use for supervisor decisions
+    temperature: 0.3            # Lower temperature for more consistent decisions
+    max_tokens: 1024           # Maximum tokens for supervisor responses
+    confidence_threshold: 70    # Confidence below this triggers human approval (0-100)
+
+  # Checkpoint persistence for interrupt/resume capability
+  checkpoints:
+    backend: "memory"          # Options: memory (dev), sqlite (production)
+    path: ".moderator/checkpoints/orchestrator.db"  # SQLite database path
+
+  # LangSmith integration for debugging and observability
+  langsmith:
+    project: "moderator-orchestration"  # LangSmith project name
+    tracing: true              # Enable tracing (requires LANGSMITH_API_KEY env var)
+    # api_key: null            # Or set directly here (not recommended)
