@@ -13,7 +13,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 from .models import ProjectState, ProjectPhase, TaskStatus
-from .decomposer import SimpleDecomposer
+from .decomposer import SimpleDecomposer, AgentDecomposer, MockAgentDecomposer
 from .executor import SequentialExecutor
 from .backend import Backend, CCPMBackend, TestMockBackend, ClaudeCodeBackend
 from .git_manager import GitManager
@@ -52,7 +52,7 @@ class Orchestrator:
         self.state_manager = StateManager(config.get('state_dir', './state'))
 
         # Components will be initialized per project
-        self.decomposer = SimpleDecomposer()
+        self.decomposer = self._create_decomposer()
 
         # Gear 2 components (initialized if gear=2)
         self.message_bus = None
@@ -62,6 +62,25 @@ class Orchestrator:
         # Gear 3: Agent lifecycle management
         self._agent_registry: dict[str, 'BaseAgent'] = {}
         self._agent_status: dict[str, str] = {}  # "healthy" | "unhealthy" | "unresponsive" | "failed"
+
+    def _create_decomposer(self):
+        """Create decomposer based on config"""
+
+        decomposer_type = self.config.get('decomposer', {}).get('type', 'simple')
+
+        if decomposer_type == 'agent':
+            # Production: AI-powered decomposition using Claude Code
+            cli_path = self.config.get('decomposer', {}).get('cli_path', 'claude')
+            timeout_s = self.config.get('decomposer', {}).get('timeout', 180)
+            return AgentDecomposer(cli_path, timeout_s)
+        elif decomposer_type == 'mock_agent':
+            # Testing: Mock agent decomposer for deterministic tests
+            return MockAgentDecomposer()
+        elif decomposer_type == 'simple':
+            # Default: Template-based decomposition (Gear 1 behavior)
+            return SimpleDecomposer()
+        else:
+            raise ValueError(f"Unknown decomposer type: {decomposer_type}")
 
     def execute(self, requirements: str) -> ProjectState:
         """Execute complete workflow (Gear 1 or Gear 2 based on config)"""

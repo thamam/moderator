@@ -21,6 +21,12 @@ backend:
   api_key: null      # Required for CCPM backend
   cli_path: "claude" # Path to Claude CLI executable (for claude_code backend)
 
+# Decomposer configuration
+decomposer:
+  type: "simple"     # Options: simple (template-based), agent (AI-powered), mock_agent (testing)
+  cli_path: "claude" # Path to Claude CLI executable (for agent decomposer)
+  timeout: 180       # Timeout in seconds for AI decomposition (default: 3 minutes)
+
 # State management
 state_dir: "./state"
 
