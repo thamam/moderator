@@ -80,7 +80,7 @@ class PylintAdapter(QAToolAdapter):
 
             return {
                 'messages': messages,
-                'exit_code': result.exit_code,
+                'exit_code': result.returncode,
                 'tool': 'pylint',
                 'files_analyzed': file_paths
             }

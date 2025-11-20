@@ -305,8 +305,6 @@ class ParallelTaskExecutor(TaskExecutor):
             # Catch any exception and convert to failed TaskResult
             logger.error(f"Task {task.id} failed with exception: {e}")
 
-            # Import here to avoid circular dependency
-            import time
             result = TaskResult(
                 task=task,
                 exit_code=1,

@@ -83,7 +83,7 @@ class BanditAdapter(QAToolAdapter):
             return {
                 'results': output.get('results', []),
                 'metrics': output.get('metrics', {}),
-                'exit_code': result.exit_code,
+                'exit_code': result.returncode,
                 'tool': 'bandit',
                 'files_analyzed': file_paths
             }

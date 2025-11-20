@@ -76,7 +76,7 @@ class Flake8Adapter(QAToolAdapter):
 
             return {
                 'output_lines': result.stdout.strip().split('\n') if result.stdout.strip() else [],
-                'exit_code': result.exit_code,
+                'exit_code': result.returncode,
                 'tool': 'flake8',
                 'files_analyzed': file_paths
             }
