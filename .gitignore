@@ -42,6 +42,16 @@ claude-generated/
 .pytest_cache/
 .coverage
 htmlcov/
+test_state/
+
+# Moderator local runtime (target project directory)
+.moderator/
+
+# BMAD story context files (generated artifacts)
+bmad-docs/stories/*.context.xml
+
+# pip install artifacts (accidental = prefix files)
+=*
 
 # OS
 .DS_Store

@@ -7,6 +7,10 @@
 # Git repository path (top-level so GitManager can access it)
 repo_path: "."
 
+# Git configuration
+git:
+  default_branch: "main"  # Default branch name for PR targets (main, master, develop, etc.)
+
 # Project settings
 project:
   name: "gear1-test-project"

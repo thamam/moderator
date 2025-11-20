@@ -47,14 +47,25 @@ class GitManager:
             check=True
         )
 
-    def create_branch(self, task: Task) -> str:
-        """Create feature branch for task"""
+    def create_branch(self, task: Task, base_branch: str = "dev") -> str:
+        """Create feature branch for task from base branch.
+
+        Args:
+            task: Task object to create branch for
+            base_branch: Base branch to create from (default: "dev")
+
+        Returns:
+            Branch name created
+        """
 
         # Generate branch name
         branch_name = f"moderator-gear1/task-{task.id}"
 
         try:
-            # Create and checkout branch
+            # First checkout base branch to ensure clean state
+            self._run_git("checkout", base_branch)
+
+            # Create and checkout new branch from base
             self._run_git("checkout", "-b", branch_name)
             task.branch_name = branch_name
             return branch_name
